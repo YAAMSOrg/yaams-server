@@ -30,9 +30,9 @@
                     <a href="" class="p-3">New...</a>
                 </li>
                 <li>
-                    <form action="{{ route('logout') }}" method=post>
+                    <form action="{{ route('logout') }}" method=post class="p-3 inline">
                         @csrf
-                        <button type="submit" class="p-3">Logout</button>
+                        <button type="submit">Logout</button>
                     </form>
                 </li>
                 @endauth
