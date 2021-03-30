@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -26,7 +26,7 @@ class RegisterController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'homebase' => $request->homebase,
+            'homebase' => Str::upper($request->homebase),
             'password' => Hash::make($request->password)
         ]);
 

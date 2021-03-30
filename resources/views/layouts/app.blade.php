@@ -12,7 +12,7 @@
         <nav class="p-6 bg-white flex justify-between mb-6">
             <ul class="flex items-center">
                 <li>
-                    <a href="" class="p-3">Home</a>
+                    <a href="{{ route('home') }}" class="p-3">Home</a>
                 </li>
                 <li>
                     <a href="" class="p-3">About Us</a>
@@ -24,25 +24,26 @@
             <ul class="flex items-center">
                 @auth
                 <li>
-                    <a href="" class="p-3">Example Pilot</a>
+                    <a href="{{ route('dashboard') }}" class="p-3">{{ Auth::user()->name }}</a>
                 </li>
-                @endauth
-                @auth
                 <li>
                     <a href="" class="p-3">New...</a>
                 </li>
-                @endauth
                 <li>
-                    <a href="" class="p-3">Login</a>
+                    <form action="{{ route('logout') }}" method=post>
+                        @csrf
+                        <button type="submit" class="p-3">Logout</button>
+                    </form>
+                </li>
+                @endauth
+                @guest
+                <li>
+                    <a href="{{ route('login') }}" class="p-3">Login</a>
                 </li>
                 <li>
                     <a href="{{ route('register') }}" class="p-3">Register</a>
                 </li>
-                @auth
-                <li>
-                    <a href="" class="p-3">Logout</a>
-                </li>
-                @endauth
+                @endguest
             </ul>
         </nav>
         @yield('content')
