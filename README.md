@@ -12,7 +12,7 @@ Right now we are building a "base" for to work with. We are building the softwar
 ## Building
 
 * Install a Laravel development environment (with a DB, composer and PHP)
-* `git clone https://github.com/flymia/YAAMS.git' in your directory
+* `git clone https://github.com/flymia/YAAMS.git` in your directory
 * Run a `composer update` to install the components
 * Done. Help by adding new features as you like and do a PR
 
