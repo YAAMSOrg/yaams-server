@@ -59,21 +59,7 @@
                 @endguest
                 @auth
                 <div class="text-end">
-
-                    <div class="btn-group">
-                        <button type="button" href="{{ route('dashboard') }}" class="btn btn-primary">{{ Auth::user()->name }}</button>
-                        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        </button>
-                        <div class="dropdown-menu">
-                          <a class="dropdown-item" href="{{ route('dashboard') }}"></a>
-                          <a class="dropdown-item" href="#">Another action</a>
-                          <a class="dropdown-item" href="#">Something else here</a>
-                          <div class="dropdown-divider"></div>
-                          <a class="dropdown-item" href="#">Separated link</a>
-                        </div>
-                      </div>
-
-                      <!--<button type="button" class="btn btn-outline-light me-2">{{ Auth::user()->name }}</button>-->
+                    <button type="button" class="btn btn-outline-light me-2">{{ Auth::user()->name }}</button>
                     <form action="{{ route('logout') }}" method=post style="display:inline">
                         @csrf
                         <button type="submit" class="btn btn-secondary">Logout</button>
