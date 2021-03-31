@@ -26,5 +26,9 @@ Right now we are building a "base" for to work with. We are building the softwar
 * A multi platform ACARS (for Linux, Windows & Mac OS)
 * SaaS hosted
 
+## Current TODOs
+
+* Get base authentification working ✅
+
 ## Open Source
 This software is open source with a reason: Because we want you to commit to the project!
