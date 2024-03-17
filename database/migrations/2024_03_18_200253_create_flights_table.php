@@ -15,18 +15,21 @@ class CreateFlightsTable extends Migration
     {
         Schema::create('flights', function (Blueprint $table) {
             $table->id(); # internal id
-            //$table->string('airline'); # TODO: Foreign!!
+            $table->foreignId('airline');
+            $table->foreign('airline')->references('id')->on('airlines');
+            $table->string('callsign', 4);
             $table->integer('flightnumber');
             $table->string('departure_icao', 4);
             $table->string('arrival_icao', 4);
-            //$table->string('aircraft'); # TODO: Foreign!!
-            $table->string('callsign', 7);
+            $table->string('aircraft', 6);
+            $table->foreign('aircraft')->references('registration')->on('aircraft');
             $table->integer('crzalt');
             $table->datetime('blockoff');
             $table->datetime('blockon');
             $table->integer('burned_fuel');
             $table->text('route');
-            $table->foreign('online_network_id')->references('id')->on('online_networks'); # TODO: Foreign!!
+            $table->foreignId('online_network');
+            $table->foreign('online_network')->references('id')->on('online_networks');
             $table->text('remarks');
             $table->timestamps();
         });

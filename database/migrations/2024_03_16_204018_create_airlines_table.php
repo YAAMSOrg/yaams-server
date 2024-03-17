@@ -16,6 +16,9 @@ class CreateAirlinesTable extends Migration
         Schema::create('airlines', function (Blueprint $table) {
             $table->id();
             $table->string("name");
+            $table->string("prefix", 2);
+            $table->string("icao_callsign", 3);
+            $table->string("atc_callsign");
             $table->timestamp("last_modified");
         });
     }

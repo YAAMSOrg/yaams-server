@@ -14,15 +14,13 @@ class CreateAircraftTable extends Migration
     public function up()
     {
         Schema::create('aircraft', function (Blueprint $table) {
-            $table->id();
-            $table->string("registration", 6);
+            $table->string("registration", 6)->primary();
             $table->string("manufacturer");
             $table->string("model");
-            $table->string("current_loc", 4);
+            $table->string("current_loc", 4)->nullable();
             $table->text("remarks");
-            $table->foreignId('used_by')->constrained(
-                table: 'airlines', indexName: 'id'
-            );
+            $table->foreignId('used_by');
+            $table->foreign('used_by')->references('id')->on('airlines')->nullable();
             $table->date("in_service_since");
             $table->boolean("active");
             $table->timestamp("last_modified");
