@@ -11,7 +11,11 @@ class FlightController extends Controller
         $this->middleware('auth');
     }
 
-    public function index(){
+    public function index() {
         return view('flights.add');
+    }
+
+    public function getFlightDuration() {
+        return "3";
     }
 }
