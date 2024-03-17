@@ -1,0 +1,3 @@
+# Phase 1
+* user roles (admin, Airline Manager, etc.)
+
