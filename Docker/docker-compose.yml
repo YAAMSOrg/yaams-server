@@ -1,0 +1,20 @@
+# Docker Compose file for the dev environment.
+
+version: '3.1'
+
+services:
+  db:
+    image: mariadb:lts
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: start123
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1

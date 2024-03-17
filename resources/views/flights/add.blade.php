@@ -2,8 +2,8 @@
 
 @section('content')
         <div class="container" >
-            <h1 class="display-1">File a flight</h1>
-            <p class="lead">Here you can manually file a flight</p>
+            <h1 class="display-2">File a PIREP</h1>
+            <p class="lead">Here you can manually file a PIREP. Please fill out all the fields.</p>
                 <form action="{{ route('addflight') }}" class="row g-3">
                     @csrf
                     <div class="col-md-2">
@@ -55,7 +55,7 @@
                     </div>
                     <div class="col-md-12">
                         <label for="route" class="form-label">Route</label>
-                        <textarea class="form-control" style="font-family: monospace; font-size: 18px; text-transform:uppercase" aria-label="With textarea" id="route" required></textarea>
+                        <textarea class="form-control" style="font-family: monospace; font-size: 18px; text-transform:uppercase" aria-label="With textarea" id="route" required>KUMIK Y854 BOMBI T104 ROKIL</textarea>
                     </div>
                     <div class="col-md-4">
                         <label for="network" class="form-label">Online network</label>
@@ -72,6 +72,7 @@
                     </div>
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">File PIREP</button>
+                        <button type="reset" class="btn btn-secondary">Clear fields</button>
                     </div>
                 </form>
         </div>

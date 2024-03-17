@@ -4,17 +4,16 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Yaams</title>
+        <title>YAAMS</title>
 
 
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
+        <!-- TODO: LOCAL Delivery of these objects. I don't want to stream them from the cloud. This is just for dev! -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-        <!-- Scripts
-        <script src="{{ asset('js/app.js') }}" defer></script>
-        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-        -->
     </head>
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
         <symbol id="bootstrap" viewBox="0 0 118 94">
@@ -49,7 +48,16 @@
 
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                 <li><a href="{{ route('home') }}" class="nav-link px-2 text-white">Home</a></li>
-                <li><a href="#" class="nav-link px-2 text-white">About Us</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle px-2 text-white" href="{{ route('flightlist') }}" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Flights
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="{{ route('addflight') }}">File PIREP</a></li>
+                        <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
+                    </ul>
+                </li>
                 <li><a href="#" class="nav-link px-2 text-white">Fleet</a></li>
                 <li><a href="#" class="nav-link px-2 text-white">Live map</a></li>
             </ul>
@@ -67,10 +75,14 @@
             @endguest
             @auth
             <div class="text-end">
-                <button type="button" class="btn btn-outline-light me-2">{{ Auth::user()->name }}</button>
+                <form action="{{ route('dashboard') }}" style="display: inline">
+                    @csrf
+                    <button type="button" class="btn btn-outline-light me-2">{{ Auth::user()->name }}</button>
+                </form>
+                
                 <form action="{{ route('logout') }}" method=post style="display:inline">
                     @csrf
-                    <button type="submit" class="btn btn-secondary">Logout</button>
+                <button type="submit" class="btn btn-secondary">Logout</button>
                 </form>
             </div>
             @endauth
