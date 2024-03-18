@@ -1,14 +1,12 @@
 # YAAMS - Yet Another Airline Management System
 
-YAAMS is a new alternative to PHPvms or Virtual Airline Manager. With YAAMS we wanted to take a more modern approach to virtual airlines software by using new techniques and going by the standard of "API first".
+YAAMS is an alternative to PHPvms or Virtual Airline Manager. YAAMS takes a more modern approach to virtual airlines software by using new technologies and going by the standard of "API first". It is at a very early development stage and not ready for production use.
 
 ## Current status
 
 We've decided to start the coding now with Laravel. It seems to be the excellent system for this kind of project.
 
 Since Laravel also includes builtin support for building REST APIs it suits perfectly.
-
-Right now we are building a "base" for to work with. We are building the software for self hosting use right now, but we've thought about SaaS hosting for a small price. Right now the main priority is self hosting.
 
 ## Building
 
