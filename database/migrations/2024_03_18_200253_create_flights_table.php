@@ -14,7 +14,7 @@ class CreateFlightsTable extends Migration
     public function up()
     {
         Schema::create('flights', function (Blueprint $table) {
-            $table->id(); # internal id
+            $table->id(); # internal flight id
             $table->foreignId('airline');
             $table->foreign('airline')->references('id')->on('airlines');
             $table->string('callsign', 4);
@@ -30,6 +30,8 @@ class CreateFlightsTable extends Migration
             $table->text('route');
             $table->foreignId('online_network');
             $table->foreign('online_network')->references('id')->on('online_networks');
+            $table->foreignId('pilot');
+            $table->foreign('pilot')->references('id')->on('users');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });

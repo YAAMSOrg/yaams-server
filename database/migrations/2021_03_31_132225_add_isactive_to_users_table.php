@@ -25,8 +25,10 @@ class AddIsactiveToUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('isactive');
-        });
+        if (Schema::hasColumn('users', 'isactive')){
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('isactive');
+            });
+        }   
     }
 }

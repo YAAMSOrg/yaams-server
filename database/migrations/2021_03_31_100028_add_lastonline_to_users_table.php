@@ -25,8 +25,10 @@ class AddLastonlineToUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('last_online_at');
-        });
+        if (Schema::hasColumn('users', 'last_online_at')){
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('last_online_at');
+            });
+        }        
     }
 }

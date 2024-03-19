@@ -25,8 +25,10 @@ class AddHomebaseToUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('homebase');
-        });
+        if (Schema::hasColumn('users', 'homebase')){
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('homebase');
+            });
+        }
     }
 }
