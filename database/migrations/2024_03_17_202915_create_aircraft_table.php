@@ -18,7 +18,7 @@ class CreateAircraftTable extends Migration
             $table->string("manufacturer");
             $table->string("model");
             $table->string("current_loc", 4)->nullable();
-            $table->text("remarks");
+            $table->text("remarks")->nullable();
             $table->foreignId('used_by');
             $table->foreign('used_by')->references('id')->on('airlines')->nullable();
             $table->date("in_service_since");

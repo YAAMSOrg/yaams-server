@@ -30,7 +30,7 @@ class CreateFlightsTable extends Migration
             $table->text('route');
             $table->foreignId('online_network');
             $table->foreign('online_network')->references('id')->on('online_networks');
-            $table->text('remarks');
+            $table->text('remarks')->nullable();
             $table->timestamps();
         });
     }
