@@ -6,3 +6,4 @@ TODO:
 Ideas:
 * Simbrief integration
 * User ranks (Base pilot, advanced pilot, etc.)
+* Laravel Backpack for Admin Panel?

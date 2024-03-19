@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Airline extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'prefix',
+        'icao_callsign',
+        'atc_callsign'
+    ];
 }
