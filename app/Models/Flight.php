@@ -19,8 +19,7 @@ class Flight extends Model
         'flight_date'
     ];
 
-    public function airline()
-    {
+    public function airline() {
         return $this->belongsTo(Airline::class, 'airline');
     }
 
@@ -48,6 +47,7 @@ class Flight extends Model
     public function getFlightDateAttribute() {
        // We take the block on time and take only the year, month and date.
        $blockontime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockon);
+       
        return $blockontime->format('Y/m/d');
     }
 }
