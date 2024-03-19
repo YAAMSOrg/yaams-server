@@ -1,3 +1,8 @@
-# Phase 1
+TODO:
+
+* Flight DB entry needs to log the pilot who filed it, too!
 * user roles (admin, Airline Manager, etc.)
 
+Ideas:
+* Simbrief integration
+* User ranks (Base pilot, advanced pilot, etc.)

@@ -1,11 +1,17 @@
 @extends('layouts.app')
 @section('title', 'YAAMS: File PIREP')
 @section('content')
+
         <div class="container" >
             <h1 class="display-2">File a PIREP</h1>
             <p class="lead">Here you can manually file a PIREP. Please fill out all the fields.</p>
                 <form action="{{ route('addflight') }}" class="row g-3">
                     @csrf
+                    <div class="col-md-4">
+                        <label for="pilot" class="form-label">Pilot</label>
+                        <input type="text" class="form-control" id="pilot" value="Max Mustermann" placeholder="Max Mustermann" disabled>
+                    </div><hr>
+                    <h3>Flight details</h3>
                     <div class="col-md-2">
                         <label for="airline" class="form-label">Airline</label>
                         <select id="airline" class="form-select" aria-label="Select the airline">
@@ -15,7 +21,7 @@
                     </div>
                     <div class="col-md-2">
                         <label for="flightnumber" class="form-label">Flight number</label>
-                        <input type="flightnumber" class="form-control" id="flightnumber"  required maxlength="4" minlength="1" placeholder="1234">
+                        <input type="text" class="form-control" id="flightnumber"  required maxlength="4" minlength="1" placeholder="1234">
                     </div>
                     <div class="col-md-2">
                         <label for="departure" class="form-label">Departure</label>
