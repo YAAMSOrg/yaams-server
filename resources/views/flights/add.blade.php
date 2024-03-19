@@ -7,10 +7,15 @@
             <p class="lead">Here you can manually file a PIREP. Please fill out all the fields.</p>
                 <form action="{{ route('addflight') }}" class="row g-3">
                     @csrf
+                    <div class="col-md-1">
+                        <label for="pilotid" class="form-label">Pilot ID</label>
+                        <input type="text" class="form-control" id="pilot_id" value="{{ Auth::user()->id }}" placeholder="{{ Auth::user()->id }}" disabled required>
+                    </div>
                     <div class="col-md-4">
                         <label for="pilot" class="form-label">Pilot</label>
-                        <input type="text" class="form-control" id="pilot" value="Max Mustermann" placeholder="Max Mustermann" disabled required>
-                    </div><hr>
+                        <input type="text" class="form-control" id="pilot" value="{{ Auth::user()->name }}" placeholder="{{ Auth::user()->name }}" disabled required>
+                    </div>
+                    <hr>
                     <h3>Flight details</h3>
                     <div class="col-md-2">
                         <label for="airline" class="form-label">Airline</label>

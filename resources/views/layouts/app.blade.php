@@ -57,7 +57,16 @@
                         <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
                     </ul>
                 </li>
-                <li><a href="#" class="nav-link px-2 text-white">Fleet</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle px-2 text-white" href="{{ route('fleetlist') }}" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Fleet
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="{{ route('fleetlist') }}">List</a></li>
+                        <!-- ADMIN ONLY --><li><a class="dropdown-item" href="{{ route('addaircraft') }}">Add aircraft</a></li>
+                    </ul>
+                </li>
                 <li><a href="#" class="nav-link px-2 text-white">Live map</a></li>
             </ul>
 
@@ -76,7 +85,7 @@
             <div class="text-end">
                 <form action="{{ route('dashboard') }}" style="display: inline">
                     @csrf
-                    <button type="button" class="btn btn-outline-light me-2">{{ Auth::user()->name }}</button>
+                    <button type="submit" class="btn btn-outline-light me-2">{{ Auth::user()->name }}</button>
                 </form>
                 
                 <form action="{{ route('logout') }}" method=post style="display:inline">
