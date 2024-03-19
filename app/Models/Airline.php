@@ -15,4 +15,5 @@ class Airline extends Model
         'icao_callsign',
         'atc_callsign'
     ];
+
 }

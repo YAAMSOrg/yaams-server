@@ -16,7 +16,9 @@ class FlightController extends Controller
     }
 
     public function listFlights() {
-        return view('flights.list')->with('flights', $flights);
+        $flights = Flights::query()->orderBy('created_at', 'DESC')->get();
+        dump($fleet);
+        return view('flights.list', ['flights' => $flights]);
     }
 
     public function store(Request $request){

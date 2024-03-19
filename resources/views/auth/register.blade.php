@@ -1,70 +1,64 @@
-@extends('layouts.app')
-@section('title', 'YAAMS: Register account')
+@extends('layouts.loginlayout')
+@section('title', 'Register as pilot')
 @section('content')
 
-    <div class="flex justify-center">
-            <div class="w-4/12 bg-white p-6 rounded-lg">
-                <h1 class="text-4xl font-normal leading-normal mt-0 mb-2 text-black-800">
-                    Register
-                </h1>
-                <p>Enter your details below to register on Yaams</p>
-                <form action="{{ route('register') }}" method="post">
-                    @csrf
-                    <div class="mb-4">
-                        <label for="name" class="sr-only">Name</label>
-                        <input type="text" name="name" id="name" placeholder="Your full name" class="bg-gray-100 border-2 w-full p-4 rounded-lg mt-4 @error('name')
-                            border-red-500 @enderror" value="{{ old('name') }}">
+    <div class="text-center">
 
-                        @error('name')
-                            <div class="text-red-500 mt-2 text-sm">
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
-                    <div class="mb-4">
-                        <label for="email" class="sr-only">Email</label>
-                        <input type="text" name="email" id="email" placeholder="Your email address" class="bg-gray-100 border-2 w-full p-4 rounded-lg mt-4 @error('email')
-                        border-red-500 @enderror" value="{{ old('email') }}">
+    <form action="{{ route('register') }}" class="form-signin" method="post">
+        @csrf
+      <i class="fas fa-plane-departure fa-5x"></i>
+      <h1 class="h3 mb-3 font-weight-normal">Register as a new pilot</h1>
+        @if(session('status'))
+          <div class="alert alert-danger" role="alert">
+            {{ session('status') }}
+          </div>
+        @endif
 
-                        @error('email')
-                        <div class="text-red-500 mt-2 text-sm">
-                            {{ $message }}
-                        </div>
-                        @enderror
-                    </div>
-                    <div class="mb-4">
-                        <label for="homebase" class="sr-only">Airport Homebase</label>
-                        <input type="homebase" name="homebase" id="homebase" placeholder="Your home airport ICAO (e.g. EDDK)" class="bg-gray-100 border-2 w-full p-4 rounded-lg mt-4 @error('homebase')
-                        border-red-500 @enderror" value="{{ old('homebase') }}">
+      <label for="email" class="sr-only">Email address</label>
+          @error('email')
+          <div class="alert alert-danger" role="alert" style="margin-top: 5px; margin-bottom: 5px;">
+              {{ $message }}
+          </div>
+          @enderror
+      <input type="email" id="email" class="form-control" name="email" placeholder="Email address" required autofocus value="{{ old('email') }}">
 
-                        @error('homebase')
-                        <div class="text-red-500 mt-2 text-sm">
-                            {{ $message }}
-                        </div>
-                        @enderror
-                    </div>
-                    <div class="mb-4">
-                        <label for="password" class="sr-only">Password</label>
-                        <input type="password" name="password" id="password" placeholder="Choose a password" class="bg-gray-100 border-2 w-full p-4 rounded-lg mt-4 @error('password')
-                        border-red-500 @enderror" value="">
+      <label for="name" class="sr-only">Full name</label>
+          @error('email')
+          <div class="alert alert-danger" role="alert" style="margin-top: 5px; margin-bottom: 5px;">
+              {{ $message }}
+          </div>
+          @enderror
+      <input type="text" id="name" class="form-control" name="name" placeholder="John Doe" required value="{{ old('name') }}">
 
-                        @error('password')
-                        <div class="text-red-500 mt-2 text-sm">
-                            {{ $message }}
-                        </div>
-                        @enderror
-                    </div>
-                    <div class="mb-4">
-                        <label for="password_confirmation" class="sr-only">Password confirmation</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Repeat your password" class="bg-gray-100 border-2 w-full p-4 rounded-lg mt-4 @error('password')
-                        border-red-500 @enderror" value="">
-                    </div>
-                    <div>
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium w-full">Register</button>
-                    </div>
-                </form>
+     
+      <label for="homebase" class="sr-only">Home base (home airport)</label>
+          @error('homebase')
+          <div class="alert alert-danger" role="alert" style="margin-top: 5px; margin-bottom: 5px;">
+              {{ $message }}
+          </div>
+          @enderror
+      <input type="text" id="homebase" class="form-control" name="homebase" placeholder="EDDK" required value="{{ old('homebase') }}">
+ 
+      <label for="password" class="sr-only">Password</label>
+      @error('password')
+      <div class="alert alert-danger" role="alert" style="margin-top: 5px; margin-bottom: 5px;">
+          {{ $message }}
+      </div>
+      @enderror
+      <input type="password" name="password" id="password" placeholder="Your password" class="form-control" value="">
+
+      <label for="password_confirmation" class="sr-only">Confirm your password</label>
+      @error('password')
+      <div class="alert alert-danger" role="alert" style="margin-top: 5px; margin-bottom: 5px;">
+          {{ $message }}
+      </div>
+      @enderror
+      <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Your password" class="form-control form-control-lg" value="">
+
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+      <button type="reset" class="btn btn-lg btn-secondary btn-block">Reset</button>
+    </form>
             </div>
     </div>
-
 
 @endsection
