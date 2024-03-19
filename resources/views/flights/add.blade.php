@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'YAAMS: File PIREP')
 @section('content')
         <div class="container" >
             <h1 class="display-2">File a PIREP</h1>

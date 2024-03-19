@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'YAAMS: Register account')
 @section('content')
 
     <div class="flex justify-center">

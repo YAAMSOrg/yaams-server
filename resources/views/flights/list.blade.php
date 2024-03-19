@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'YAAMS: Flight list')
 @section('content')
         <div class="container" >
             <h1 class="display-2">My flights</h1>

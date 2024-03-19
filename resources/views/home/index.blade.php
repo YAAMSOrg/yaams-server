@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'Welcome to YAAMS')
 @section('content')
 <div class="container" >
     <div class="flex justify-center">
