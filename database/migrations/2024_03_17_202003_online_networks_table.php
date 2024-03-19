@@ -16,6 +16,7 @@ class OnlineNetworksTable extends Migration
         Schema::create('online_networks', function (Blueprint $table) {
             $table->id(); # internal id
             $table->string("networkname");
+            $table->timestamps();
         });
     }
 

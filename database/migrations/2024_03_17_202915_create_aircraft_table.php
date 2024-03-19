@@ -22,8 +22,8 @@ class CreateAircraftTable extends Migration
             $table->foreignId('used_by');
             $table->foreign('used_by')->references('id')->on('airlines')->nullable();
             $table->date("in_service_since");
-            $table->boolean("active");
-            $table->timestamp("last_modified");
+            $table->boolean('active')->default(true);
+            $table->timestamps();
         });
     }
 

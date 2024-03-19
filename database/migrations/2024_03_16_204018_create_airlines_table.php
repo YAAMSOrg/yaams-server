@@ -19,7 +19,7 @@ class CreateAirlinesTable extends Migration
             $table->string("prefix", 2);
             $table->string("icao_callsign", 3);
             $table->string("atc_callsign");
-            $table->timestamp("last_modified");
+            $table->timestamps();
         });
     }
 
