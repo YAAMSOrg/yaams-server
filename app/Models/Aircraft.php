@@ -14,7 +14,7 @@ class Aircraft extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = [
+   protected $fillable = [
         'registration',
         'manufacturer',
         'model',

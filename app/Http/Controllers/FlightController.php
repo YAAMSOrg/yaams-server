@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Flight;
 
 class FlightController extends Controller
 {
@@ -16,8 +17,7 @@ class FlightController extends Controller
     }
 
     public function listFlights() {
-        $flights = Flights::query()->orderBy('created_at', 'DESC')->get();
-        dump($fleet);
+        $flights = Flight::query()->orderBy('created_at', 'DESC')->get();
         return view('flights.list', ['flights' => $flights]);
     }
 

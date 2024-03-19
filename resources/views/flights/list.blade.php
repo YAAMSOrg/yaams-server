@@ -18,37 +18,20 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                <th scope="row">2634</th>
-                <td>DLH281</td>
-                <td>EDDF</td>
-                <td>EDDM</td>
-                <td>2023/08/15</td>
-                <td>2023/08/15</td>
-                <td>Accepted ✅</td>
+                @foreach($flights as $flight)
+                <tr>  
+                    <th scope="row"></th>
+                    <td>{{ $flight->full_flight_number }}</td>
+                    <td>{{ $flight->departure_icao }}</td>
+                    <td>{{ $flight->arrival_icao }}</td>
+                    <td>{{ $flight->flight_duration }}</td>
+                    <td>{{ $flight->flight_date }}</td>
+                    <td>Accepted ✅</td>
                 </tr>
-                <tr>
-                <th scope="row">6371</th>
-                <td>DLH281</td>
-                <td>EDDM</td>
-                <td>EDDH</td>
-                <td>2023/08/16</td>
-                <td>2023/08/16</td>
-                <td>Declined ⚠️</td>
-                </tr>
-                <tr>
-                <th scope="row">7715</th>
-                <td>DLH281</td>
-                <td>EDDH</td>
-                <td>LEPA</td>
-                <td>2023/08/11</td>
-                <td>2023/08/11</td>
-                <td>Accepted ✅</td>
-                </tr>
+                @endforeach
             </tbody>
-            </table>
-
-        </div>
+        </table>
+    </div>
 
 @endsection
 
