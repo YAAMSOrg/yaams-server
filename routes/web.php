@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LogoutController;
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FlightController;
+use App\Http\Controllers\AircraftController;
 
 Route::get('/auth/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/auth/register', [RegisterController::class, 'store']);
