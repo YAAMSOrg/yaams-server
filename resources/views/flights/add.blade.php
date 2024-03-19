@@ -9,19 +9,22 @@
                     @csrf
                     <div class="col-md-4">
                         <label for="pilot" class="form-label">Pilot</label>
-                        <input type="text" class="form-control" id="pilot" value="Max Mustermann" placeholder="Max Mustermann" disabled>
+                        <input type="text" class="form-control" id="pilot" value="Max Mustermann" placeholder="Max Mustermann" disabled required>
                     </div><hr>
                     <h3>Flight details</h3>
                     <div class="col-md-2">
                         <label for="airline" class="form-label">Airline</label>
-                        <select id="airline" class="form-select" aria-label="Select the airline">
+                        <select id="airline" class="form-select" aria-label="Select the airline" required>
                             <option value="1">LH - Lufthansa Virtual</option>
                             <option value="2">4U - Germanwings Virtual</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label for="flightnumber" class="form-label">Flight number</label>
-                        <input type="text" class="form-control" id="flightnumber"  required maxlength="4" minlength="1" placeholder="1234">
+                        <div class="input-group">
+                            <span class="input-group-text" id="flightnumber_prefix">LH</span>
+                            <input type="text" class="form-control" id="flightnumber" required maxlength="4" minlength="1" placeholder="1234" aria-describedby="basic-addon3 basic-addon4">
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <label for="departure" class="form-label">Departure</label>
@@ -33,7 +36,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="aircraft" class="form-label">Aircraft</label>
-                        <select id="aircraft" class="form-select" aria-label="Select the aircraft">
+                        <select id="aircraft" class="form-select" aria-label="Select the aircraft" required>
                             <option selected></option>
                             <option value="1">A321-200 D-AFME</option>
                             <option value="2">A320-214 D-AMET</option>
@@ -41,7 +44,10 @@
                     </div>
                     <div class="col-md-2">
                         <label for="callsign" class="form-label">Callsign</label>
-                        <input type="text" class="form-control" style="text-transform:uppercase" id="callsign" required minlength="4" maxlength="7" placeholder="DLH141">
+                        <div class="input-group">
+                            <span class="input-group-text" id="callsign_prefix">DLH</span>
+                            <input type="text" class="form-control" style="text-transform:uppercase" id="callsign" required minlength="4" maxlength="7" placeholder="443">
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <label for="cruisealt" class="form-label">Cruise altitude</label>
@@ -65,7 +71,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="network" class="form-label">Online network</label>
-                        <select id="network" class="form-select" aria-label="Select the online network">
+                        <select id="network" class="form-select" required aria-label="Select the online network">
                             <option value="1">OFFLINE</option>
                             <option value="2">VATSIM</option>
                             <option value="3">IVAO</option>
@@ -82,5 +88,4 @@
                     </div>
                 </form>
         </div>
-
 @endsection
