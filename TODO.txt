@@ -2,6 +2,9 @@ TODO:
 
 * Flight DB entry needs to log the pilot who filed it, too!
 * user roles (admin, Airline Manager, etc.)
+* Store small images of the airplanes in aircraft table
+* Internationalization
+* Error handling
 
 Ideas:
 * Simbrief integration

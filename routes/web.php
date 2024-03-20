@@ -22,8 +22,7 @@ Route::get('/user/dashboard', [DashboardController::class, 'index'])->name('dash
 Route::get('/user/flights/add', [FlightController::class, 'index'])->name('addflight');
 Route::get('/user/flights/list', [FlightController::class, 'listFlights'])->name('flightlist');
 
-Route::get('/fleet/list', [AircraftController::class, 'index'])->name('fleetlist');
-Route::get('/fleet/add', [AircraftController::class, 'store'])->name('addaircraft');
+Route::match(['GET', 'POST'], '/fleetmanager', [AircraftController::class, 'index'])->name('fleetmanager');
 
 Route::get('/', function () {
     return view('home.index');

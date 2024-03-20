@@ -19,7 +19,8 @@ class Aircraft extends Model
         'manufacturer',
         'model',
         'remarks',
-        'usedByAirline'
+        'current_loc',
+        'used_by'
     ];
 
     protected $appends = [
