@@ -8,14 +8,17 @@ We've decided to start the coding now with Laravel. It seems to be the excellent
 
 Since Laravel also includes builtin support for building REST APIs it suits perfectly.
 
-## Building
+## Setting up dev environment
 
 ### Docker
 * Install Docker
-* Build the YAAMS docker image, which is located under Docker/Dockerfile using `docker build . -t yaams_app:dev`
+* Build the YAAMS docker image, which is located under Docker/Dockerfile using `docker build . -t yaams-app:dev`
+* Create the docker network, which is needed for internal container communication: `docker network create yaams`
 * Run the docker-compose.yml which is also located in the Docker folder
-* Run php artisan commands using the newly built container: `docker run -it --rm -v $(pwd):/app -p 8000:8000 yaams/app:test bash`
-* Notice: When you run a dev server, please use `php artisan serve --host 0.0.0.0` as command!
+* Run php artisan commands using the newly built container: `docker run -it --rm -v $(pwd):/app -p 8000:8000 yaams-app:dev bash`
+* Run the migrations and seed the db with example data: `php artisan migrate && php artisan db:seed` 
+
+Notice: When you run a dev server, please use `php artisan serve --host 0.0.0.0` as command!
 
 ### Native
 * Install a Laravel development environment (with a DB, composer and PHP)

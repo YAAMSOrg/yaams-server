@@ -3,17 +3,11 @@
 version: '3.1'
 
 services:
-  web:
-    image: docker.io/php:8.1.27-fpm-alpine
-    container_name: yaams-app
-    ports:
-      - 8000:8000
-    volumes:
-      - "..:/app"
-
   db:
     image: docker.io/mariadb:lts
     container_name: yaams-db
+    networks:
+      -  "yaams"
     ports:
       - 3306:3306
     environment:
@@ -22,7 +16,14 @@ services:
   phpmyadmin:
     image: phpmyadmin
     container_name: yaams-phpmyadmin
+    networks: 
+      - "yaams"
     ports:
       - 8080:80
     environment:
       - PMA_ARBITRARY=1
+
+networks:
+  yaams:
+    name: yaams
+    external: true
