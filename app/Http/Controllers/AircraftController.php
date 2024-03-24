@@ -28,4 +28,5 @@ class AircraftController extends Controller
         $fleet = Aircraft::query()->orderBy('created_at', 'DESC')->get()->all();
         return view('fleet.index', ['fleet' => $fleet]);
     }
+
 }

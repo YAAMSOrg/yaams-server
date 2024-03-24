@@ -43,4 +43,8 @@ class User extends Authenticatable
         'last_online_at' => 'datetime'
     ];
 
+    public function getRecentFlightForUser(){
+        // TODO
+    }
+
 }

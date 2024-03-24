@@ -19,8 +19,9 @@ Route::post('/auth/logout', [LogoutController::class, 'store'])->name('logout');
 
 Route::get('/user/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::get('/user/flights/add', [FlightController::class, 'index'])->name('addflight');
-Route::get('/user/flights/list', [FlightController::class, 'listFlights'])->name('flightlist');
+
+Route::match(['GET', 'POST'], '/user/flights/add', [FlightController::class, 'addFlight'])->name('addflight');
+Route::get('/user/flights/list', [FlightController::class, 'displayFlightsForUser'])->name('flightlist');
 
 Route::match(['GET', 'POST'], '/fleetmanager', [AircraftController::class, 'index'])->name('fleetmanager');
 

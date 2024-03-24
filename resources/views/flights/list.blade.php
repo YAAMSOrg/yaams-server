@@ -4,7 +4,11 @@
         <div class="container" >
             <h1 class="display-2">My flights</h1>
             <p class="lead">Here is a list of your filed flights and their PIREP status.</p>
-            <p>You already did <b>3</b> flights with a total length of <b>3:30h</b>. You flew the most from <b>EDDM</b>.
+            
+            @empty($flights)
+                <p>You have not logged any flights yet.</p>
+            @endempty
+            
             <table class="table">
             <thead class="table-dark">
                 <tr>

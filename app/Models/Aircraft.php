@@ -32,6 +32,10 @@ class Aircraft extends Model
         return $this->manufacturer . ' ' . $this->model;
     }
 
+    public function getRecentLocation() {
+        // TODO
+    }
+
     public function airline()
     {
         return $this->belongsTo(Airline::class, 'used_by');

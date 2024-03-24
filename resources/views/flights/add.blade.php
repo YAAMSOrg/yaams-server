@@ -72,7 +72,7 @@
                     </div>
                     <div class="col-md-12">
                         <label for="route" class="form-label">Route</label>
-                        <textarea class="form-control" style="font-family: monospace; font-size: 18px; text-transform:uppercase" aria-label="With textarea" id="route" required>KUMIK Y854 BOMBI T104 ROKIL</textarea>
+                        <textarea class="form-control" style="font-family: monospace; font-size: 18px; text-transform:uppercase" aria-label="With textarea" id="route" placeholder="KUMIK Y854 BOMBI T104 ROKIL" required></textarea>
                     </div>
                     <div class="col-md-4">
                         <label for="network" class="form-label">Online network</label>
