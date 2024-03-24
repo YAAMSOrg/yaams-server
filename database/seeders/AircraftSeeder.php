@@ -22,7 +22,6 @@ class AircraftSeeder extends Seeder
             'current_loc' => 'EXAM',
             'remarks' => "Cool airplane",
             'used_by' => 1,
-            'in_service_since' => ('2023-04-25'),
             'created_at' => Carbon::now()->toDateTimeString(),
             'updated_at' => Carbon::now()->toDateTimeString(),
         ]);

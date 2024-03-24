@@ -14,12 +14,11 @@ class AircraftController extends Controller
     public function index(Request $request) {
         if($request->getMethod() == "POST"){
             $validated = $request->validate([
-                'registration' => 'required|max:6|unique',
+                'registration' => 'required|max:6',
                 'manufacturer' => 'required',
                 'model' => 'required',
                 'current_loc' => 'required|max:4',
                 'remarks' => 'nullable',
-                'in_service_since' => 'required',
                 'used_by' => 'required'
             ]);
 

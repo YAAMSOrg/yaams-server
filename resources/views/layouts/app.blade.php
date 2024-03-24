@@ -93,14 +93,15 @@
     </header>
     <body>
         @yield('content')
-    </body>
 
-    <footer class="bg-body-tertiary text-center fixed-bottom">
-        <div class="container p-4"></div>
-      
-        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
-          YAAMS Version v0.0.1
-          <a class="text-body" href="https://www.github.com/flymia/YAAMS/">GitHub</a>
-        </div>
-    </footer>
+
+        <footer class="bg-body-tertiary text-center fixed-bottom">
+            <div class="container p-4"></div>
+          
+            <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+              YAAMS Version v0.0.1
+              <a class="text-body" href="https://www.github.com/flymia/YAAMS/">GitHub</a>
+            </div>
+        </footer>
+    </body>
 </html>
