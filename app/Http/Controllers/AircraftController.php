@@ -25,8 +25,19 @@ class AircraftController extends Controller
             Aircraft::create($validated);
         }
 
-        $fleet = Aircraft::query()->orderBy('created_at', 'DESC')->get()->all();
+        $limit = 5;
+        $maxEntries = Aircraft::count();
+        $maxPages = (int)ceil($maxEntries/$limit);
+        $page = (int)$request->get('page', 1);
+        $page = min(max(1, $page), $maxPages);
+        $offset = ($page -1) * $limit;
+
+        $fleet = Aircraft::query()
+        ->orderBy('created_at', 'DESC')
+        ->offset($offset)
+        ->limit($limit)
+        ->get();
+
         return view('fleet.index', ['fleet' => $fleet]);
     }
-
 }

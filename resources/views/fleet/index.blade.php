@@ -34,7 +34,7 @@
                         <input type="hidden" id="used_by" name="used_by" value="1" hidden required>
                         <div class="row">
                             <div class="mb-3">
-                                <label for="registration" class="form-label">Registration</label>
+                                <label for="registration" class="form-label">Tail number</label>
                                 <input type="text" id="registration" name="registration"
                                     style="text-transform:uppercase" class="form-control" required placeholder="D-EXAM"
                                     minlength="4" maxlength="6">
@@ -75,35 +75,51 @@
         <table class="table">
             <thead class="table-dark">
                 <tr>
-                    <th scope="col">Tail number</th>
-                    <th scope="col">Airline</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Current location</th>
+                    <th scope="col" class="text-center">Tail number</th>
+                    <th scope="col" class="text-center">Airline</th>
+                    <th scope="col" class="text-center">Type</th>
+                    <th scope="col" class="text-center">Current location</th>
+                    <th scope="col" class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($fleet as $aircraft)
                     <tr>
-                        <th scope="row">{{ $aircraft->registration }}</th>
+                        <th scope="row" class="text-center">{{ $aircraft->registration }}</th>
 
-                        <td>{{ $aircraft->airline->name }}</td>
+                        <td class="text-center">{{ $aircraft->airline->name }}</td>
 
-                        <td>{{ $aircraft->full_type }}</td>
+                        <td class="text-center">{{ $aircraft->full_type }}</td>
 
-                        <td>@if(is_null($aircraft->current_loc))
+                        <td class="text-center">@if(is_null($aircraft->current_loc))
                             <abbr title="This might be, because the aircraft just got initialized.">No location
                                 found</abbr>
                         @else
                             {{ $aircraft->current_loc }}
-                @endif
+                        @endif
+                        <td class="text-center"><a href="">View and Edit</a></td>
                 </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              <li class="page-item disabled">
+                <a class="page-link">Previous</a>
+              </li>
+              <li class="page-item"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+
         @else
         <br><br><br> <!-- Something is buggy here and I don't know why. FIXME! -->
-        <div class="alert alert-info center-block">No aircraft has been added yet.</p>        
+        <div class="alert alert-info center-block">No aircraft has been added yet.</p>       
     @endif
 
 </div>
