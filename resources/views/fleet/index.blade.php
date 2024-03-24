@@ -33,29 +33,31 @@
                                         @csrf
                                         <input type="hidden" id="in_service_since" name="in_service_since" value="2023-05-05" hidden required>
                                         <input type="hidden" id="used_by" name="used_by" value="1" hidden required>
-                                        <div>
-                                            <label for="registration" class="form-label">Registration</label>
-                                            <input type="text" id="registration" name="registration" style="text-transform:uppercase" class="form-control" required placeholder="D-EXAM" minlength="4" maxlength="6">
-                                        </div>
-                                        <div>
-                                            <label for="manufacturer" class="form-label">Manufacturer</label>
-                                            <input type="text" class="form-control" id="manufacturer" name="manufacturer" required placeholder="Boeing">
-                                        </div>
-                                        <div>
-                                            <label for="model" class="form-label">Model</label>
-                                                <input type="text" class="form-control" id="model" name="model" required placeholder="737-800WL">
-                                        </div>
-                                        <div>
-                                            <label for="current_loc" class="form-label">First location</label>
-                                            <input type="text" class="form-control" id="current_loc" name="current_loc" required placeholder="EDDL">
-                                        </div>
-                                        <div>
-                                            <label for="remarks" class="form-label">Remarks / Description</label>
-                                            <textarea class="form-control" style="font-family: monospace; font-size: 18px; text-transform:uppercase" aria-label="With textarea" id="remarks" name="remarks" required>Split Scimilar Winglet Variant</textarea>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">File PIREP</button>
+                                        <div class="row">
+                                            <div class="mb-3">
+                                                <label for="registration" class="form-label">Registration</label>
+                                                <input type="text" id="registration" name="registration" style="text-transform:uppercase" class="form-control" required placeholder="D-EXAM" minlength="4" maxlength="6">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="manufacturer" class="form-label">Manufacturer</label>
+                                                <input type="text" class="form-control" id="manufacturer" name="manufacturer" required placeholder="Boeing">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="model" class="form-label">Model</label>
+                                                    <input type="text" class="form-control" id="model" name="model" required placeholder="737-800WL">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="current_loc" class="form-label">First location</label>
+                                                <input type="text" class="form-control" id="current_loc" name="current_loc" minlength="4" maxlength="4" pattern="[A-Z]+" required placeholder="EDDL">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="remarks" class="form-label">Remarks / Description</label>
+                                                <textarea class="form-control" style="font-family: monospace; font-size: 18px;" aria-label="With textarea" id="remarks" name="remarks" placeholder="Split scimitar winglet variant"></textarea>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary">Add aircraft</button>
+                                            </div>
                                         </div>
                                     </form>
                                 </div>
