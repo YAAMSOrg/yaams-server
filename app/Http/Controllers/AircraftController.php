@@ -38,6 +38,6 @@ class AircraftController extends Controller
         ->limit($limit)
         ->get();
 
-        return view('fleet.index', ['fleet' => $fleet]);
+        return view('fleet.index', ['fleet' => $fleet, 'maxPages' => $maxPages, 'currentPage' => $page]);
     }
 }

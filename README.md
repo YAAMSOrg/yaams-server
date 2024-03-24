@@ -12,13 +12,14 @@ Since Laravel also includes builtin support for building REST APIs it suits perf
 
 ### Docker
 * Install Docker
-* Build the YAAMS docker image, which is located under Docker/Dockerfile using `docker build . -t yaams-app:dev`
+* Build the YAAMS docker image, which is located under `Docker/Dockerfile` using `cd Docker; docker build . -t yaams-app:dev`
 * Create the docker network, which is needed for internal container communication: `docker network create yaams`
-* Run the docker-compose.yml which is also located in the Docker folder
-* Run php artisan commands using the newly built container: `docker run -it --rm -v $(pwd):/app -p 8000:8000 yaams-app:dev bash`
+* In the main folder, copy the `.env.example` to `.env`
+* Run the docker-compose.yml which is also located in the Docker folder using `cd Docker; docker-compose up -d`. These containers are the database and a GUI using phpMyAdmin. The password of the root user is "start123", the server info in phpMyAdmin is "yaams-db".
+* Run php artisan commands using the newly built container: `docker run -it --rm --network yaams -v $(pwd):/app -p 8000:8000 yaams-app:dev bash`
 * Run the migrations and seed the db with example data: `php artisan migrate && php artisan db:seed` 
 
-Notice: When you run a dev server, please use `php artisan serve --host 0.0.0.0` as command!
+Notice: When you run a dev container, please use `php artisan serve --host="0.0.0.0"` as command!
 
 ### Native
 * Install a Laravel development environment (with a DB, composer and PHP)
@@ -39,7 +40,7 @@ Notice: When you run a dev server, please use `php artisan serve --host 0.0.0.0`
 
 ## Current TODOs
 
-* Get base authentification working ✅
+* Get base authentification working
 * Create the PIREP filing process
 
 ## Open Source
