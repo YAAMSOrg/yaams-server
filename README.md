@@ -10,6 +10,14 @@ Since Laravel also includes builtin support for building REST APIs it suits perf
 
 ## Building
 
+### Docker
+* Install Docker
+* Build the YAAMS docker image, which is located under Docker/Dockerfile using `docker build . -t yaams_app:dev`
+* Run the docker-compose.yml which is also located in the Docker folder
+* Run php artisan commands using the newly built container: `docker run -it --rm -v $(pwd):/app -p 8000:8000 yaams/app:test bash`
+* Notice: When you run a dev server, please use `php artisan serve --host 0.0.0.0` as command!
+
+### Native
 * Install a Laravel development environment (with a DB, composer and PHP)
 * `git clone https://github.com/flymia/YAAMS.git` in your directory
 * Run a `composer update` to install the components

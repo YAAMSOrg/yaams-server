@@ -3,9 +3,17 @@
 version: '3.1'
 
 services:
+  web:
+    image: docker.io/php:8.1.27-fpm-alpine
+    container_name: yaams-app
+    ports:
+      - 8000:8000
+    volumes:
+      - "..:/app"
+
   db:
-    image: mariadb:lts
-    restart: always
+    image: docker.io/mariadb:lts
+    container_name: yaams-db
     ports:
       - 3306:3306
     environment:
@@ -13,7 +21,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin
-    restart: always
+    container_name: yaams-phpmyadmin
     ports:
       - 8080:80
     environment:
