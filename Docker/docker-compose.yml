@@ -11,17 +11,17 @@ services:
     ports:
       - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: start123
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
 
   phpmyadmin:
-    image: phpmyadmin
+    image: docker.io/phpmyadmin:latest
     container_name: yaams-phpmyadmin
     networks: 
       - "yaams"
     ports:
       - 8080:80
     environment:
-      - PMA_ARBITRARY=1
+      - PMA_USER=root
 
 networks:
   yaams:
