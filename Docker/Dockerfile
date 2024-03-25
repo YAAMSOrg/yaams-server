@@ -1,5 +1,7 @@
 FROM php:8.2-cli
 
+LABEL org.opencontainers.image.authors="YAAMS Dev Team"
+
 RUN apt update
 RUN apt install -y curl git zip unzip
 RUN docker-php-ext-install mysqli pdo_mysql
