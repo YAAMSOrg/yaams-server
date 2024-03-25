@@ -70,7 +70,6 @@
             </div>
         </div>
     </div>
-
     @if(!empty($fleet))
         <table class="table">
             <thead class="table-dark">
@@ -107,9 +106,21 @@
         @if($maxPages > 1)
         <nav>
             <ul class="pagination justify-content-center">
-              <li class="page-item"><a class="page-link" href="">1</a></li>
-              <li class="page-item"><a class="page-link" href="#">2</a></li>
-              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item">
+                <a class="page-link" href="{{ route('fleetmanager', ['page' => $currentPage-1], false)}}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+
+              @for($page=1;$page<=$maxPages;$page++)
+                <li class="page-item @if($page === $currentPage) active @endif"><a class="page-link" href="{{ route('fleetmanager', ['page' => $page], false)}}">{{ $page }}</a></li>
+              @endfor
+              
+              <li class="page-item">
+                <a class="page-link" href="{{ route('fleetmanager', ['page' => $currentPage+1], false)}}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
             </ul>
         </nav>
         @endif
@@ -118,6 +129,5 @@
         <br><br><br> <!-- Something is buggy here and I don't know why. FIXME! -->
         <div class="alert alert-info center-block">No aircraft has been added yet.</p>       
     @endif
-
 </div>
 @endsection

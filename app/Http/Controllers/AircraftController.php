@@ -25,7 +25,7 @@ class AircraftController extends Controller
             Aircraft::create($validated);
         }
 
-        $limit = 5;
+        $limit = max(env('FLEET_PAGE_LIMIT'), 1);
         $maxEntries = Aircraft::count();
         $maxPages = (int)ceil($maxEntries/$limit);
         $page = (int)$request->get('page', 1);
