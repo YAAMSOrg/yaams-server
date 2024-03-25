@@ -30,17 +30,23 @@ The main priority, in order, as of now is the following:
 * Build the YAAMS docker image, which is located under `Docker/Dockerfile` using `cd Docker; docker build . -t yaams-app:dev`
 * Create the docker network, which is needed for internal container communication: `docker network create yaams`
 * In the main folder, copy the `.env.example` to `.env`
-* Run the docker-compose.yml which is also located in the Docker folder using `cd Docker; docker-compose up -d`. These containers are the database and a GUI using phpMyAdmin. The password of the root user is "start123", the server info in phpMyAdmin is "yaams-db".
+* Run the docker-compose.yml which is also located in the Docker folder using `cd Docker; docker-compose up -d`. These containers are the database and a GUI using phpMyAdmin.
 * Run php artisan commands using the newly built container: `docker run -it --rm --network yaams -v $(pwd):/app -p 8000:8000 yaams-app:dev bash`
-* Run the migrations and seed the db with example data: `php artisan migrate && php artisan db:seed` 
+* Run the migrations and seed the db with example data: `php artisan migrate && php artisan db:seed`
 
-Notice: When you run a dev container, please use `php artisan serve --host="0.0.0.0"` as command!
+Notice: When you run a dev container, please use `php artisan serve --host="0.0.0.0"` as command.
 
 ### Native
 * Install a Laravel development environment (with a DB, composer and PHP)
 * `git clone https://github.com/flymia/YAAMS.git` in your directory
 * Run a `composer update` to install the components
 * Done. Help by adding new features as you like and do a PR!
+
+#### Example users
+
+The default users and password for testing are: 
+* test@test.com / start
+* homer@test.com / start
 
 ## Open Source
 
