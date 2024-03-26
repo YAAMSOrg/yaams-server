@@ -8,11 +8,7 @@ use Carbon\Carbon;
 
 class Aircraft extends Model
 {
-    use HasFactory;
-
-    protected $primaryKey = 'registration';
-    public $incrementing = false;
-    protected $keyType = 'string';
+   use HasFactory;
 
    protected $fillable = [
         'registration',
