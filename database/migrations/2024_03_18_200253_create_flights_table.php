@@ -21,8 +21,8 @@ class CreateFlightsTable extends Migration
             $table->integer('flightnumber');
             $table->string('departure_icao', 4);
             $table->string('arrival_icao', 4);
-            $table->string('aircraft', 6);
-            $table->foreign('aircraft')->references('registration')->on('aircraft');
+            $table->foreignId('aircraft');
+            $table->foreign('aircraft')->references('id')->on('aircraft');
             $table->integer('crzalt');
             $table->datetime('blockoff');
             $table->datetime('blockon');
