@@ -5,7 +5,9 @@
     <h1 class="display-2">Fleet overview</h1>
     <p class="lead" style="float: left">Here is a list of all aircraft and their current locations according to their last flight.</p>
     <!-- TODO: Only show if user is a manager of the particular airline! -->
-    <button type="button" class="btn btn-primary" style="float: right" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add aircraft</button>
+    @can('add aircraft')
+        <button type="button" class="btn btn-primary" style="float: right" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add aircraft</button>
+    @endcan
 
     @if($errors->any())
         <div class="alert alert-danger">
@@ -17,6 +19,8 @@
             </ul>
         </div>
     @endif
+    @can('add aircraft')
+
     <!-- Modal -->
     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -70,6 +74,9 @@
             </div>
         </div>
     </div>
+    @endcan
+
+
     @if(!empty($fleet))
         <table class="table">
             <thead class="table-dark">
