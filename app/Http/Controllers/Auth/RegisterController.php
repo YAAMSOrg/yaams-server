@@ -28,12 +28,15 @@ class RegisterController extends Controller
             'password' => 'required|confirmed'
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'homebase' => Str::upper($request->homebase),
             'password' => Hash::make($request->password)
         ]);
+
+        //Default role of every registered user is pilot
+        $user->assignRole('Pilot');
 
         //Sign in user
         auth()->attempt($request->only('email', 'password'));
