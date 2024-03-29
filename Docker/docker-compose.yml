@@ -22,6 +22,7 @@ services:
       - 8080:80
     environment:
       - PMA_USER=root
+      - UPLOAD_LIMIT=300M
 
 networks:
   yaams:
