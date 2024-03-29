@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('airports', function (Blueprint $table) {
             $table->string('icao_code', 4)->primary();
             $table->string('name', 80)->nullable();
-            $table->decimal('latitude_deg');
-            $table->decimal('longitude_deg');
+            $table->float('latitude_deg', 15);
+            $table->float('longitude_deg', 15);
             $table->integer('elevation_ft');
             $table->string('iso_country', 11);
             $table->string('iata_code', 3)->nullable();
