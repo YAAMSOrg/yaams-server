@@ -31,20 +31,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `airports`
---
-
-CREATE TABLE `airports` (
-  `icao_code` varchar(4) NOT NULL,
-  `name` varchar(80) NOT NULL,
-  `latitude_deg` varchar(19) NOT NULL,
-  `longitude_deg` varchar(19) NOT NULL,
-  `elevation_ft` varchar(12) DEFAULT NULL,
-  `iso_country` varchar(11) NOT NULL,
-  `iata_code` varchar(3) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
 -- Dumping data for table `airports`
 --
 
@@ -31592,16 +31578,6 @@ INSERT INTO `airports` (`icao_code`, `name`, `latitude_deg`, `longitude_deg`, `e
 ('ZYYK', 'Yingkou Lanqi Airport', '40.542524', '122.3586', '', 'CN', 'YKH'),
 ('ZYYY', 'Shenyang Dongta Airport', '41.784401', '123.496002', '', 'CN', '');
 
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `airports`
---
-ALTER TABLE `airports`
-  ADD PRIMARY KEY (`icao_code`);
-COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
