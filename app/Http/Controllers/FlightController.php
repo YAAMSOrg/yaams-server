@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Flight;
+use App\Models\Airline;
 
 class FlightController extends Controller
 {
@@ -13,7 +14,10 @@ class FlightController extends Controller
     }
 
     public function displayAllFlights() {
-        $flights = Flight::query()->orderBy('created_at', 'DESC')->get();
+        $flights = Flight::query()
+        ->orderBy('created_at', 'DESC')
+        ->get();
+
         return view('flights.list', ['flights' => $flights]);
     }
 
@@ -25,8 +29,6 @@ class FlightController extends Controller
         ->orderBy('created_at', 'DESC')
         ->get();
 
-       
-        dump($flights->count());
         return view('flights.list', ['flights' => $flights]);
     }
 
@@ -48,11 +50,15 @@ class FlightController extends Controller
                 'online_network' => 'required',
                 'remarks' => 'regex:/^([a-zA-Z]+)(\s[a-zA-Z]+)*$/'
             ]);
-            dump($validated);
 
             Flight::create($validated);
         }
 
-        return view('flights.add');
+        //TODO: Get all airlines, where the pilot is member of
+        $prefill_select_airline = Airline::query()->get();
+
+        //dump($prefill_select_airline);
+
+        return view('flights.add', [ 'prefill_airline' => $prefill_select_airline ]);
     }
 }

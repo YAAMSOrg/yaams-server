@@ -20,8 +20,9 @@
                     <div class="col-md-2">
                         <label for="airline" class="form-label">Airline</label>
                         <select id="airline" class="form-select" aria-label="Select the airline" required>
-                            <option value="1">LH - Lufthansa Virtual</option>
-                            <option value="2">4U - Germanwings Virtual</option>
+                            @foreach($prefill_airline as $prefill_airline_item)
+                            <option value="{{ $prefill_airline_item->id }}">{{ $prefill_airline_item->prefix }} - {{ $prefill_airline_item->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-2">
