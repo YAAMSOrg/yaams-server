@@ -19,6 +19,7 @@ class CreateAircraftTable extends Migration
             $table->string("manufacturer", 100);
             $table->string("model", 100);
             $table->string("current_loc", 4);
+            $table->foreign("current_loc")->references('icao_code')->on('airports')->nullable();
             $table->text("remarks")->nullable();
             $table->foreignId('used_by');
             $table->foreign('used_by')->references('id')->on('airlines')->nullable();

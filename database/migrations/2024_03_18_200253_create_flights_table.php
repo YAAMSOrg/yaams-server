@@ -20,7 +20,9 @@ class CreateFlightsTable extends Migration
             $table->string('callsign', 4);
             $table->integer('flightnumber');
             $table->string('departure_icao', 4);
+            $table->foreign('departure_icao')->references('icao_code')->on('airports');
             $table->string('arrival_icao', 4);
+            $table->foreign('arrival_icao')->references('icao_code')->on('airports');
             $table->foreignId('aircraft');
             $table->foreign('aircraft')->references('id')->on('aircraft');
             $table->integer('crzalt');
