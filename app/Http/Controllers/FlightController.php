@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Flight;
 use App\Models\Airline;
+use App\Models\OnlineNetwork;
+use App\Models\Aircraft;
 
 class FlightController extends Controller
 {
@@ -57,8 +59,16 @@ class FlightController extends Controller
         //TODO: Get all airlines, where the pilot is member of
         $prefill_select_airline = Airline::query()->get();
 
-        //dump($prefill_select_airline);
+        $prefill_select_online_network = OnlineNetwork::query()->get();
 
-        return view('flights.add', [ 'prefill_airline' => $prefill_select_airline ]);
+        //TODO: Only get aircraft from an airline, which the pilot is member of
+        $prefill_select_aircraft = Aircraft::query()->get();
+
+        //dump($prefill_select_aircraft);
+
+        return view('flights.add', [ 'prefill_airline' => $prefill_select_airline,
+                                     'prefill_online_network' => $prefill_select_online_network,
+                                     'prefill_aircraft' => $prefill_select_aircraft ]);
+
     }
 }

@@ -43,9 +43,9 @@
                     <div class="col-md-4">
                         <label for="aircraft" class="form-label">Aircraft</label>
                         <select id="aircraft" class="form-select" aria-label="Select the aircraft" required>
-                            <option selected></option>
-                            <option value="1">A321-200 D-AFME</option>
-                            <option value="2">A320-214 D-AMET</option>
+                            @foreach($prefill_aircraft as $prefill_aircraft_item)
+                            <option value="{{ $prefill_aircraft_item->id }}">{{ $prefill_aircraft_item->registration }} ({{ $prefill_aircraft_item->full_type }})</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -78,10 +78,9 @@
                     <div class="col-md-4">
                         <label for="network" class="form-label">Online network</label>
                         <select id="network" class="form-select" required aria-label="Select the online network">
-                            <option value="1">OFFLINE</option>
-                            <option value="2">VATSIM</option>
-                            <option value="3">IVAO</option>
-                            <option value="4">POSCON</option>
+                            @foreach($prefill_online_network as $prefill_online_network_item)
+                            <option value="{{ $prefill_online_network_item->id }}">{{ $prefill_online_network_item->networkname }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-8">

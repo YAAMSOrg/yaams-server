@@ -56,7 +56,7 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
-                        <li><a class="dropdown-item" href="{{ route('addflight') }}">File PIREP</a></li>
+                        <li><a class="dropdown-item" href="{{ route('addflight') }}">File a PIREP</a></li>
                     </ul>
                 </li>
 
