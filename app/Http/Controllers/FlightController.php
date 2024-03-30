@@ -18,7 +18,15 @@ class FlightController extends Controller
     }
 
     public function displayFlightsForUser() {
-        $flights = Flight::query()->orderBy('created_at', 'DESC')->get();
+        $current_auth_user_id = auth()->id();
+
+        $flights = Flight::query()
+        ->where('pilot', $current_auth_user_id)
+        ->orderBy('created_at', 'DESC')
+        ->get();
+
+       
+        dump($flights->count());
         return view('flights.list', ['flights' => $flights]);
     }
 
