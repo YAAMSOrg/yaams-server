@@ -18,9 +18,14 @@ YAAMS is an alternative to PHPvms or Virtual Airline Manager. YAAMS takes a more
 
 The main priority, in order, as of now is the following:
 
-* Ease up the dev environment (including better documentation)
-* Rework the database model
+* Finalize the database model
 * Get the API working for read and write access
+
+### Showcase
+
+For example, this is the file PIREP form. This is all a WIP.
+
+![PIREP filing demo](https://github.com/YAAMSOrg/yaams-sever/blob/readme-update/Docs/res/file_pirep_showcase.gif?raw=true)
 
 ## Setting up dev environment
 
