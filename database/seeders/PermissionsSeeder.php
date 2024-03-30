@@ -52,7 +52,7 @@ class PermissionsSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@test.com',
             'password' => Hash::make('start'),
-            'homebase' => 'START'
+            'homebase' => 'EDDM'
         ]);
         $user->assignRole($role3);
     }

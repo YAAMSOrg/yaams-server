@@ -14,7 +14,8 @@ class AddHomebaseToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('homebase');
+            $table->string('homebase', 4);
+            $table->foreign('homebase')->references('icao_code')->on('airports');
         });
     }
 
