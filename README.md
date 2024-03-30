@@ -25,7 +25,7 @@ The main priority, in order, as of now is the following:
 
 For example, this is the file PIREP form. This is all a WIP.
 
-![PIREP filing demo](https://github.com/YAAMSOrg/yaams-sever/blob/readme-update/Docs/res/file_pirep_showcase.gif?raw=true)
+![PIREP filing demo](https://raw.githubusercontent.com/YAAMSOrg/yaams-sever/main/Docs/res/file_pirep_showcase.gif)
 
 ## Setting up dev environment
 
