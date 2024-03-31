@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Flight;
+use App\Models\Airline;
+use App\Models\OnlineNetwork;
+use App\Models\Aircraft;
 
 class FlightController extends Controller
 {
@@ -13,12 +16,21 @@ class FlightController extends Controller
     }
 
     public function displayAllFlights() {
-        $flights = Flight::query()->orderBy('created_at', 'DESC')->get();
+        $flights = Flight::query()
+        ->orderBy('created_at', 'DESC')
+        ->get();
+
         return view('flights.list', ['flights' => $flights]);
     }
 
     public function displayFlightsForUser() {
-        $flights = Flight::query()->orderBy('created_at', 'DESC')->get();
+        $current_auth_user_id = auth()->id();
+
+        $flights = Flight::query()
+        ->where('pilot', $current_auth_user_id)
+        ->orderBy('created_at', 'DESC')
+        ->get();
+
         return view('flights.list', ['flights' => $flights]);
     }
 
@@ -40,11 +52,23 @@ class FlightController extends Controller
                 'online_network' => 'required',
                 'remarks' => 'regex:/^([a-zA-Z]+)(\s[a-zA-Z]+)*$/'
             ]);
-            dump($validated);
 
             Flight::create($validated);
         }
 
-        return view('flights.add');
+        //TODO: Get all airlines, where the pilot is member of
+        $prefill_select_airline = Airline::query()->get();
+
+        $prefill_select_online_network = OnlineNetwork::query()->get();
+
+        //TODO: Only get aircraft from an airline, which the pilot is member of
+        $prefill_select_aircraft = Aircraft::query()->get();
+
+        //dump($prefill_select_aircraft);
+
+        return view('flights.add', [ 'prefill_airline' => $prefill_select_airline,
+                                     'prefill_online_network' => $prefill_select_online_network,
+                                     'prefill_aircraft' => $prefill_select_aircraft ]);
+
     }
 }
