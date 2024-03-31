@@ -54,6 +54,10 @@ The default users and password for testing are:
 * test@test.com / start
 * homer@test.com / start
 
+The auth tokens for developing the API are issued on the db:seed command and printed out. 
+
+**Please store them somewhere, they are not shown again!**
+
 ## Used libraries
 
 * [laravel-permission](https://github.com/spatie/laravel-permission)
