@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\V1\ApiTestController;
+use App\Http\Controllers\Api\V1\AirlineAPIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,4 +27,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1', 'middleware' => 'auth:sanctum' ], function() {
     Route::get('apitest', [ApiTestController::class, 'index'])->name('apitest');
+    Route::apiResource('airlines', AirlineAPIController::class);
 });

@@ -10,7 +10,10 @@ class Airline extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'prefix',
+        'icao_callsign',
+        'atc_callsign'
     ];
 
 }
