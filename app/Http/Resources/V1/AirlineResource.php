@@ -20,6 +20,7 @@ class AirlineResource extends JsonResource
             'prefix' => $this->prefix,
             'icaoCallsign' => $this->icao_callsign,
             'atcCallsign' => $this->atc_callsign,
+            'unitIsLbs' => $this->unit_is_lbs,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at
         ];

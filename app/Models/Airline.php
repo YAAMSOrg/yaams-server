@@ -13,7 +13,8 @@ class Airline extends Model
         'name',
         'prefix',
         'icao_callsign',
-        'atc_callsign'
+        'atc_callsign',
+        'unit_is_lbs'
     ];
 
 }
