@@ -16,10 +16,20 @@ class AirlinesSeeder extends Seeder
     public function run(): void
     {
         DB::table('airlines')->insert([
-            'name' => "Example VA",
-            'prefix' => "EV",
-            'icao_callsign' => 'EVA',
-            'atc_callsign' => 'EXAMPLE',
+            'name' => "First VA",
+            'prefix' => "FV",
+            'icao_callsign' => 'FVA',
+            'atc_callsign' => 'FIRST',
+            'unit_is_lbs' => false,
+            'created_at' => Carbon::now()->toDateTimeString(),
+            'updated_at' => Carbon::now()->toDateTimeString()
+        ]);
+        DB::table('airlines')->insert([
+            'name' => "Second VA",
+            'prefix' => "SV",
+            'icao_callsign' => 'SVA',
+            'atc_callsign' => 'SECOND',
+            'unit_is_lbs' => true,
             'created_at' => Carbon::now()->toDateTimeString(),
             'updated_at' => Carbon::now()->toDateTimeString()
         ]);
