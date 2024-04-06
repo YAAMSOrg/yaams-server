@@ -2,9 +2,6 @@
 @section('title', 'YAAMS: Pilot Dashboard')
 @section('content')
 
-<div class="container mt-5" style="max-width: 2000px">  
-    <div class="row justify-content-center">
-        <div class="col-md-8">
             <h1 class="display-4 mb-4">Welcome, {{ Auth::user()->name }}!</h1>
             <p class="lead">You have a total of <b>161 hours</b> in <b>54 flights</b>.</p>
 
@@ -66,8 +63,5 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-</div>
 
 @endsection

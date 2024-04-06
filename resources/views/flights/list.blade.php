@@ -2,15 +2,13 @@
 @section('title', 'YAAMS: Flight list')
 @section('content')
 
-    <div class="container mt-5" style="max-width: 2000px">  
-            <div class="row justify-content-center">
-                <div class="col-md-8" style="">
+        <div class="container mt-4">
+                <div class="col-md-12">
                     <h1 class="display-4 mb-4">My flights</h1>
                     <p class="lead">Here is a list of your filed flights and their PIREP status.</p>
 
                 @if ($flights->isEmpty())
                         <p class="alert alert-warning">You have not logged any flights yet. Go ahead and <a href="{{ route('addflight') }}">file a PIREP</a>.</p>
-                    </div>
                 </div>
                 @else
                     <table class="table">
@@ -40,7 +38,6 @@
                         </tbody>
                     </table>
                 @endif
-        </div>      
     </div>
 @endsection
 

@@ -74,8 +74,11 @@
         </div>
     </header>
     <body>
-        @yield('content')
-
+        <div class="container mt-4">
+            <div class="col-md-12">
+                @yield('content')
+            </div>
+        </div>
 
         <footer class="bg-body-tertiary text-center fixed-bottom">
             <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">

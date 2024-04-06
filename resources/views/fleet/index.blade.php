@@ -2,9 +2,6 @@
 @section('title', 'YAAMS: Pilot Dashboard')
 @section('content')
 
-<div class="container mt-5" style="max-width: 2000px">  
-    <div class="row justify-content-center">
-        <div class="col-md-8">
             <h1 class="display-4 mb-4">Fleet overview</h1>
             <p class="lead">Here is a list of all aircraft and their current locations according to their last flight.</p>
 
@@ -140,6 +137,5 @@
         @endif
         </div>
     </div>
-</div>
 
 @endsection
