@@ -36,7 +36,7 @@ For example, this is the file PIREP form. This is all a WIP.
 * Create the docker network, which is needed for internal container communication: `$ docker network create yaams`
 * In the main folder, copy the `.env.example` to `.env`
 * Run the docker-compose.yml which is also located in the Docker folder using `$ cd Docker; docker-compose up -d`. These containers are the database and a GUI using phpMyAdmin.
-* Run php artisan commands using the newly built container: `$ docker run -it --rm --network yaams -v $(pwd):/app -p 8000:8000 yaams-app:dev bash`
+* Run php artisan commands using the newly built container: `$ docker run -it --rm --network yaams -u $(id -u):$(id -g) -v $(pwd):/app -p 8000:8000 yaams-app:dev bash`
 * Install the composer components: `$ composer update`
 * Run the migrations and seed the db with example data: `$ php artisan migrate && php artisan db:seed`
 
