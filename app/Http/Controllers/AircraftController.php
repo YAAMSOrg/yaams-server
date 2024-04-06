@@ -22,10 +22,7 @@ class AircraftController extends Controller
                 'remarks' => 'nullable',
                 'used_by' => 'required'
             ]);
-
-            $checkRegForDouble = $request->post('registration');
-            $checkAirlineForDouble = $request->post('used_by');
-            
+           
             if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $request->post('used_by'))->count() >= 1)
             {
                 throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
