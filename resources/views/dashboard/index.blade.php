@@ -2,7 +2,7 @@
 @section('title', 'YAAMS: Pilot Dashboard')
 @section('content')
 
-<div class="container-fluid mt-5">
+<div class="container mt-5" style="max-width: 2000px">  
     <div class="row justify-content-center">
         <div class="col-md-8">
             <h1 class="display-4 mb-4">Welcome, {{ Auth::user()->name }}!</h1>
