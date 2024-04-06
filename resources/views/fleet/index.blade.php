@@ -5,10 +5,6 @@
             <h1 class="display-4 mb-4">Fleet overview</h1>
             <p class="lead">Here is a list of all aircraft and their current locations according to their last flight.</p>
 
-            @can('add aircraft')
-                <button type="button" class="btn btn-primary" style="float: right" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add aircraft</button>
-            @endcan
-            
             @if($errors->any())
             <div class="alert alert-danger">
                 Error during request:
@@ -20,6 +16,9 @@
             </div>
             @endif
 
+            @can('add aircraft')
+                <button type="button" class="btn btn-primary" style="float: right" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add aircraft</button>
+            @endcan
             @can('add aircraft')
             <!-- Modal -->
             <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
