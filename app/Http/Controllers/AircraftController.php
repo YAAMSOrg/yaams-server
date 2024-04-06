@@ -63,7 +63,6 @@ class AircraftController extends Controller
                 'remarks' => 'nullable',
                 'used_by' => 'required'
             ]);
-            //TODO: When changing something, check if there is another aircraft on the same airline which is active.
 
             $targetAircraft = Aircraft::find($aircraft->id);
             $targetAircraft->registration = $request->post('registration');
@@ -73,15 +72,20 @@ class AircraftController extends Controller
             $targetAircraft->active = $finalStatus;
             $targetAircraft->remarks = $request->post('remarks');
 
-            if($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')){
-                if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $request->post('used_by'))->count() >= 1) {
-                    throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
-                } else {
-                    $targetAircraft->save();
+            if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')) {
+
+                $existingAircraft = Aircraft::where('registration', $request->post('registration'))
+                    ->where('used_by', $request->post('used_by'))
+                    ->where('id', '<>', $aircraft->id) // Exclude current aircraft
+                    ->where('active', true)
+                    ->exists();
+
+                if ($existingAircraft) {
+                    throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exists in this airline. Please set the aircraft inactive or choose another tail number.']);
                 }
-            } else {
-                $targetAircraft->save();
             }
+
+            $targetAircraft->save();
 
             return redirect()->route('fleetmanager');
         }
