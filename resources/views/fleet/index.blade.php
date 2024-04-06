@@ -37,7 +37,7 @@
                             <input type="hidden" id="used_by" name="used_by" value="1" hidden required>
                             <div class="row">
                                 <div class="mb-3">
-                                    <label for="registration" class="form-label">Tail number</label>
+                                    <label for="registration" class="form-label">Registration (tail number)</label>
                                     <input type="text" id="registration" name="registration"
                                         style="text-transform:uppercase" class="form-control" required placeholder="D-EXAM"
                                         minlength="4" maxlength="6">
@@ -84,25 +84,29 @@
                             <th scope="col" class="text-center">Airline</th>
                             <th scope="col" class="text-center">Type</th>
                             <th scope="col" class="text-center">Current location</th>
+                            @can('edit aircraft')
                             <th scope="col" class="text-center">Actions</th>
+                            @endcan
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($fleet as $aircraft)
                             <tr>
-                                <th scope="row" class="text-center">{{ $aircraft->registration }}</th>
+                                <th scope="row" class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->registration }}</th>
         
-                                <td class="text-center">{{ $aircraft->airline->name }}</td>
+                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->airline->name }}</td>
         
-                                <td class="text-center">{{ $aircraft->full_type }}</td>
+                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->full_type }}</td>
         
-                                <td class="text-center">@if(is_null($aircraft->current_loc))
+                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>@if(is_null($aircraft->current_loc))
                                     <abbr title="This might be, because the aircraft just got initialized.">No location
                                         found</abbr>
                                 @else
                                     {{ $aircraft->current_loc }}
                                 @endif
-                                <td class="text-center"><a href="">View and Edit</a></td>
+                                @can('edit aircraft')
+                                <td class="text-center"><a href="{{ route('editfleet', $aircraft->id) }}">Edit</a></td>
+                                @endcan
                         </td>
                         </tr>
                         @endforeach

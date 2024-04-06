@@ -62,7 +62,8 @@ class FlightController extends Controller
         $prefill_select_online_network = OnlineNetwork::query()->get();
 
         //TODO: Only get aircraft from an airline, which the pilot is member of
-        $prefill_select_aircraft = Aircraft::query()->get();
+
+        $prefill_select_aircraft = Aircraft::where('active', '=', true)->get();
 
         //dump($prefill_select_aircraft);
 
