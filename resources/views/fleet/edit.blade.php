@@ -21,15 +21,15 @@
                 <input type="hidden" id="used_by" name="used_by" value="1" hidden required>
                 <div class="col-md-4">
                     <label for="registration" class="form-label">Registration (tail number)</label>
-                    <input type="text" class="form-control" id="registration" name="registration" value="{{ $aircraft->registration }}" required>
+                    <input type="text" class="form-control" id="registration" name="registration" value="{{ $aircraft->registration }}" maxlength="6" required>
                 </div>
                 <div class="col-md-4">
                     <label for="manufacturer" class="form-label">Manufacturer</label>
-                    <input type="text" class="form-control" id="manufacturer" name="manufacturer" value="{{ $aircraft->manufacturer }}" required>
+                    <input type="text" class="form-control" id="manufacturer" name="manufacturer" value="{{ $aircraft->manufacturer }}" maxlength="100" required>
                 </div>
                 <div class="col-md-4">
                     <label for="model" class="form-label">Model</label>
-                    <input type="text" class="form-control" id="model" name="model" value="{{ $aircraft->model }}" required>
+                    <input type="text" class="form-control" id="model" name="model" value="{{ $aircraft->model }}" maxlength="100" required>
                 </div>
                 <div class="col-md-4">
                     <label for="status" class="form-label">Status</label>
