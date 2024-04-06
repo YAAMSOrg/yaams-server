@@ -60,7 +60,7 @@
                             <li><a class="dropdown-item" href="#">Edit profile</a></li>
                             <li><a class="dropdown-item" href="#">Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Current airline: Lufthansa</a></li>
+                            <li><a class="dropdown-item" href="{{ route('changeactiveairline') }}">Current airline: Lufthansa</a></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="post">
                                     @csrf

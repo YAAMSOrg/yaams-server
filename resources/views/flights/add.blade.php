@@ -28,7 +28,7 @@
                     <div class="col-md-2">
                         <label for="flightnumber" class="form-label">Flight number</label>
                         <div class="input-group">
-                            <span class="input-group-text" id="flightnumber_prefix">LH</span>
+                            <span class="input-group-text" id="flightnumber_prefix">{{ $prefill_airline_item->prefix }}</span>
                             <input type="text" class="form-control" id="flightnumber" required maxlength="4" minlength="1" placeholder="1234" aria-describedby="basic-addon3 basic-addon4">
                         </div>
                     </div>
