@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Aircraft;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AircraftController extends Controller
 {
@@ -21,8 +22,13 @@ class AircraftController extends Controller
                 'remarks' => 'nullable',
                 'used_by' => 'required'
             ]);
-
-            Aircraft::create($validated);
+           
+            if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $request->post('used_by'))->count() >= 1)
+            {
+                throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
+            } else {
+                Aircraft::create($validated);
+            }
         }
 
         $limit = max(env('FLEET_PAGE_LIMIT'), 1);

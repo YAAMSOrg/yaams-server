@@ -2,9 +2,9 @@
 @section('title', 'YAAMS: File PIREP')
 @section('content')
 
-        <div class="container" >
-            <h1 class="display-2">File a PIREP</h1>
-            <p class="lead">Here you can manually file a PIREP. Please fill out all the fields.</p>
+                <h1 class="display-4 mb-4">File a PIREP</h1>
+                <p class="lead">Here you can manually file a PIREP. Please fill out all the fields.</p>
+
                 <form action="{{ route('addflight') }}" class="row g-3">
                     @csrf
                     <div class="col-md-1">
@@ -92,5 +92,6 @@
                         <button type="reset" class="btn btn-secondary">Clear fields</button>
                     </div>
                 </form>
+            </div>
         </div>
 @endsection
