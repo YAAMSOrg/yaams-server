@@ -40,55 +40,59 @@
         </symbol>
     </svg>
 
-    <header class="p-3 bg-dark text-white">
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
-            <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
+            <a class="navbar-brand" href="/">
+                <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="YAAMS Logo" height="40">
             </a>
 
-            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                <li><a href="{{ route('home') }}" class="nav-link px-2 text-white">Home</a></li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle px-2 text-white" href="{{ route('flightlist') }}" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Flights
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
-                        <li><a class="dropdown-item" href="{{ route('addflight') }}">File a PIREP</a></li>
-                    </ul>
-                </li>
-
-                <li><a href="{{ route('fleetmanager') }}" class="nav-link px-2 text-white">Fleet</a></li>
-                <li><a href="#" class="nav-link px-2 text-white">Live map</a></li>
-            </ul>
-
-            @guest
-            <div class="text-end">
-                <form action="{{ route('login') }}" style="display: inline">
-                    <button type="submit" class="btn btn-outline-light me-2">Login</button>
-                </form>
-
-                <form action="{{ route('register') }}" style="display: inline">
-                    <button type="submit" class="btn  btn-warning me-2">Sign-up</button>
-                </form>
+            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('home') }}">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFlights" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Flights
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownFlights">
+                            <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
+                            <li><a class="dropdown-item" href="{{ route('addflight') }}">File a PIREP</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('fleetmanager') }}">Fleet</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Live map</a>
+                    </li>
+                </ul>
+                <div class="navbar-nav">
+                    @guest
+                    <a href="{{ route('login') }}" class="nav-link">Login</a>
+                    <a href="{{ route('register') }}" class="nav-link btn btn-warning">Sign-up</a>
+                    @endguest
+                    @auth
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ Auth::user()->name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+                            <li><a class="dropdown-item" href="#">Edit profile</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Current airline: Lufthansa</a></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="post">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    @endauth
+                </div>
             </div>
-            @endguest
-            @auth
-            <div class="text-end">
-                <form action="{{ route('dashboard') }}" style="display: inline">
-                    @csrf
-                    <button type="submit" class="btn btn-outline-light me-2">{{ Auth::user()->name }}</button>
-                </form>
-                
-                <form action="{{ route('logout') }}" method=post style="display:inline">
-                    @csrf
-                <button type="submit" class="btn btn-secondary">Logout</button>
-                </form>
-            </div>
-            @endauth
-        </div>
         </div>
     </header>
     <body>
