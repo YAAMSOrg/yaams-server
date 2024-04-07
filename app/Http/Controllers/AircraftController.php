@@ -13,6 +13,8 @@ class AircraftController extends Controller
     }
 
     public function index(Request $request) {
+        $currentActiveAirline = $request->session()->get('activeairline');
+
         if($request->getMethod() == "POST"){
             $validated = $request->validate([
                 'registration' => 'required|max:6',
@@ -20,13 +22,12 @@ class AircraftController extends Controller
                 'model' => 'required',
                 'current_loc' => 'required|max:4',
                 'remarks' => 'nullable',
-                'used_by' => 'required'
             ]);
-           
-            if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $request->post('used_by'))->count() >= 1) {
+
+            if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $currentActiveAirline->airline->id)->count() >= 1) {
                 throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
             } else {
-                Aircraft::create($validated);
+                Aircraft::create($validated + ['used_by' => $currentActiveAirline->airline->id]);
             }
         }
 
@@ -37,7 +38,7 @@ class AircraftController extends Controller
         $page = min(max(1, $page), $maxPages);
         $offset = ($page -1) * $limit;
 
-        $currentActiveAirline = $request->session()->get('activeairline');
+        
 
         $fleet = Aircraft::query()
         ->orderBy('created_at', 'DESC')
@@ -50,6 +51,7 @@ class AircraftController extends Controller
     }
 
     public function edit(Request $request, Aircraft $aircraft) {
+        $currentActiveAirline = $request->session()->get('activeairline');
         $gotStatus = $request->post('active');
 
         if($gotStatus == "on"){
@@ -64,12 +66,11 @@ class AircraftController extends Controller
                 'manufacturer' => 'required',
                 'model' => 'required',
                 'remarks' => 'nullable',
-                'used_by' => 'required'
             ]);
 
             $targetAircraft = Aircraft::find($aircraft->id);
             $targetAircraft->registration = $request->post('registration');
-            $targetAircraft->used_by = $request->post('used_by');
+            $targetAircraft->used_by = $currentActiveAirline->airline->id;
             $targetAircraft->manufacturer = $request->post('manufacturer');
             $targetAircraft->model = $request->post('model');
             $targetAircraft->active = $finalStatus;
@@ -78,7 +79,7 @@ class AircraftController extends Controller
             if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')) {
 
                 $existingAircraft = Aircraft::where('registration', $request->post('registration'))
-                    ->where('used_by', $request->post('used_by'))
+                    ->where('used_by', $currentActiveAirline->airline->id)
                     ->where('id', '<>', $aircraft->id) // Exclude current aircraft
                     ->where('active', true)
                     ->exists();
