@@ -53,14 +53,14 @@
                     @auth
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ Auth::user()->name }}
+                            {{ Auth::user()->name }} | EVA
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                             <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
                             <li><a class="dropdown-item" href="#">Edit profile</a></li>
                             <li><a class="dropdown-item" href="#">Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('changeactiveairline') }}">Current airline: Lufthansa</a></li>
+                            <li><a class="dropdown-item" href="{{ route('changeactiveairline') }}">Current airline: Example VA</a></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="post">
                                     @csrf
