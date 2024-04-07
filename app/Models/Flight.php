@@ -16,6 +16,7 @@ class Flight extends Model
         'full_flight_number',
         'full_icao_callsign',
         'flight_duration',
+        'flight_duration_minutes',
         'flight_date'
     ];
 
@@ -42,6 +43,23 @@ class Flight extends Model
         $duration = $blockofftime->diff($blockontime);
 
         return $duration->format('%h:%i h');
+    }
+
+    public function getFlightDurationMinutesAttribute() {
+        $blockofftime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockoff);
+        $blockontime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockon);
+        
+        if ($blockofftime === false || $blockontime === false) {
+            return "Error while parsing flight duration time.";
+        }
+    
+        $duration = $blockofftime->diff($blockontime);
+    
+        // Die Dauer in Minuten berechnen
+        $hoursInMinutes = $duration->h * 60;
+        $totalMinutes = $hoursInMinutes + $duration->i;
+    
+        return $totalMinutes;
     }
 
     public function getFlightDateAttribute() {

@@ -112,13 +112,13 @@
         @if(!$fleet->count() == 0)
             <div class="my-4">
                 <h2 class="h4">Current active fleet</h2>
-                <table class="table sortable">
+                <table class="table sortable table-sm">
                     <thead class="table-dark">
                         <tr>
                             <th scope="col" class="text-center">Tail number</th>
                             <th scope="col" class="text-center">Type</th>
                             <th scope="col" class="text-center">Current location</th>
-                            <th scope="col" class="text-center">Logged hours</th>
+                            <th scope="col" class="text-center">Total logged hours</th>
                             @can('edit aircraft')
                             <th scope="col" class="text-center">Actions</th>
                             @endcan
@@ -135,9 +135,9 @@
                                     <abbr title="This might be, because the aircraft just got initialized.">No location
                                         found</abbr>
                                 @else
-                                    {{ $aircraft->current_loc }}
+                                <abbr title="{{ $aircraft->location->name }}" class="initialism">{{ $aircraft->location->icao_code }}</abbr>
                                 @endif
-                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>TODO</td>
+                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->total_flights_hours }}</td>
                                 @can('edit aircraft')
                                 <td class="text-center"><a href="{{ route('editfleet', $aircraft->id) }}">Edit</a></td>
                                 @endcan
