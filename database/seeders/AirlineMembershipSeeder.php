@@ -34,5 +34,23 @@ class AirlineMembershipSeeder extends Seeder
             'created_at' => Carbon::now()->toDateTimeString(),
             'updated_at' => Carbon::now()->toDateTimeString(),
         ]);
+        DB::table('airline_memberships')->insert([
+            'airline_id' => "1",
+            'user_id' => "3",
+            'created_at' => Carbon::now()->toDateTimeString(),
+            'updated_at' => Carbon::now()->toDateTimeString(),
+        ]);
+        DB::table('airline_memberships')->insert([
+            'airline_id' => "2",
+            'user_id' => "3",
+            'created_at' => Carbon::now()->toDateTimeString(),
+            'updated_at' => Carbon::now()->toDateTimeString(),
+        ]);
+        DB::table('airline_memberships')->insert([
+            'airline_id' => "3",
+            'user_id' => "3",
+            'created_at' => Carbon::now()->toDateTimeString(),
+            'updated_at' => Carbon::now()->toDateTimeString(),
+        ]);
     }
 }
