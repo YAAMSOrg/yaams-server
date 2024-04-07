@@ -112,7 +112,7 @@
         @if(!$fleet->count() == 0)
             <div class="my-4">
                 <h2 class="h4">Current active fleet</h2>
-                <table class="table sortable">
+                <table class="table sortable table-sm">
                     <thead class="table-dark">
                         <tr>
                             <th scope="col" class="text-center">Tail number</th>
@@ -135,7 +135,7 @@
                                     <abbr title="This might be, because the aircraft just got initialized.">No location
                                         found</abbr>
                                 @else
-                                    {{ $aircraft->current_loc }}
+                                <abbr title="{{ $aircraft->location->name }}" class="initialism">{{ $aircraft->location->icao_code }}</abbr>
                                 @endif
                                 <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>TODO</td>
                                 @can('edit aircraft')

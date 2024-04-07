@@ -38,8 +38,6 @@ class AircraftController extends Controller
         $page = min(max(1, $page), $maxPages);
         $offset = ($page -1) * $limit;
 
-        
-
         $fleet = Aircraft::query()
         ->orderBy('created_at', 'DESC')
         ->where('used_by', '=', $currentActiveAirline->airline->id )
@@ -67,6 +65,8 @@ class AircraftController extends Controller
                 'model' => 'required',
                 'remarks' => 'nullable',
             ]);
+
+            
 
             $targetAircraft = Aircraft::find($aircraft->id);
             $targetAircraft->registration = $request->post('registration');

@@ -32,6 +32,11 @@ class Aircraft extends Model
         // TODO
     }
 
+    public function location()
+    {
+        return $this->belongsTo(Airport::class, 'current_loc');
+    }
+
     public function airline()
     {
         return $this->belongsTo(Airline::class, 'used_by');

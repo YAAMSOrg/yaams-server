@@ -42,6 +42,10 @@
                         <label class="form-check-label" for="active">Aircraft in service</label>
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <label for="location" class="form-label">Location</label>
+                    <p><abbr title="{{ $aircraft->location->name }}" class="initialism">{{ $aircraft->location->icao_code }}</abbr></p>
+                </div>
                 <div class="col-md-12">
                     <label for="remarks" class="form-label">Remarks / Description</label>
                     <textarea class="form-control" id="remarks" name="remarks">{{ $aircraft->remarks }}</textarea>
