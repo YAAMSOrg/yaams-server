@@ -25,9 +25,11 @@ class FlightController extends Controller
 
     public function displayFlightsForUser() {
         $current_auth_user_id = auth()->id();
-
+        $currentActiveAirline = Session()->get('activeairline');
+        
         $flights = Flight::query()
         ->where('pilot', $current_auth_user_id)
+        ->where('airline', $currentActiveAirline->airline->id)
         ->orderBy('created_at', 'DESC')
         ->get();
 
@@ -35,6 +37,7 @@ class FlightController extends Controller
     }
 
     public function addFlight(Request $request){
+        $currentActiveAirline = Session()->get('activeairline');
         if($request->getMethod() == "POST"){
             $request->validate([
                 'pilot_id' => 'required|max:255',
@@ -56,19 +59,17 @@ class FlightController extends Controller
             Flight::create($validated);
         }
 
-        //TODO: Get all airlines, where the pilot is member of
-        $prefill_select_airline = Airline::query()->get();
-
         $prefill_select_online_network = OnlineNetwork::query()->get();
 
         //TODO: Only get aircraft from an airline, which the pilot is member of
 
-        $prefill_select_aircraft = Aircraft::where('active', '=', true)->get();
+        $prefill_select_aircraft = Aircraft::where('active', '=', true)
+        ->where('used_by', '=', $currentActiveAirline->airline->id)
+        ->get();
 
         //dump($prefill_select_aircraft);
 
-        return view('flights.add', [ 'prefill_airline' => $prefill_select_airline,
-                                     'prefill_online_network' => $prefill_select_online_network,
+        return view('flights.add', [ 'prefill_online_network' => $prefill_select_online_network,
                                      'prefill_aircraft' => $prefill_select_aircraft ]);
 
     }

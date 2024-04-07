@@ -9,26 +9,22 @@
                     @csrf
                     <div class="col-md-1">
                         <label for="pilotid" class="form-label">Pilot ID</label>
-                        <input type="text" class="form-control" id="pilot_id" value="{{ Auth::user()->id }}" placeholder="{{ Auth::user()->id }}" disabled required>
+                        <p id="pilot_id" style="font-family: 'Courier New', Courier, monospace">{{ Auth::user()->id }}</p>
                     </div>
                     <div class="col-md-4">
                         <label for="pilot" class="form-label">Pilot</label>
-                        <input type="text" class="form-control" id="pilot" value="{{ Auth::user()->name }}" placeholder="{{ Auth::user()->name }}" disabled required>
+                        <p id="pilot_name" style="font-family: 'Courier New', Courier, monospace">{{ Auth::user()->name }}</p>
                     </div>
                     <hr>
                     <h3>Flight details</h3>
                     <div class="col-md-2">
                         <label for="airline" class="form-label">Airline</label>
-                        <select id="airline" class="form-select" aria-label="Select the airline" required>
-                            @foreach($prefill_airline as $prefill_airline_item)
-                            <option value="{{ $prefill_airline_item->id }}">{{ $prefill_airline_item->prefix }} - {{ $prefill_airline_item->name }}</option>
-                            @endforeach
-                        </select>
+                        <p id="airline">{{ session('activeairline')->airline->name }}</p>
                     </div>
                     <div class="col-md-2">
                         <label for="flightnumber" class="form-label">Flight number</label>
                         <div class="input-group">
-                            <span class="input-group-text" id="flightnumber_prefix">{{ $prefill_airline_item->prefix }}</span>
+                            <span class="input-group-text" id="flightnumber_prefix">{{ session('activeairline')->airline->prefix }}</span>
                             <input type="text" class="form-control" id="flightnumber" required maxlength="4" minlength="1" placeholder="1234" aria-describedby="basic-addon3 basic-addon4">
                         </div>
                     </div>
@@ -51,7 +47,7 @@
                     <div class="col-md-2">
                         <label for="callsign" class="form-label">Callsign</label>
                         <div class="input-group">
-                            <span class="input-group-text" id="callsign_prefix">DLH</span>
+                            <span class="input-group-text" id="callsign_prefix">{{ session('activeairline')->airline->icao_callsign }}</span>
                             <input type="text" class="form-control" style="text-transform:uppercase" id="callsign" required minlength="4" maxlength="7" placeholder="443">
                         </div>
                     </div>
