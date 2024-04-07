@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
             AirlinesSeeder::class,
             AirportsSeeder::class,
             AircraftSeeder::class,
-            UserAndPermissionsSeeder::class
+            UserAndPermissionsSeeder::class,
+            AirlineMembershipSeeder::class
         ]);
     }
 }
