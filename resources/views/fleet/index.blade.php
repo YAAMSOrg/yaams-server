@@ -69,7 +69,7 @@
                             @csrf
                             <input type="hidden" id="in_service_since" name="in_service_since" value="2023-05-05" hidden
                                 required>
-                            <input type="hidden" id="used_by" name="used_by" value="1" hidden required>
+                            <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->airline->id }}" hidden required>
                             <div class="row">
                                 <div class="mb-3">
                                     <label for="registration" class="form-label">Registration (tail number)</label>
@@ -116,9 +116,9 @@
                     <thead class="table-dark">
                         <tr>
                             <th scope="col" class="text-center">Tail number</th>
-                            <th scope="col" class="text-center">Airline</th>
                             <th scope="col" class="text-center">Type</th>
                             <th scope="col" class="text-center">Current location</th>
+                            <th scope="col" class="text-center">Logged hours</th>
                             @can('edit aircraft')
                             <th scope="col" class="text-center">Actions</th>
                             @endcan
@@ -129,8 +129,6 @@
                             <tr>
                                 <th scope="row" class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->registration }}</th>
         
-                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->airline->name }}</td>
-        
                                 <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->full_type }}</td>
         
                                 <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>@if(is_null($aircraft->current_loc))
@@ -139,6 +137,7 @@
                                 @else
                                     {{ $aircraft->current_loc }}
                                 @endif
+                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>TODO</td>
                                 @can('edit aircraft')
                                 <td class="text-center"><a href="{{ route('editfleet', $aircraft->id) }}">Edit</a></td>
                                 @endcan

@@ -37,8 +37,11 @@ class AircraftController extends Controller
         $page = min(max(1, $page), $maxPages);
         $offset = ($page -1) * $limit;
 
+        $currentActiveAirline = $request->session()->get('activeairline');
+
         $fleet = Aircraft::query()
         ->orderBy('created_at', 'DESC')
+        ->where('used_by', '=', $currentActiveAirline->airline->id )
         ->offset($offset)
         ->limit($limit)
         ->get();

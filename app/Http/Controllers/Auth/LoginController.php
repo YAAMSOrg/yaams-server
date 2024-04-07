@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\AirlineMembership;
+
 use Illuminate\Http\Request;
 
 class LoginController extends Controller
@@ -26,7 +28,11 @@ class LoginController extends Controller
              return back()->with('status', 'Invalid login details');
         }
 
-        
+        // Set the first airline found for the user in the DB as the active airline.
+        // FIXME/TODO: What to do if no airline exists??
+        $firstAirlineFound = AirlineMembership::where('user_id', '=', auth()->user()->id)->first();
+        $request->session()->put('activeairline', $firstAirlineFound);
+
         return redirect()->route('dashboard');
     }
 }

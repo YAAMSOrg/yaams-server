@@ -85,5 +85,29 @@ class AircraftSeeder extends Seeder
             'created_at' => Carbon::now()->toDateTimeString(),
             'updated_at' => Carbon::now()->toDateTimeString(),
         ]);
+
+        // One Aircraft for Third VA with the same tail number!
+        DB::table('aircraft')->insert([
+            'registration' => "D-EXAM",
+            'manufacturer' => "Boeing",
+            'model' => '737-800',
+            'current_loc' => 'EFHK',
+            'remarks' => "Special paint scheme",
+            'used_by' => 3,
+            'created_at' => Carbon::now()->toDateTimeString(),
+            'updated_at' => Carbon::now()->toDateTimeString(),
+        ]);
+
+        DB::table('aircraft')->insert([
+            'registration' => "N1338L",
+            'manufacturer' => "Cirrus",
+            'model' => 'SR22',
+            'current_loc' => 'KMIA',
+            'remarks' => "Special paint scheme",
+            'used_by' => 2,
+            'created_at' => Carbon::now()->toDateTimeString(),
+            'updated_at' => Carbon::now()->toDateTimeString(),
+        ]);
+
     }
 }
