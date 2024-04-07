@@ -66,8 +66,6 @@ class AircraftController extends Controller
                 'remarks' => 'nullable',
             ]);
 
-            
-
             $targetAircraft = Aircraft::find($aircraft->id);
             $targetAircraft->registration = $request->post('registration');
             $targetAircraft->used_by = $currentActiveAirline->airline->id;

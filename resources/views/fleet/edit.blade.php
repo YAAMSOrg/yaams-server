@@ -15,7 +15,7 @@
                 </ul>
             </div>
             @endif
-        
+
             <form action="{{ route('editfleet', $aircraft->id) }}" method="POST" class="row g-3">
                 @csrf
                 <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->airline->id }}" hidden required>
@@ -43,7 +43,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <label for="location" class="form-label">Location</label>
+                    <label for="location" class="form-label">Location <i>(Only Admins can change this)</i></label>
                     <p><abbr title="{{ $aircraft->location->name }}" class="initialism">{{ $aircraft->location->icao_code }}</abbr></p>
                 </div>
                 <div class="col-md-12">
