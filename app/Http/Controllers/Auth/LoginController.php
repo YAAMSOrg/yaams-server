@@ -31,7 +31,7 @@ class LoginController extends Controller
         // Set the first airline found for the user in the DB as the active airline.
         // FIXME/TODO: What to do if no airline exists??
         $firstAirlineFound = AirlineMembership::where('user_id', '=', auth()->user()->id)->first();
-        $request->session()->put('activeairlineid', $firstAirlineFound);
+        $request->session()->put('activeairline', $firstAirlineFound);
 
         return redirect()->route('dashboard');
     }

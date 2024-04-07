@@ -33,5 +33,14 @@ class AirlinesSeeder extends Seeder
             'created_at' => Carbon::now()->toDateTimeString(),
             'updated_at' => Carbon::now()->toDateTimeString()
         ]);
+        DB::table('airlines')->insert([
+            'name' => "Third VA",
+            'prefix' => "TV",
+            'icao_callsign' => 'TVA',
+            'atc_callsign' => 'THIRD',
+            'unit_is_lbs' => true,
+            'created_at' => Carbon::now()->toDateTimeString(),
+            'updated_at' => Carbon::now()->toDateTimeString()
+        ]);
     }
 }
