@@ -49,48 +49,60 @@ class AircraftController extends Controller
     }
 
     public function edit(Request $request, Aircraft $aircraft) {
-        $currentActiveAirline = $request->session()->get('activeairline');
-        $gotStatus = $request->post('active');
-
-        if($gotStatus == "on"){
-            $finalStatus = true;
-        } else {
-            $finalStatus = false;
-        }
-
-        if($request->getMethod() == "POST"){
-            $validated = $request->validate([
-                'registration' => 'required|uppercase|max:6',
-                'manufacturer' => 'required',
-                'model' => 'required',
-                'remarks' => 'nullable',
-            ]);
-
-            $targetAircraft = Aircraft::find($aircraft->id);
-            $targetAircraft->registration = $request->post('registration');
-            $targetAircraft->used_by = $currentActiveAirline->airline->id;
-            $targetAircraft->manufacturer = $request->post('manufacturer');
-            $targetAircraft->model = $request->post('model');
-            $targetAircraft->active = $finalStatus;
-            $targetAircraft->remarks = $request->post('remarks');
-
-            if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')) {
-
-                $existingAircraft = Aircraft::where('registration', $request->post('registration'))
-                    ->where('used_by', $currentActiveAirline->airline->id)
-                    ->where('id', '<>', $aircraft->id) // Exclude current aircraft
-                    ->where('active', true)
-                    ->exists();
-
-                if ($existingAircraft) {
-                    throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exists in this airline. Please set the aircraft inactive or choose another tail number.']);
-                }
+        if(auth()->user()->can('add aircraft')) {
+            $currentActiveAirline = $request->session()->get('activeairline');
+    
+            //Check if users airline owns the aircraft
+            if(!$currentActiveAirline->airline->id = $aircraft->airline->id) {
+                dd($currentActiveAirline->airline->id);
+                dd($aircraft->airline->id);  
+                return redirect()->route('dashboard')->with('error', 'You did something nasty!');
             }
-
-            $targetAircraft->save();
-
-            return redirect()->route('fleetmanager');
-        }
-        return view('fleet.edit', ['aircraft' => $aircraft ]);
+    
+            $gotStatus = $request->post('active');
+    
+            if($gotStatus == "on"){
+                $finalStatus = true;
+            } else {
+                $finalStatus = false;
+            }
+    
+            if($request->getMethod() == "POST"){
+                $validated = $request->validate([
+                    'registration' => 'required|uppercase|max:6',
+                    'manufacturer' => 'required',
+                    'model' => 'required',
+                    'remarks' => 'nullable',
+                ]);
+    
+                $targetAircraft = Aircraft::find($aircraft->id);
+                $targetAircraft->registration = $request->post('registration');
+                $targetAircraft->used_by = $currentActiveAirline->airline->id;
+                $targetAircraft->manufacturer = $request->post('manufacturer');
+                $targetAircraft->model = $request->post('model');
+                $targetAircraft->active = $finalStatus;
+                $targetAircraft->remarks = $request->post('remarks');
+    
+                if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')) {
+    
+                    $existingAircraft = Aircraft::where('registration', $request->post('registration'))
+                        ->where('used_by', $currentActiveAirline->airline->id)
+                        ->where('id', '<>', $aircraft->id) // Exclude current aircraft
+                        ->where('active', true)
+                        ->exists();
+    
+                    if ($existingAircraft) {
+                        throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exists in this airline. Please set the aircraft inactive or choose another tail number.']);
+                    }
+                }
+    
+                $targetAircraft->save();
+    
+                return redirect()->route('fleetmanager');
+            }
+            return view('fleet.edit', ['aircraft' => $aircraft ]);
+        } else {
+            return redirect()->route('dashboard')->with('error', "You did something nasty. You don't have the permission to edit aircraft.");
+        }    
     }
 }
