@@ -11,6 +11,12 @@
             </div>
             @endif
 
+            @if (session('error'))
+            <div class="alert alert-danger" role="alert">
+                You did something nasty!
+            </div>
+            @endif    
+
             <div class="my-4">
                 <h2 class="h4">Live Flights</h2>
                 <div class="border p-4" style="min-height: 400px;">
