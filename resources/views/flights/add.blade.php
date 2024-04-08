@@ -19,12 +19,12 @@
                     <h3>Flight details</h3>
                     <div class="col-md-2">
                         <label for="airline" class="form-label">Airline</label>
-                        <p id="airline">{{ session('activeairline')->airline->name }}</p>
+                        <p id="airline">{{ session('activeairline')->name }}</p>
                     </div>
                     <div class="col-md-2">
                         <label for="flightnumber" class="form-label">Flight number</label>
                         <div class="input-group">
-                            <span class="input-group-text" id="flightnumber_prefix">{{ session('activeairline')->airline->prefix }}</span>
+                            <span class="input-group-text" id="flightnumber_prefix">{{ session('activeairline')->prefix }}</span>
                             <input type="text" class="form-control" id="flightnumber" required maxlength="4" minlength="1" placeholder="1234" aria-describedby="basic-addon3 basic-addon4">
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                     <div class="col-md-2">
                         <label for="callsign" class="form-label">Callsign</label>
                         <div class="input-group">
-                            <span class="input-group-text" id="callsign_prefix">{{ session('activeairline')->airline->icao_callsign }}</span>
+                            <span class="input-group-text" id="callsign_prefix">{{ session('activeairline')->icao_callsign }}</span>
                             <input type="text" class="form-control" style="text-transform:uppercase" id="callsign" required minlength="4" maxlength="7" placeholder="443">
                         </div>
                     </div>

@@ -32,10 +32,10 @@ class AircraftController extends Controller
             }
 
             // Check if user given aircraft exists for the same airline and status = active. If not, throw exception.
-            if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $currentActiveAirline->airline->id)->count() >= 1) {
+            if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $currentActiveAirline->id)->count() >= 1) {
                 throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
             } else {
-                Aircraft::create($validated + ['used_by' => $currentActiveAirline->airline->id]);
+                Aircraft::create($validated + ['used_by' => $currentActiveAirline->id]);
             }
         }
 
@@ -50,7 +50,7 @@ class AircraftController extends Controller
         // This is pagination voodo.
         $fleet = Aircraft::query()
         ->orderBy('created_at', 'DESC')
-        ->where('used_by', '=', $currentActiveAirline->airline->id )
+        ->where('used_by', '=', $currentActiveAirline->id )
         ->offset($offset)
         ->limit($limit)
         ->get();
@@ -63,7 +63,7 @@ class AircraftController extends Controller
             $currentActiveAirline = $request->session()->get('activeairline');
     
             //Check if users airline owns the aircraft
-            if(!$currentActiveAirline->airline->id = $aircraft->airline->id) {
+            if(!$currentActiveAirline->id = $aircraft->airline->id) {
                 return redirect()->route('dashboard')->with('error', 'You did something nasty!');
             }
     
@@ -85,7 +85,7 @@ class AircraftController extends Controller
 
                 $targetAircraft = Aircraft::find($aircraft->id);
                 $targetAircraft->registration = $request->post('registration');
-                $targetAircraft->used_by = $currentActiveAirline->airline->id;
+                $targetAircraft->used_by = $currentActiveAirline->id;
                 $targetAircraft->manufacturer = $request->post('manufacturer');
                 $targetAircraft->model = $request->post('model');
                 $targetAircraft->active = $finalStatus;
@@ -94,7 +94,7 @@ class AircraftController extends Controller
                 if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')) {
     
                     $existingAircraft = Aircraft::where('registration', $request->post('registration'))
-                        ->where('used_by', $currentActiveAirline->airline->id)
+                        ->where('used_by', $currentActiveAirline->id)
                         ->where('id', '<>', $aircraft->id) // Exclude current aircraft
                         ->where('active', true)
                         ->exists();

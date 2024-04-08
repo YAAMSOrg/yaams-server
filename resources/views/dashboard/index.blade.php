@@ -3,7 +3,7 @@
 @section('content')
 
             <h1 class="display-4 mb-4">Welcome, {{ Auth::user()->name }}!</h1>
-            <p class="lead">You have a total of <b>161 hours</b> in <b>54 flights</b> logged for {{ session('activeairline')->airline->name }}.</p>
+            <p class="lead">You have a total of <b>161 hours</b> in <b>54 flights</b> logged for {{ session('activeairline')->name }}.</p>
 
             @if(is_null(Auth::user()->email_verified_at))
             <div class="alert alert-warning" role="alert">
@@ -25,7 +25,7 @@
             </div>
 
             <div class="my-4">
-                <h2 class="h4">Last 5 Flights of {{ session('activeairline')->airline->name }}</h2>
+                <h2 class="h4">Last 5 Flights of {{ session('activeairline')->name }}</h2>
                 <table class="table">
                     <thead>
                         <tr>

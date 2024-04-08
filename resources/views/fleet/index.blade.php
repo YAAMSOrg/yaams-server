@@ -69,7 +69,7 @@
                             @csrf
                             <input type="hidden" id="in_service_since" name="in_service_since" value="2023-05-05" hidden
                                 required>
-                            <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->airline->id }}" hidden required>
+                            <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->id }}" hidden required>
                             <div class="row">
                                 <div class="mb-3">
                                     <label for="registration" class="form-label">Registration (tail number)</label>

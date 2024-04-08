@@ -10,26 +10,25 @@ use Session;
 class AirlineMembershipController extends Controller
 {
     public function changeActiveAirline(Request $request) {
+
+
         if($request->getMethod() == "POST"){
+            // This is wrong! We get an AirlineMembership back, when we should really get a back an Airline.
             // Get data from the form.
-            $selectedTargetAirline = AirlineMembership::where('airline_id', '=', $request->post('airline_id'))->where('user_id', '=', auth()->user()->id)->first();
+            //$selectedTargetAirline = AirlineMembership::where('airline_id', '=', $request->post('airline_id'))->where('user_id', '=', auth()->user()->id)->first();
 
-            //dd($selectedTargetAirline);
+            $selectedTargetAirline = auth()->user()->airlines()
+            ->where('airline_id', $request->post('airline_id'))
+            ->first();
 
-            // Double check if the user is member
-            if ($selectedTargetAirline->count() == 0) {
-                throw ValidationException::withMessages(['airline_id' => 'You are not a member of this airline.']);
-            } else {
-                
-                $request->session()->forget('activeairline');
-                Session::put('activeairline', $selectedTargetAirline);
-                $currentActiveAirline = $request->session()->get('activeairline');
-                //dump($currentActiveAirline->airline->name);
-                return redirect()->route('changeactiveairline');
-            }
+            $request->session()->forget('activeairline');
+            Session::put('activeairline', $selectedTargetAirline);
+            return redirect()->route('changeactiveairline');
         }
 
         $currentActiveAirline = $request->session()->get('activeairline');
+
+        dump($currentActiveAirline);
 
         // We need this later to check if the user is not member of any airlines at all.
         $memberships = AirlineMembership::where('user_id', '=', auth()->user()->id)->get();

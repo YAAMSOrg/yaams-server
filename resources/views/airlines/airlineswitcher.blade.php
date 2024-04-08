@@ -4,7 +4,7 @@
             <h1 class="display-4 mb-4">Switch active airline</h1>
             <p class="lead">Change the current airline for your active session.</p>
             <p>
-                Current active airline: <b>{{ session('activeairline')->airline->name }}</b>
+                Current active airline: <b>{{ session('activeairline')->name }}</b>
             </p>
 
             @if($errors->any())

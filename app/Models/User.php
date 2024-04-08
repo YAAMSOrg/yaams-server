@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\Access\Authorizable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -46,8 +47,17 @@ class User extends Authenticatable
         'last_online_at' => 'datetime'
     ];
 
+    //protected $appends = [
+        //'airlines'
+    //];
+
     public function getHoursLogged(Airline $airline) {
         
+    }
+
+    public function airlines(): BelongsToMany
+    {
+        return $this->belongsToMany(Airline::class, 'airline_memberships', 'user_id', 'airline_id');
     }
 
 }
