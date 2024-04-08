@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Pilot Dashboard')
+@section('title', 'YAAMS: Fleet overview')
 @section('content')
 
         <script>
