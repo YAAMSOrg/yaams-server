@@ -27,11 +27,11 @@ class AirlineMembershipController extends Controller
         }
 
         $currentActiveAirline = $request->session()->get('activeairline');
-
-        dump($currentActiveAirline);
-
+        
+        //TODO: Investige, if this can return an airline rather than AirlineMembership
         // We need this later to check if the user is not member of any airlines at all.
         $memberships = AirlineMembership::where('user_id', '=', auth()->user()->id)->get();
+       
         return view('airlines.airlineswitcher', [ 'current_active' => $currentActiveAirline, 'memberships' => $memberships ]);
     }
 }
