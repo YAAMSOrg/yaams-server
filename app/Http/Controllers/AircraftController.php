@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aircraft;
+use App\Models\Airport;
+
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -24,6 +26,12 @@ class AircraftController extends Controller
                 'remarks' => 'nullable',
             ]);
 
+            // Check if user given airport exists, if not throw an exception.
+            if (!Airport::find($request->post('current_loc'))) {
+                throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
+            }
+
+            // Check if user given aircraft exists for the same airline and status = active. If not, throw exception.
             if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $currentActiveAirline->airline->id)->count() >= 1) {
                 throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
             } else {
@@ -31,6 +39,7 @@ class AircraftController extends Controller
             }
         }
 
+        // This is pagination voodo.
         $limit = max(env('FLEET_PAGE_LIMIT'), 1);
         $maxEntries = Aircraft::count();
         $maxPages = (int)ceil($maxEntries/$limit);
@@ -38,6 +47,7 @@ class AircraftController extends Controller
         $page = min(max(1, $page), $maxPages);
         $offset = ($page -1) * $limit;
 
+        // This is pagination voodo.
         $fleet = Aircraft::query()
         ->orderBy('created_at', 'DESC')
         ->where('used_by', '=', $currentActiveAirline->airline->id )
@@ -54,8 +64,6 @@ class AircraftController extends Controller
     
             //Check if users airline owns the aircraft
             if(!$currentActiveAirline->airline->id = $aircraft->airline->id) {
-                dd($currentActiveAirline->airline->id);
-                dd($aircraft->airline->id);  
                 return redirect()->route('dashboard')->with('error', 'You did something nasty!');
             }
     
@@ -74,7 +82,7 @@ class AircraftController extends Controller
                     'model' => 'required',
                     'remarks' => 'nullable',
                 ]);
-    
+
                 $targetAircraft = Aircraft::find($aircraft->id);
                 $targetAircraft->registration = $request->post('registration');
                 $targetAircraft->used_by = $currentActiveAirline->airline->id;
