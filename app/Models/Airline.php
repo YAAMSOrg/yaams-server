@@ -32,4 +32,23 @@ class Airline extends Model
         return $this->belongsToMany(User::class, 'airline_memberships', 'airline_id', 'user_id');
     }
 
+    /***
+     * Helper function, to check if a given user is member of a specific airline. 
+     * For example, if you want to check if the logged in User is member of the airline instance, you can do:
+     * $airline->isMember(auth()->user()); and it will return true or false.
+     */
+    
+    public function isMember(User $user): bool {
+        $usercheck = DB::table('airline_memberships')
+                ->where('airline_id', '=', $this->id)
+                ->where('user_id', '=', $user->id)
+                ->count();
+
+        if($usercheck == 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 }
