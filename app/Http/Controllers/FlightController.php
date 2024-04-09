@@ -73,4 +73,8 @@ class FlightController extends Controller
                                      'prefill_aircraft' => $prefill_select_aircraft ]);
 
     }
+
+    public function view(Flight $flight) {
+        return view('flights.detail', ['flight' => $flight ]);
+    }
 }
