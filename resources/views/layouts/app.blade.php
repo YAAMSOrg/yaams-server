@@ -9,12 +9,12 @@
         <link rel="icon" href="{{ asset('favicon.ico') }}">
 
         <!-- TODO: LOCAL Delivery of these objects. I don't want to stream them from the cloud. This is just for dev! -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         
     </head>
 
@@ -31,7 +31,7 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFlights" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Flights
+                            <i class="bi-journal-album"></i> Flights
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownFlights">
                             <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
@@ -39,10 +39,10 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('fleetmanager') }}">Fleet</a>
+                        <a class="nav-link" href="{{ route('fleetmanager') }}"><i class="bi-airplane-fill"></i> Fleet</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Live map</a>
+                        <a class="nav-link" href="#"><i class="bi-globe-americas"></i> Live map</a>
                     </li>
                 </ul>
                 <div class="navbar-nav">
@@ -53,7 +53,7 @@
                     @auth
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ Auth::user()->name }} | {{ session('activeairline')->icao_callsign }}
+                            <i class="bi-person-circle"></i> {{ Auth::user()->name }} | {{ session('activeairline')->icao_callsign }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                             <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>

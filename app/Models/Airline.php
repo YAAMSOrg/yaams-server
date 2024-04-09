@@ -19,14 +19,9 @@ class Airline extends Model
         'unit_is_lbs'
     ];
 
-    //protected $appends = [
-        //'airline_members'
-    //];
-
-    //public function getAirlineMembersAttribute() {
-        //return $this->belongsToMany(User::class, 'airline_memberships', 'airline_id', 'user_id');
-    //}
-
+    /***
+     * Returns all User Models, which are members of the airline.
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'airline_memberships', 'airline_id', 'user_id');
@@ -37,7 +32,6 @@ class Airline extends Model
      * For example, if you want to check if the logged in User is member of the airline instance, you can do:
      * $airline->isMember(auth()->user()); and it will return true or false.
      */
-    
     public function isMember(User $user): bool {
         $usercheck = DB::table('airline_memberships')
                 ->where('airline_id', '=', $this->id)
