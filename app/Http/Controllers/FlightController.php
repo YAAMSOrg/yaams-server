@@ -28,8 +28,8 @@ class FlightController extends Controller
         $currentActiveAirline = Session()->get('activeairline');
         
         $flights = Flight::query()
-        ->where('pilot', $current_auth_user_id)
-        ->where('airline', $currentActiveAirline->id)
+        ->where('pilot_id', $current_auth_user_id)
+        ->where('airline_id', $currentActiveAirline->id)
         ->orderBy('created_at', 'DESC')
         ->get();
 

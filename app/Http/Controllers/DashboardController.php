@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Aircraft;
+use App\Models\Flight;
 
 class DashboardController extends Controller
 {
@@ -13,6 +15,8 @@ class DashboardController extends Controller
     }
 
     public function index(){
-        return view('dashboard.index');
+        $currentActiveAirline = Session()->get('activeairline');
+        $airlineFlights = $currentActiveAirline->flights;
+        return view('dashboard.index', ['flights' => $airlineFlights]);
     }
 }
