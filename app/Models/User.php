@@ -51,7 +51,7 @@ class User extends Authenticatable
         //'airlines'
     //];
 
-    public function getHoursLogged(Airline $airline) {
+    public function getHoursLogged() {
         
     }
 

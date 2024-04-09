@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Aircraft;
+use App\Models\Flight;
+use App\Models\Airline;
+
 
 class DashboardController extends Controller
 {
@@ -13,6 +17,17 @@ class DashboardController extends Controller
     }
 
     public function index(){
-        return view('dashboard.index');
+        $currentActiveAirline = Session()->get('activeairline');
+ 
+        // Alternative approach:
+        // $airlineFlights = $currentActiveAirline->flights;
+
+        $airlineFlights = Flight::query()
+        ->orderBy('created_at', 'DESC')
+        ->where('airline_id', '=', $currentActiveAirline->id )
+        ->limit(5)
+        ->get();
+
+        return view('dashboard.index', ['flights' => $airlineFlights]);
     }
 }

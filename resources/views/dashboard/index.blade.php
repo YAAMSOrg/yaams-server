@@ -15,7 +15,7 @@
             <div class="alert alert-danger" role="alert">
                 You did something nasty!
             </div>
-            @endif    
+            @endif
 
             <div class="my-4">
                 <h2 class="h4">Live Flights</h2>
@@ -24,48 +24,28 @@
                 </div>
             </div>
 
+            <ul>
+            </ul>
             <div class="my-4">
                 <h2 class="h4">Last 5 Flights of {{ session('activeairline')->name }}</h2>
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">Flight</th>
-                            <th scope="col">Departure</th>
-                            <th scope="col">Arrival</th>
-                            <th scope="col">Duration</th>
+                            <th class="text-center" scope="col">Flight</th>
+                            <th class="text-center" scope="col">Callsign</th>
+                            <th class="text-center" scope="col">From / To</th>
+                            <th class="text-center" scope="col">Aircraft</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($flights as $flight)
                         <tr>
-                            <td>Flight 1</td>
-                            <td>Departure 1</td>
-                            <td>Arrival 1</td>
-                            <td>Duration 1</td>
+                            <td class="text-center">{{ $flight->full_flight_number }}</td>
+                            <td class="text-center">{{ $flight->full_icao_callsign }}</td>
+                            <td class="text-center">{{ $flight->departure_icao }} <i class="bi-arrow-right"></i> {{ $flight->arrival_icao }}</td>
+                            <td class="text-center">{{ $flight->aircraft->registration }}</td>
                         </tr>
-                        <tr>
-                            <td>Flight 2</td>
-                            <td>Departure 2</td>
-                            <td>Arrival 2</td>
-                            <td>Duration 2</td>
-                        </tr>
-                        <tr>
-                            <td>Flight 3</td>
-                            <td>Departure 3</td>
-                            <td>Arrival 3</td>
-                            <td>Duration 3</td>
-                        </tr>
-                        <tr>
-                            <td>Flight 4</td>
-                            <td>Departure 4</td>
-                            <td>Arrival 4</td>
-                            <td>Duration 4</td>
-                        </tr>
-                        <tr>
-                            <td>Flight 5</td>
-                            <td>Departure 5</td>
-                            <td>Arrival 5</td>
-                            <td>Duration 5</td>
-                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>

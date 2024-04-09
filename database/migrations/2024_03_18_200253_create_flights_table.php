@@ -15,25 +15,25 @@ class CreateFlightsTable extends Migration
     {
         Schema::create('flights', function (Blueprint $table) {
             $table->id(); # internal flight id
-            $table->foreignId('airline');
-            $table->foreign('airline')->references('id')->on('airlines');
+            $table->foreignId('airline_id');
+            $table->foreign('airline_id')->references('id')->on('airlines');
             $table->string('callsign', 4);
             $table->integer('flightnumber');
             $table->string('departure_icao', 4);
             $table->foreign('departure_icao')->references('icao_code')->on('airports');
             $table->string('arrival_icao', 4);
             $table->foreign('arrival_icao')->references('icao_code')->on('airports');
-            $table->foreignId('aircraft');
-            $table->foreign('aircraft')->references('id')->on('aircraft');
+            $table->foreignId('aircraft_id');
+            $table->foreign('aircraft_id')->references('id')->on('aircraft');
             $table->integer('crzalt');
             $table->datetime('blockoff');
             $table->datetime('blockon');
             $table->integer('burned_fuel');
             $table->text('route');
-            $table->foreignId('online_network');
-            $table->foreign('online_network')->references('id')->on('online_networks');
-            $table->foreignId('pilot');
-            $table->foreign('pilot')->references('id')->on('users');
+            $table->foreignId('online_network_id');
+            $table->foreign('online_network_id')->references('id')->on('online_networks');
+            $table->foreignId('pilot_id');
+            $table->foreign('pilot_id')->references('id')->on('users');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });

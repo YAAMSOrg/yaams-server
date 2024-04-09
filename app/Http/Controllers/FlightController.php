@@ -28,8 +28,8 @@ class FlightController extends Controller
         $currentActiveAirline = Session()->get('activeairline');
         
         $flights = Flight::query()
-        ->where('pilot', $current_auth_user_id)
-        ->where('airline', $currentActiveAirline->id)
+        ->where('pilot_id', $current_auth_user_id)
+        ->where('airline_id', $currentActiveAirline->id)
         ->orderBy('created_at', 'DESC')
         ->get();
 
@@ -63,15 +63,10 @@ class FlightController extends Controller
 
         //TODO: Only get aircraft from an airline, which the pilot is member of
 
-        $prefill_select_aircraft = Aircraft::where('active', '=', true)
-        ->where('used_by', '=', $currentActiveAirline->id)
-        ->get();
-
-        //dump($prefill_select_aircraft);
+        $prefill_select_aircraft = $currentActiveAirline->aircraft;
 
         return view('flights.add', [ 'prefill_online_network' => $prefill_select_online_network,
                                      'prefill_aircraft' => $prefill_select_aircraft ]);
-
     }
 
     public function view(Flight $flight) {

@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Airline;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use DateTime;
 
 class Flight extends Model
@@ -21,7 +22,11 @@ class Flight extends Model
     ];
 
     public function airline() {
-        return $this->belongsTo(Airline::class, 'airline');
+        return $this->belongsTo(Airline::class, 'airline_id');
+    }
+
+    public function aircraft() {
+        return $this->belongsTo(Aircraft::class, 'aircraft_id');
     }
 
     public function getFullFlightNumberAttribute() {

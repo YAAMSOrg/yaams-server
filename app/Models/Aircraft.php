@@ -45,11 +45,11 @@ class Aircraft extends Model
     }
 
     public function getTotalFlightsCountAttribute() {
-        return Flight::where('aircraft', '=', $this->id)->count();
+        return Flight::where('aircraft_id', '=', $this->id)->count();
     }
 
     public function getTotalFlightsHoursAttribute() {
-        $flights = Flight::where('aircraft', '=', $this->id)->get();
+        $flights = Flight::where('aircraft_id', '=', $this->id)->get();
 
         $totalFlightMinutes = 0;
 

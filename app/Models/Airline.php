@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Airline extends Model
 {
@@ -43,6 +44,14 @@ class Airline extends Model
         } else {
             return true;
         }
+    }
+
+    public function flights() {
+        return $this->hasMany(Flight::class, 'airline_id');
+    }
+
+    public function aircraft() {
+        return $this->hasMany(Aircraft::class, 'used_by');
     }
 
 }
