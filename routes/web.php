@@ -26,6 +26,7 @@ Route::match(['GET', 'POST'], '/user/switchactiveairline', [AirlineMembershipCon
 
 Route::match(['GET', 'POST'], '/user/flights/add', [FlightController::class, 'addFlight'])->name('addflight');
 Route::get('/user/flights/list', [FlightController::class, 'displayFlightsForUser'])->name('flightlist');
+Route::get('/user/flights/view/{flight}', [FlightController::class, 'view'])->name('viewflight');
 
 Route::match(['GET', 'POST'], '/fleetmanager', [AircraftController::class, 'index'])->name('fleetmanager');
 Route::get('/fleetmanager/view/{aircraft}', [AircraftController::class, 'view'])->name('viewaircraft');

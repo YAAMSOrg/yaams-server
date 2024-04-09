@@ -28,7 +28,7 @@
                         <tbody>
                             @foreach($flights as $flight)
                             <tr>  
-                                <td class="text-center">{{ $flight->id }}</td>
+                                <td class="text-center"><a href="{{ route('viewflight', $flight->id) }}">{{ $flight->id }}</a></td>
                                 <td class="text-center">{{ $flight->full_flight_number }}</td>
                                 <td class="text-center">{{ $flight->full_icao_callsign }}</td>
                                 <td class="text-center">{{ $flight->departure_icao }}</td>
