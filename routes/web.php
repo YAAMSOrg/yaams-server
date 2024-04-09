@@ -28,7 +28,7 @@ Route::match(['GET', 'POST'], '/user/flights/add', [FlightController::class, 'ad
 Route::get('/user/flights/list', [FlightController::class, 'displayFlightsForUser'])->name('flightlist');
 
 Route::match(['GET', 'POST'], '/fleetmanager', [AircraftController::class, 'index'])->name('fleetmanager');
-Route::match(['GET', 'POST'], '/fleetmanager/edit/{aircraft}', [AircraftController::class, 'edit'])->name('editfleet');
+Route::match(['GET', 'POST'], '/fleetmanager/edit/{aircraft}', [AircraftController::class, 'edit'])->name('editfleet')->middleware(['role:Manager']);
 
 Route::get('/', function () {
     return view('home.index');

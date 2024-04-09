@@ -52,7 +52,7 @@
             @endif
 
             @can('add aircraft')
-                <button type="button" class="btn btn-primary" style="float: right" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add aircraft</button>
+                <button type="button" class="btn btn-success" style="float: right" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add aircraft</button>
             @endcan
             @can('add aircraft')
             <!-- Modal -->
@@ -100,7 +100,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Add aircraft</button>
+                                    <button type="submit" class="btn btn-success">Add aircraft</button>
                                 </div>
                             </div>
                         </form>

@@ -24,13 +24,19 @@ class UserAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit aircraft']);
 
         // create roles and assign existing permissions
+
+        // Normal permission for a new user
         $role1 = Role::create(['name' => 'Pilot']);
+
+        // Airline Manager
         $role2 = Role::create(['name' => 'Manager']);
         $role2->givePermissionTo('add aircraft');
         $role2->givePermissionTo('edit aircraft');
-        $role3 = Role::create(['name' => 'Super-Admin']);
-        // gets all permissions via Gate::before rule; see AuthServiceProvider
 
+        // Super-Admin, which will get all permissions
+        // gets all permissions via Gate::before rule; see AuthServiceProvider
+        $role3 = Role::create(['name' => 'Super-Admin']);
+        
         // create demo users and api auth tokens for them
         $user = \App\Models\User::factory()->create([
             'name' => 'Homer Simpson',

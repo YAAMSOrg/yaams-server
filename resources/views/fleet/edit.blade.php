@@ -51,7 +51,7 @@
                     <textarea class="form-control" id="remarks" name="remarks">{{ $aircraft->remarks }}</textarea>
                 </div>
                 <div class="">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-success">Save</button>
                     <input type="button" class="btn btn-secondary" value="Back" onclick="window.location.href='{{ route('fleetmanager') }}'">
                 </div>
             </form>
