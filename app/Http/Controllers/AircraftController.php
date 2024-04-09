@@ -127,5 +127,9 @@ class AircraftController extends Controller
         // If we just get a GET request, display the manager.
         return view('fleet.edit', ['aircraft' => $aircraft ]);
     } 
+
+    public function view(Aircraft $aircraft) {
+        return view('fleet.detail', ['aircraft' => $aircraft ]);
+    }
 }
 

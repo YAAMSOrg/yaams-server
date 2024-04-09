@@ -2,43 +2,9 @@
 @section('title', 'YAAMS: Fleet overview')
 @section('content')
 
-        <script>
-            $(document).ready(function(){
-                $('.sortable th').click(function(){
-                    var table = $(this).parents('table').eq(0);
-                    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()));
-                    this.asc = !this.asc;
-                    if (!this.asc){rows = rows.reverse()}
-                    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
-                });
-                function comparer(index) {
-                    return function(a, b) {
-                        var valA = getCellValue(a, index), valB = getCellValue(b, index);
-                        // Überprüfen Sie den Typ der Daten in der ersten Spalte (index 0) und sortieren Sie entsprechend
-                        if (index === 0) {
-                            if (!isNaN(valA) && !isNaN(valB)) {
-                                return parseFloat(valA) - parseFloat(valB);
-                            } else {
-                                return valA.localeCompare(valB);
-                            }
-                        } else {
-                            // Für andere Spalten sortiere numerisch, wenn möglich, sonst nach dem Textwert
-                            return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-                        }
-                    };
-                }
-                function getCellValue(row, index){ return $(row).children('td').eq(index).text() }
-            });
-        </script>
-
-        <style>
-        .sortable th:hover {
-            cursor: pointer;
-        }
-        </style>
-
             <h1 class="display-4 mb-4">Fleet overview</h1>
             <p class="lead">Here is a list of all aircraft and their current locations according to their last flight.</p>
+            <hr>
 
             @if($errors->any())
             <div class="alert alert-danger">
@@ -112,7 +78,7 @@
         @if(!$fleet->count() == 0)
             <div class="my-4">
                 <h2 class="h4">Current active fleet</h2>
-                <table class="table sortable table-sm">
+                <table class="table table-sm">
                     <thead class="table-dark">
                         <tr>
                             <th scope="col" class="text-center">Tail number</th>
@@ -127,7 +93,7 @@
                     <tbody>
                         @foreach($fleet as $aircraft)
                             <tr>
-                                <th scope="row" class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->registration }}</th>
+                                <th scope="row" class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif><a href="{{ route('viewaircraft', $aircraft->id) }}">{{ $aircraft->registration }}</a></th>
         
                                 <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->full_type }}</td>
         
@@ -139,7 +105,7 @@
                                 @endif
                                 <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->total_flights_hours }}</td>
                                 @can('edit aircraft')
-                                <td class="text-center"><a href="{{ route('editfleet', $aircraft->id) }}">Edit</a></td>
+                                <td class="text-center"><a href="{{ route('editaircraft', $aircraft->id) }}">Edit</a></td>
                                 @endcan
                         </td>
                         </tr>

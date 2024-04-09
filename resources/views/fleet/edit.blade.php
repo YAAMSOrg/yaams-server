@@ -16,7 +16,7 @@
             </div>
             @endif
 
-            <form action="{{ route('editfleet', $aircraft->id) }}" method="POST" class="row g-3">
+            <form action="{{ route('editaircraft', $aircraft->id) }}" method="POST" class="row g-3">
                 @csrf
                 <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->id }}" hidden required>
                 <div class="col-md-4">

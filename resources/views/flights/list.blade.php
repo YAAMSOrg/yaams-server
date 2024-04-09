@@ -3,7 +3,8 @@
 @section('content')
 
         <h1 class="display-4 mb-4">My flights</h1>
-                    <p class="lead">Here is a list of your filed flights and their PIREP status. Keep in mind, that this is only for your active airline: {{ session('activeairline')->name }}</p>
+        <p class="lead">Here is a list of your filed flights and their PIREP status. Keep in mind, that this is only for your active airline: {{ session('activeairline')->name }}</p>
+        <hr>
 
                 @if ($flights->isEmpty())
                 <div class="alert alert-warning" role="alert">
