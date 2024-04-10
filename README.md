@@ -48,6 +48,12 @@ Notice: When you run a dev container, please use `$ php artisan serve --host="0.
 * Run a `composer install` to install the components
 * Done. Help by adding new features as you like and do a PR!
 
+## Developing
+
+Since this project is at a very early development stage, it can happen, that Laravel migrations are changed. So I recommend, that, before you start working on your tasks, you run a `php artisan migrate:fresh; php artisan db:seed` before starting your development.
+
+This will change in the future, since we then start migrations the way they should be used, but at this time it is way more practical to just edit the migrations that are already there.
+
 #### Example users
 
 The default users and password for testing are: 
