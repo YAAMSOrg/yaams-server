@@ -29,6 +29,14 @@ class Flight extends Model
         return $this->belongsTo(Aircraft::class, 'aircraft_id');
     }
 
+    public function departure_airport() {
+        return $this->belongsTo(Airport::class, 'departure_icao');
+    }
+
+    public function arrival_airport() {
+        return $this->belongsTo(Airport::class, 'arrival_icao');
+    }
+
     public function getFullFlightNumberAttribute() {
         return $this->Airline->prefix . $this->flightnumber;
     }

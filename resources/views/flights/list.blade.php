@@ -31,8 +31,8 @@
                                 <td class="text-center"><a href="{{ route('viewflight', $flight->id) }}">{{ $flight->id }}</a></td>
                                 <td class="text-center">{{ $flight->full_flight_number }}</td>
                                 <td class="text-center">{{ $flight->full_icao_callsign }}</td>
-                                <td class="text-center">{{ $flight->departure_icao }}</td>
-                                <td class="text-center">{{ $flight->arrival_icao }}</td>
+                                <td class="text-center"><abbr title="{{ $flight->departure_airport->name }}">{{ $flight->departure_airport->icao_code }}</abbr></td>
+                                <td class="text-center"><abbr title="{{ $flight->arrival_airport->name }}">{{ $flight->arrival_airport->icao_code }}</abbr></td>
                                 <td class="text-center">{{ $flight->flight_duration }}</td>
                                 <td class="text-center">{{ $flight->flight_date }}</td>
                                 <td class="text-center">TODO</td>
