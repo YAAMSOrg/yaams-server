@@ -57,9 +57,13 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                             <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
-                            <li><a class="dropdown-item" href="#">Edit profile</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            @role('Manager')
                             <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Notifications</a></li>
+                            <li><a class="dropdown-item" href="#">Manage pilots</a></li>
+                            @endrole
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
                             <li><a class="dropdown-item" href="{{ route('changeactiveairline') }}">Current airline: {{ session('activeairline')->name }}</a></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="post">
