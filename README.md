@@ -37,16 +37,22 @@ For example, this is the file PIREP form. This is all a WIP.
 * In the main folder, copy the `.env.example` to `.env`
 * Run the docker-compose.yml which is also located in the Docker folder using `$ cd Docker; docker-compose up -d`. These containers are the database and a GUI using phpMyAdmin.
 * Run php artisan commands using the newly built container: `$ docker run -it --rm --network yaams -u $(id -u):$(id -g) -v $(pwd):/app -p 8000:8000 yaams-app:dev bash`
-* Install the composer components: `$ composer update`
+* Install the composer components: `$ composer install`
 * Run the migrations and seed the db with example data: `$ php artisan migrate && php artisan db:seed`
 
 Notice: When you run a dev container, please use `$ php artisan serve --host="0.0.0.0"` as command.
 
 ### Native
 * Install a Laravel development environment (with a DB, composer and PHP)
-* `git clone https://github.com/flymia/YAAMS.git` in your directory
-* Run a `composer update` to install the components
+* `git clone https://github.com/YAAMSOrg/yaams-server.git` in your directory
+* Run a `composer install` to install the components
 * Done. Help by adding new features as you like and do a PR!
+
+## Developing
+
+Since this project is at a very early development stage, it can happen, that Laravel migrations are changed. So I recommend, that, before you start working on your tasks, you run a `php artisan migrate:fresh; php artisan db:seed` before starting your development.
+
+This will change in the future, since we then start migrations the way they should be used, but at this time it is way more practical to just edit the migrations that are already there.
 
 #### Example users
 
