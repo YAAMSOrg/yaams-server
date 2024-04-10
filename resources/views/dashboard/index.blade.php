@@ -42,8 +42,8 @@
                         <tr>
                             <td class="text-center">{{ $flight->full_flight_number }}</td>
                             <td class="text-center">{{ $flight->full_icao_callsign }}</td>
-                            <td class="text-center">{{ $flight->departure_icao }} <i class="bi-arrow-right"></i> {{ $flight->arrival_icao }}</td>
-                            <td class="text-center">{{ $flight->aircraft->registration }}</td>
+                            <td class="text-center"><abbr title="{{ $flight->departure_airport->name }}">{{ $flight->departure_airport->icao_code }}</abbr> <i class="bi-arrow-right"></i> <abbr title="{{ $flight->arrival_airport->name }}">{{ $flight->arrival_icao }}</abbr></td>
+                            <td class="text-center"><abbr title="{{ $flight->aircraft->full_type }}">{{ $flight->aircraft->registration }}</abbr></td>
                         </tr>
                         @endforeach
                     </tbody>
