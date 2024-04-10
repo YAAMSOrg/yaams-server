@@ -38,5 +38,5 @@
             TODO
             <br>
 
-            <input type="button" class="btn btn-secondary" value="Back" onclick="window.location.href='{{ route('fleetmanager') }}'">
+            <input type="button" class="btn btn-secondary" value="Back" onclick="window.location.href='{{ route('flightlist') }}'">
 @endsection
