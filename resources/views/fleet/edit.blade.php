@@ -44,7 +44,7 @@
                 </div>
                 <div class="col-md-4">
                     <label for="location" class="form-label">Location <i>(Only Admins can change this)</i></label>
-                    <p><abbr title="{{ $aircraft->location->name }}" class="initialism">{{ $aircraft->location->icao_code }}</abbr></p>
+                    <p><abbr title="{{ $aircraft->location->name }}">{{ $aircraft->location->icao_code }}</abbr></p>
                 </div>
                 <div class="col-md-12">
                     <label for="remarks" class="form-label">Remarks / Description</label>
