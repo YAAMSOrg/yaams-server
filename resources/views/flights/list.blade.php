@@ -18,9 +18,9 @@
                             <th scope="col" class="text-center">PIREP ID</th>
                             <th scope="col" class="text-center">Flight number</th>
                             <th scope="col" class="text-center">ATC Callsign</th>
-                            <th scope="col" class="text-center">From</th>
-                            <th scope="col" class="text-center">To</th>
+                            <th scope="col" class="text-center">From / To</th>
                             <th scope="col" class="text-center">Duration</th>
+                            <th scope="col" class="text-center">Aircraft</th>
                             <th scope="col" class="text-center">Date</th>
                             <th scope="col" class="text-center">Status</th>
                             </tr>
@@ -31,9 +31,9 @@
                                 <td class="text-center"><a href="{{ route('viewflight', $flight->id) }}">{{ $flight->id }}</a></td>
                                 <td class="text-center">{{ $flight->full_flight_number }}</td>
                                 <td class="text-center">{{ $flight->full_icao_callsign }}</td>
-                                <td class="text-center"><abbr title="{{ $flight->departure_airport->name }}">{{ $flight->departure_airport->icao_code }}</abbr></td>
-                                <td class="text-center"><abbr title="{{ $flight->arrival_airport->name }}">{{ $flight->arrival_airport->icao_code }}</abbr></td>
+                                <td class="text-center"><abbr title="{{ $flight->departure_airport->name }}">{{ $flight->departure_airport->icao_code }}</abbr> <i class="bi-arrow-right"></i> <abbr title="{{ $flight->arrival_airport->name }}">{{ $flight->arrival_icao }}</abbr></td>
                                 <td class="text-center">{{ $flight->flight_duration }}</td>
+                                <td class="text-center"><abbr title="{{ $flight->aircraft->full_type }}">{{ $flight->aircraft->registration }}</abbr></td>
                                 <td class="text-center">{{ $flight->flight_date }}</td>
                                 <td class="text-center">TODO</td>
                             </tr>

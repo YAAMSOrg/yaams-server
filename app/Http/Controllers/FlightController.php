@@ -38,31 +38,30 @@ class FlightController extends Controller
 
     public function addFlight(Request $request){
         $currentActiveAirline = Session()->get('activeairline');
-        if($request->getMethod() == "POST"){
-            $request->validate([
-                'pilot_id' => 'required|max:255',
-                'airline_id' => 'required',
-                'flight_number' => 'required|max:4',
-                'departure' => 'required|max:4',
-                'arrival' => 'required|max:4',
-                'aircraft' => 'required',
-                'callsign' => 'required|max:7',
-                'cruise_alt' => 'required|max:5',
-                'block_off' => 'required',
-                'block_on' => 'required',
-                'burned_fuel' => 'required',
-                'route' => 'required',
-                'online_network' => 'required',
-                'remarks' => 'regex:/^([a-zA-Z]+)(\s[a-zA-Z]+)*$/'
-            ]);
 
-            Flight::create($validated);
+        if($request->getMethod() == "POST"){
+            $validated = $request->validate([
+                'flightnumber' => 'numeric|digits_between:1,4|required',
+                'departure_icao' => 'alpha|max:4|required',
+                'arrival_icao' => 'alpha|max:4|required',
+                'aircraft_id' => 'numeric|required',
+                'callsign' => 'alpha_num|max:7|required',
+                'crzalt' => 'numeric|max:50000|digits_between:1,5|required',
+                'blockoff' => 'required',
+                'blockon' => 'required',
+                'burned_fuel' => 'numeric|required',
+                'route' => 'required',
+                'online_network_id' => 'required',
+                'remarks' => ''
+            ]);
+            
+            // TODO: Maybe a few checks are needed here?
+            Flight::create($validated + ['airline_id' => $currentActiveAirline->id, 'pilot_id' => auth()->user()->id]);
+
+            return redirect()->route('flightlist');
         }
 
         $prefill_select_online_network = OnlineNetwork::query()->get();
-
-        //TODO: Only get aircraft from an airline, which the pilot is member of
-
         $prefill_select_aircraft = $currentActiveAirline->aircraft;
 
         return view('flights.add', [ 'prefill_online_network' => $prefill_select_online_network,
@@ -70,6 +69,8 @@ class FlightController extends Controller
     }
 
     public function view(Flight $flight) {
+        // TODO: Check if user is in the correct airline.
+        
         return view('flights.detail', ['flight' => $flight ]);
     }
 }

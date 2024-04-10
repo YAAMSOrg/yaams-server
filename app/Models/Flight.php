@@ -13,6 +13,23 @@ class Flight extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'airline_id',
+        'callsign',
+        'flightnumber',
+        'departure_icao',
+        'arrival_icao',
+        'aircraft_id',
+        'crzalt',
+        'blockoff',
+        'blockon',
+        'burned_fuel',
+        'route',
+        'online_network_id',
+        'pilot_id',
+        'remarks'
+    ];
+
     protected $appends = [
         'full_flight_number',
         'full_icao_callsign',
