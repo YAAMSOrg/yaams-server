@@ -5,7 +5,6 @@
             <h1 class="display-4 mb-4">Fleet overview</h1>
             <p class="lead">Here is a list of all aircraft and their current locations according to their last flight.</p>
             <hr>
-
             @if($errors->any())
             <div class="alert alert-danger">
                 Error during request:
@@ -21,6 +20,7 @@
                 <button type="button" class="btn btn-success" style="float: right" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add aircraft</button>
             @endcan
             @can('add aircraft')
+            
             <!-- Modal -->
             <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -101,7 +101,7 @@
                                     <abbr title="This might be, because the aircraft just got initialized.">No location
                                         found</abbr>
                                 @else
-                                <abbr title="{{ $aircraft->location->name }}" class="initialism">{{ $aircraft->location->icao_code }}</abbr>
+                                <abbr title="{{ $aircraft->location->name }}">{{ $aircraft->location->icao_code }}</abbr>
                                 @endif
                                 <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->total_flights_hours }}</td>
                                 @can('edit aircraft')
