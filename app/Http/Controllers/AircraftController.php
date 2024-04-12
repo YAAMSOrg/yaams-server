@@ -68,12 +68,12 @@ class AircraftController extends Controller
     public function edit(Request $request, Aircraft $aircraft) {
         // Get the current active airline
         $currentActiveAirline = $request->session()->get('activeairline');
-    
+
         //Check if users airline owns the aircraft
         if(!$currentActiveAirline->id = $aircraft->airline->id) {
             return redirect()->route('dashboard')->with('error', 'You did something nasty!');
         }
-    
+
         /**
          * Since we get "on" or "off" from the form checkbox element, we need to convert this into usable values. If we get "on", we can set $gotStatus to true.
          */
@@ -103,7 +103,7 @@ class AircraftController extends Controller
             $targetAircraft->model = $request->post('model');
             $targetAircraft->active = $finalStatus;
             $targetAircraft->remarks = $request->post('remarks');
-    
+
             // If we notice, that the registration has changed, we need to make a check if there is an aircraft with the same tail number already active, since we can't have the same tail number active twice.
             if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')) {
 
@@ -119,16 +119,17 @@ class AircraftController extends Controller
             }
             // Save the changes.
             $targetAircraft->save();
-    
+
             // And boom: Back to fleetmanager :)
             return redirect()->route('fleetmanager');
         }
 
         // If we just get a GET request, display the manager.
         return view('fleet.edit', ['aircraft' => $aircraft ]);
-    } 
+    }
 
     public function view(Aircraft $aircraft) {
+        // TODO: Check if user is member of the aircrafts owner airline.
         return view('fleet.detail', ['aircraft' => $aircraft ]);
     }
 }

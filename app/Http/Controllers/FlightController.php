@@ -65,9 +65,15 @@ class FlightController extends Controller
                 throw ValidationException::withMessages(['arrival_icao' => 'This airport could not be found in the database.']);
             }
 
-            // TODO: Maybe a few checks are needed here?
+            // Check if the aircraft is indeed part of the active airline
+            if (Aircraft::query()->where('id', '=', $request->post('aircraft_id'))->where('used_by', '=', $currentActiveAirline->id)->count() == 0) {
+                throw ValidationException::withMessages(['aircraft_id' => 'This aircraft is not owned by your current airline.']);
+            }
+
+            // All checks passed, so create the flight.
             Flight::create($validated + ['airline_id' => $currentActiveAirline->id, 'pilot_id' => auth()->user()->id]);
 
+            // And redirect the user.
             return redirect()->route('flightlist');
         }
 
