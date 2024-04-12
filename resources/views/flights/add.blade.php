@@ -74,10 +74,17 @@
                         <label for="blockontime" class="form-label">Block on time (Zulu)</label>
                         <input type="datetime-local" class="form-control"  required name="blockon" id="blockon">
                     </div>
+                    @if ( session('activeairline')->unit_is_lbs == true )
+                    <div class="col-md-2">
+                        <label for="fuel" class="form-label">Burned Fuel (LBS)</label>
+                        <input type="number" class="form-control"  min="0" placeholder="36000" required name="burned_fuel" id="burned_fuel">
+                    </div>
+                    @else
                     <div class="col-md-2">
                         <label for="fuel" class="form-label">Burned Fuel (KG)</label>
                         <input type="number" class="form-control"  min="0" placeholder="5900" required name="burned_fuel" id="burned_fuel">
                     </div>
+                    @endif
                     <div class="col-md-12">
                         <label for="route" class="form-label">Route</label>
                         <textarea class="form-control" style="font-family: monospace; font-size: 18px; text-transform:uppercase" aria-label="With textarea" name="route" id="route" placeholder="KUMIK Y854 BOMBI T104 ROKIL" required></textarea>

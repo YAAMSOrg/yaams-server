@@ -7,6 +7,8 @@ use App\Models\Flight;
 use App\Models\Airline;
 use App\Models\OnlineNetwork;
 use App\Models\Aircraft;
+use App\Models\Airport;
+use Illuminate\Validation\ValidationException;
 
 class FlightController extends Controller
 {
@@ -26,7 +28,7 @@ class FlightController extends Controller
     public function displayFlightsForUser() {
         $current_auth_user_id = auth()->id();
         $currentActiveAirline = Session()->get('activeairline');
-        
+
         $flights = Flight::query()
         ->where('pilot_id', $current_auth_user_id)
         ->where('airline_id', $currentActiveAirline->id)
@@ -54,14 +56,25 @@ class FlightController extends Controller
                 'online_network_id' => 'required',
                 'remarks' => ''
             ]);
-            
+
+            // Check if user given airport exists, if not throw an exception. We need to do this on the two fields, to display the error.
+            if (!Airport::find($request->post('departure_icao'))) {
+                throw ValidationException::withMessages(['departure_icao' => 'This airport could not be found in the database.']);
+            }
+            if (!Airport::find($request->post('arrival_icao'))) {
+                throw ValidationException::withMessages(['arrival_icao' => 'This airport could not be found in the database.']);
+            }
+
             // TODO: Maybe a few checks are needed here?
             Flight::create($validated + ['airline_id' => $currentActiveAirline->id, 'pilot_id' => auth()->user()->id]);
 
             return redirect()->route('flightlist');
         }
 
+        // Get all available online networks to display in the select
         $prefill_select_online_network = OnlineNetwork::query()->get();
+
+        // Get all aircraft of the active airline for the select. This returns the models and we can access the properties of them in the view.
         $prefill_select_aircraft = $currentActiveAirline->aircraft;
 
         return view('flights.add', [ 'prefill_online_network' => $prefill_select_online_network,
@@ -70,7 +83,7 @@ class FlightController extends Controller
 
     public function view(Flight $flight) {
         // TODO: Check if user is in the correct airline.
-        
+
         return view('flights.detail', ['flight' => $flight ]);
     }
 }
