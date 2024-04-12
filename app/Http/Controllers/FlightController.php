@@ -54,7 +54,7 @@ class FlightController extends Controller
                 'burned_fuel' => 'numeric|required',
                 'route' => 'required',
                 'online_network_id' => 'required',
-                'remarks' => ''
+                'remarks' => 'nullable|regex:^[\pL\s\d]+'
             ]);
 
             // Check if user given airport exists, if not throw an exception. We need to do this on the two fields, to display the error.
