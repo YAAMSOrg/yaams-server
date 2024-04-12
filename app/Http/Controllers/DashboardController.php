@@ -28,6 +28,9 @@ class DashboardController extends Controller
         ->limit(5)
         ->get();
 
-        return view('dashboard.index', ['flights' => $airlineFlights]);
+        $flightCount = auth()->user()->logged_flights($currentActiveAirline);
+        $flightHours = auth()->user()->logged_hours($currentActiveAirline);
+
+        return view('dashboard.index', ['flights' => $airlineFlights, 'flight_count' => $flightCount, 'flight_hours' => $flightHours]);
     }
 }
