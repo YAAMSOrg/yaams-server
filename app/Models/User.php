@@ -36,7 +36,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
+   
     /**
      * The attributes that should be cast to native types.
      *
@@ -48,11 +48,31 @@ class User extends Authenticatable
     ];
 
     //protected $appends = [
-        //'airlines'
+//
     //];
 
-    public function getHoursLogged() {
-        
+    public function logged_hours(Airline $airline) {
+        $flights = Flight::query()
+        ->where('airline_id', '=', $airline->id)
+        ->where('pilot_id', '=', $this->id)
+        ->get();
+
+        $totalFlightMinutes = 0;
+
+        foreach ($flights as $flight) {
+            $totalFlightMinutes += $flight->flight_duration_minutes;
+        }
+        $hours = floor($totalFlightMinutes / 60);
+        $minutes = $totalFlightMinutes % 60;
+
+        return $hours;
+    }
+
+    public function logged_flights(Airline $airline) {
+        return Flight::query()
+        ->where('airline_id', '=', $airline->id)
+        ->where('pilot_id', '=', $this->id)
+        ->get()->count();
     }
 
     public function airlines(): BelongsToMany
