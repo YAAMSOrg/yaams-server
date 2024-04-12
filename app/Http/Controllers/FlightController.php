@@ -47,7 +47,7 @@ class FlightController extends Controller
                 'departure_icao' => 'alpha|max:4|required',
                 'arrival_icao' => 'alpha|max:4|required',
                 'aircraft_id' => 'numeric|required',
-                'callsign' => 'alpha_num|max:7|required',
+                'callsign' => ['regex:/^(?:\d{1,4}|(?:\d{1}[A-Z]{2})|(?:\d{2}[A-Z]{2})|(?:\d{3}[A-Z]{1})|(?:\d{2}[A-Z]{1}))$/', 'max:7', 'required'],
                 'crzalt' => 'numeric|max:50000|digits_between:1,5|required',
                 'blockoff' => 'required',
                 'blockon' => 'required',
