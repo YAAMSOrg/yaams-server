@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
     public function index(){
         $currentActiveAirline = Session()->get('activeairline');
- 
+
         // Alternative approach:
         // $airlineFlights = $currentActiveAirline->flights;
 

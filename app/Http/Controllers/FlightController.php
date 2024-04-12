@@ -7,6 +7,8 @@ use App\Models\Flight;
 use App\Models\Airline;
 use App\Models\OnlineNetwork;
 use App\Models\Aircraft;
+use App\Models\Airport;
+use Illuminate\Validation\ValidationException;
 
 class FlightController extends Controller
 {
@@ -26,7 +28,7 @@ class FlightController extends Controller
     public function displayFlightsForUser() {
         $current_auth_user_id = auth()->id();
         $currentActiveAirline = Session()->get('activeairline');
-        
+
         $flights = Flight::query()
         ->where('pilot_id', $current_auth_user_id)
         ->where('airline_id', $currentActiveAirline->id)
@@ -45,23 +47,40 @@ class FlightController extends Controller
                 'departure_icao' => 'alpha|max:4|required',
                 'arrival_icao' => 'alpha|max:4|required',
                 'aircraft_id' => 'numeric|required',
-                'callsign' => 'alpha_num|max:7|required',
+                'callsign' => ['regex:/^(?:\d{1,4}|(?:\d{1}[A-Z]{2})|(?:\d{2}[A-Z]{2})|(?:\d{3}[A-Z]{1})|(?:\d{2}[A-Z]{1}))$/', 'max:7', 'required'],
                 'crzalt' => 'numeric|max:50000|digits_between:1,5|required',
                 'blockoff' => 'required',
                 'blockon' => 'required',
                 'burned_fuel' => 'numeric|required',
                 'route' => 'required',
                 'online_network_id' => 'required',
-                'remarks' => ''
+                'remarks' => 'nullable|regex:^[\pL\s\d]+'
             ]);
-            
-            // TODO: Maybe a few checks are needed here?
+
+            // Check if user given airport exists, if not throw an exception. We need to do this on the two fields, to display the error.
+            if (!Airport::find($request->post('departure_icao'))) {
+                throw ValidationException::withMessages(['departure_icao' => 'This airport could not be found in the database.']);
+            }
+            if (!Airport::find($request->post('arrival_icao'))) {
+                throw ValidationException::withMessages(['arrival_icao' => 'This airport could not be found in the database.']);
+            }
+
+            // Check if the aircraft is indeed part of the active airline
+            if (Aircraft::query()->where('id', '=', $request->post('aircraft_id'))->where('used_by', '=', $currentActiveAirline->id)->count() == 0) {
+                throw ValidationException::withMessages(['aircraft_id' => 'This aircraft is not owned by your current airline.']);
+            }
+
+            // All checks passed, so create the flight.
             Flight::create($validated + ['airline_id' => $currentActiveAirline->id, 'pilot_id' => auth()->user()->id]);
 
+            // And redirect the user.
             return redirect()->route('flightlist');
         }
 
+        // Get all available online networks to display in the select
         $prefill_select_online_network = OnlineNetwork::query()->get();
+
+        // Get all aircraft of the active airline for the select. This returns the models and we can access the properties of them in the view.
         $prefill_select_aircraft = $currentActiveAirline->aircraft;
 
         return view('flights.add', [ 'prefill_online_network' => $prefill_select_online_network,
@@ -70,7 +89,7 @@ class FlightController extends Controller
 
     public function view(Flight $flight) {
         // TODO: Check if user is in the correct airline.
-        
+
         return view('flights.detail', ['flight' => $flight ]);
     }
 }
