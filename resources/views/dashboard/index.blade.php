@@ -3,7 +3,11 @@
 @section('content')
 
             <h1 class="display-4 mb-4">Welcome, {{ Auth::user()->name }}!</h1>
-            <p class="lead">You have a total of <b>{{ $flight_hours }} hours</b> in <b>{{ $flight_count }} flights</b> logged for {{ session('activeairline')->name }}.</p>
+            @if( $flight_count == 0)
+                <p class="lead">You have no logged flights on your current airline {{ session('activeairline')->name }}.</p>
+            @else
+                <p class="lead">You have a total of <b>{{ $flight_hours }} hours</b> in <b>{{ $flight_count }} flights</b> logged for {{ session('activeairline')->name }}.</p>
+            @endif
 
             @if(is_null(Auth::user()->email_verified_at))
             <div class="alert alert-warning" role="alert">
