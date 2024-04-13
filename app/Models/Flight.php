@@ -65,37 +65,37 @@ class Flight extends Model
     public function getFlightDurationAttribute() {
         $blockofftime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockoff);
         $blockontime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockon);
-        
+
         if ($blockofftime === false || $blockontime === false) {
             return "Error while parsing flight duration time.";
         }
 
         $duration = $blockofftime->diff($blockontime);
 
-        return $duration->format('%h:%i h');
+        return $duration->format('%H:%I h');
     }
 
     public function getFlightDurationMinutesAttribute() {
         $blockofftime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockoff);
         $blockontime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockon);
-        
+
         if ($blockofftime === false || $blockontime === false) {
             return "Error while parsing flight duration time.";
         }
-    
+
         $duration = $blockofftime->diff($blockontime);
-    
+
         // Die Dauer in Minuten berechnen
         $hoursInMinutes = $duration->h * 60;
         $totalMinutes = $hoursInMinutes + $duration->i;
-    
+
         return $totalMinutes;
     }
 
     public function getFlightDateAttribute() {
        // We take the block on time and take only the year, month and date.
        $blockontime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockon);
-       
+
        return $blockontime->format('Y/m/d');
     }
 }
