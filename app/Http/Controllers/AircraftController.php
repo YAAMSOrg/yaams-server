@@ -129,7 +129,14 @@ class AircraftController extends Controller
     }
 
     public function view(Aircraft $aircraft) {
-        // TODO: Check if user is member of the aircrafts owner airline.
+        // Get the current active airline
+        $currentActiveAirline = Session()->get('activeairline');
+
+        // Check if the aircraft is indeed part of the active airline
+        if (Aircraft::query()->where('id', '=', $aircraft->id)->where('used_by', '=', $currentActiveAirline->id)->count() == 0) {
+            return redirect()->route('dashboard')->with('error', 'The aircraft you tried to edit is not owned by the current active airline.');
+        }
+
         return view('fleet.detail', ['aircraft' => $aircraft ]);
     }
 }
