@@ -132,9 +132,6 @@ class AircraftController extends Controller
     public function view(Aircraft $aircraft) {
         $currentActiveAirline = Session::get('activeairline');
 
-        dump($currentActiveAirline->id);
-        dump($aircraft->airline->id);
-
         //Check if users airline owns the aircraft
         if($currentActiveAirline->id !== $aircraft->airline->id) {
             return redirect()->route('dashboard')->with('error', 'You did something nasty!');
