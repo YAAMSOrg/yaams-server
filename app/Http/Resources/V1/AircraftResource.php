@@ -19,9 +19,9 @@ class AircraftResource extends JsonResource
             'registration' => $this->registration,
             'manufacturer' => $this->manufacturer,
             'model' => $this->model,
-            'current_loc' => $this->current_loc,
+            'currentLoc' => $this->current_loc,
             'remarks' => $this->remarks,
-            'used_by' => $this->used_by,
+            'usedBy' => $this->used_by,
             'active' => $this->active,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at
