@@ -82,7 +82,6 @@ class User extends Authenticatable
 
     public function isMemberOf(Airline $airline) : bool
     {
-        // Überprüfe, ob die Airline in der Liste der Airlines vorhanden ist, zu denen der Benutzer eine Beziehung hat
         return $this->airlines()->where('airline_id', $airline->id)->exists();
     }
 
