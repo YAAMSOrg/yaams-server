@@ -31,7 +31,7 @@ class AircraftController extends Controller
                 'manufacturer' => 'required',
                 'model' => 'required',
                 'current_loc' => 'required|max:4',
-                'remarks' => 'nullable',
+                'remarks' => 'alphanum|nullable',
             ]);
 
             // Check if user given airport exists, if not throw an exception.

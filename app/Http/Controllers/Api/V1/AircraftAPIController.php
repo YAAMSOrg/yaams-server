@@ -44,7 +44,7 @@ class AircraftAPIController extends Controller
                 'manufacturer' => 'required',
                 'model' => 'required',
                 'current_loc' => 'required|max:4',
-                'remarks' => 'nullable',
+                'remarks' => 'nullable|alphanum',
             ]);
 
             if (!Airport::find($request->post('current_loc'))) {
