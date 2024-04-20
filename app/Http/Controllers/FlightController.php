@@ -42,6 +42,12 @@ class FlightController extends Controller
     public function addFlight(Request $request){
         $currentActiveAirline = Session()->get('activeairline');
 
+        //Reload airline since we sometimes saw
+        $tempAirlineID = $currentActiveAirline->id;
+        $request->session()->forget('activeairline');
+        $tempAirline = Airline::find($tempAirlineID);
+        $request->session()->put('activeairline', $tempAirline);
+
         if($request->getMethod() == "POST"){
             $validated = $request->validate([
                 'flightnumber' => 'numeric|digits_between:1,4|required',
