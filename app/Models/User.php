@@ -36,7 +36,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-   
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -78,6 +78,11 @@ class User extends Authenticatable
     public function airlines(): BelongsToMany
     {
         return $this->belongsToMany(Airline::class, 'airline_memberships', 'user_id', 'airline_id');
+    }
+
+    public function isMemberOf(Airline $airline) : bool
+    {
+        return $this->airlines()->where('airline_id', $airline->id)->exists();
     }
 
 }

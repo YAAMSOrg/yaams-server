@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AircraftAPIController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,5 +28,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1', 'middleware' => 'auth:sanctum' ], function() {
     Route::get('apitest', [ApiTestController::class, 'index'])->name('apitest');
+
+    // Can receive GET or POST.
     Route::apiResource('airlines', AirlineAPIController::class);
+
+    Route::get('/airline/{airline}/aircraft/', [AircraftAPIController::class, 'listAircraftForAirline'])->name('aircraftlistforairline');
+    Route::post('/airline/{airline}/aircraft/', [AircraftAPIController::class, 'addAircraftForAirline'])->name('aircraftaddforairline');
+
 });

@@ -8,6 +8,7 @@ use App\Models\Airline;
 use App\Models\OnlineNetwork;
 use App\Models\Aircraft;
 use App\Models\Airport;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 class FlightController extends Controller
@@ -40,6 +41,12 @@ class FlightController extends Controller
 
     public function addFlight(Request $request){
         $currentActiveAirline = Session()->get('activeairline');
+
+        //Reload airline since we sometimes saw
+        $tempAirlineID = $currentActiveAirline->id;
+        $request->session()->forget('activeairline');
+        $tempAirline = Airline::find($tempAirlineID);
+        $request->session()->put('activeairline', $tempAirline);
 
         if($request->getMethod() == "POST"){
             $validated = $request->validate([
@@ -88,8 +95,13 @@ class FlightController extends Controller
     }
 
     public function view(Flight $flight) {
-        // TODO: Check if user is in the correct airline.
+        $currentActiveAirline = Session::get('activeairline');
 
-        return view('flights.detail', ['flight' => $flight ]);
+        //Check if users airline is equal to the flights airline
+        if($currentActiveAirline->id !== $flight->airline->id) {
+            return redirect()->route('dashboard')->with('error', 'You tried to view a flight of another airline.');
+        } else {
+            return view('flights.detail', ['flight' => $flight ]);
+        }
     }
 }

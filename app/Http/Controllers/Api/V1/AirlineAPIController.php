@@ -27,10 +27,8 @@ class AirlineAPIController extends Controller
     public function store(Request $request){
         $get_asking_user = request()->user('sanctum');
 
-
         if($get_asking_user->can('add airlines')){ // Check user permission
             if($request->getMethod() == "POST"){
-
                 $validated = $request->validate([
                     'name' => 'required|max:50|unique:airlines', // Example Airline
                     'prefix' => 'required|min:2|max:2|unique:airlines|uppercase', // EV
@@ -38,7 +36,6 @@ class AirlineAPIController extends Controller
                     'atc_callsign' => 'required|regex:/^[a-zA-Z]+$/u|max:25|unique:airlines' // EXAMPLE
                 ]);
                 Airline::create($validated);
-
             }
 
             return response()->json([
@@ -49,4 +46,5 @@ class AirlineAPIController extends Controller
             return response()->json(['error' => 'Missing "add airlines" permission. Unauthenticated.'], 401);
         }
     }
+
 }
