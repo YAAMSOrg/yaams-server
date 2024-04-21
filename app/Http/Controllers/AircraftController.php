@@ -70,7 +70,7 @@ class AircraftController extends Controller
         $currentActiveAirline = $request->session()->get('activeairline');
 
         //Check if users airline owns the aircraft
-        if(!$currentActiveAirline->id = $aircraft->airline->id) {
+        if(!$aircraft->ownedBy($currentActiveAirline)) {
             return redirect()->route('dashboard')->with('error', 'You did something nasty!');
         }
 
