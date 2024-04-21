@@ -138,7 +138,11 @@ class AircraftController extends Controller
             return redirect()->route('dashboard')->with('error', 'The aircraft you tried to edit is not owned by the current active airline.');
         }
 
-        return view('fleet.detail', ['aircraft' => $aircraft ]);
+        // Get lat and lon for position view
+        $curLat = $aircraft->location->latitude_deg;
+        $curLon = $aircraft->location->longitude_deg;
+
+        return view('fleet.detail', ['aircraft' => $aircraft, 'lon' => $curLon, 'lat' => $curLat ]);
     }
 }
 
