@@ -92,25 +92,33 @@
                     </thead>
                     <tbody>
                         @foreach($fleet as $aircraft)
-                            <tr>
-                                <th scope="row" class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif><a href="{{ route('viewaircraft', $aircraft->id) }}">{{ $aircraft->registration }}</a></th>
-        
-                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->full_type }}</td>
-        
-                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>@if(is_null($aircraft->current_loc))
-                                    <abbr title="This might be, because the aircraft just got initialized.">No location
-                                        found</abbr>
-                                @else
-                                <abbr title="{{ $aircraft->location->name }}">{{ $aircraft->location->icao_code }}</abbr>
-                                @endif
-                                <td class="text-center" @if( $aircraft->active == 0) style="color: gray" @endif>{{ $aircraft->total_flights_hours }}</td>
+                            <tr @if($aircraft->active == 0) style="background-color: #f0f0f0;" @endif>
+                                <th scope="row" class="text-center">
+                                    <a href="{{ route('viewaircraft', $aircraft->id) }}" @if($aircraft->active == 0) class="text-muted" @endif>
+                                        {{ $aircraft->registration }}
+                                    </a>
+                                </th>
+                                <td class="text-center" @if($aircraft->active == 0) class="text-muted" @endif>
+                                    {{ $aircraft->full_type }}
+                                </td>
+                                <td class="text-center" @if($aircraft->active == 0) class="text-muted" @endif>
+                                    @if(is_null($aircraft->current_loc))
+                                        <abbr title="This might be because the aircraft just got initialized.">No location found</abbr>
+                                    @else
+                                        <abbr title="{{ $aircraft->location->name }}">{{ $aircraft->location->icao_code }}</abbr>
+                                    @endif
+                                </td>
+                                <td class="text-center" @if($aircraft->active == 0) class="text-muted" @endif>
+                                    {{ $aircraft->total_flights_hours }}
+                                </td>
                                 @can('edit aircraft')
-                                <td class="text-center"><a href="{{ route('editaircraft', $aircraft->id) }}">Edit</a></td>
+                                    <td class="text-center">
+                                        <a href="{{ route('editaircraft', $aircraft->id) }}" @if($aircraft->active == 0) class="text-muted" @endif>Edit</a>
+                                    </td>
                                 @endcan
-                        </td>
-                        </tr>
+                            </tr>
                         @endforeach
-                    </tbody>
+                    </tbody>                    
                 </table>
                 @if($maxPages > 1)
                 <nav>

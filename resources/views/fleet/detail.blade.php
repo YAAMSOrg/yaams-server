@@ -1,41 +1,59 @@
 @extends('layouts.app')
-@section('title', 'View aircraft')
+@section('title', 'View Aircraft')
 @section('content')
-            @if($errors->any())
-            <div class="alert alert-danger">
-                Error during request:
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+
+<!-- Error Handling -->
+@if($errors->any())
+    <div class="alert alert-danger">
+        <strong>Error during request:</strong>
+        <ul>
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<!-- Aircraft Details -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Aircraft Registration -->
+            <h2 class="display-4">{{ $aircraft->registration }}</h2>
+
+            <!-- Aircraft Information -->
+            <div class="card">
+                <div class="card-header">
+                    <strong>Aircraft Information</strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Owner:</strong> {{ $aircraft->airline->name }}</p>
+                    <p><strong>Type:</strong> {{ $aircraft->full_type }}</p>
+                    <p><strong>Remarks:</strong> {{ $aircraft->remarks }}</p>
+                    <p><strong>Total Flights:</strong> {{ $aircraft->total_flights_count }}</p>
+                    <p><strong>Total Flight Hours:</strong> {{ $aircraft->total_flights_hours }} hours</p>
+                </div>
             </div>
-            @endif
 
-            <h5 class="display-5">{{ $aircraft->registration }}</h2>
+            <!-- Action Buttons -->
+            <div class="mt-3">
+                <button class="btn btn-secondary" onclick="window.location.href='{{ route('fleetmanager') }}'">Back</button>
+            </div>
+        </div>
 
-            <dl class="row">
-                <dt class="col-sm-3">Type</dt>
-                <dd class="col-sm-9">{{ $aircraft->full_type }}</dd>
-              
-                <dt class="col-sm-3">In service since</dt>
-                <dd class="col-sm-9">TODO</dd>
+        <!-- Current Location -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Current Location</strong>
+                </div>
+                <div class="card-body">
+                    <x-maps-leaflet style="height: 300px; width: 100%;" :zoomLevel="11" :markers="[['lat' => $lat, 'long' => $lon]]" :centerPoint="['lat' => $lat, 'long' => $lon]"></x-maps-leaflet>
+                    <p class="text-center">Currently standing at {{ $aircraft->location->icao_code }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <dt class="col-sm-3">First flight</dt>
-                <dd class="col-sm-9">TODO</dd>
-            </dl>
-
-            <b>I like the idea of this page, so I'm keeping it. But it needs to be filled.</b>
-
-
-            <h6 class="display-6">Flight list</h2>
-            
-            TODO
-
-            <h6 class="display-6">What to do here</h6>
-
-            TODO
-            <br>
-
-            <input type="button" class="btn btn-secondary" value="Back" onclick="window.location.href='{{ route('fleetmanager') }}'">
 @endsection

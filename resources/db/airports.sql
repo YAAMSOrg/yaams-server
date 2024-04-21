@@ -17005,7 +17005,7 @@ INSERT INTO `airports` (`icao_code`, `name`, `latitude_deg`, `longitude_deg`, `e
 ('LOLW', 'Wels Airfield', '48.182513', '14.039283', '1043.0', 'AT', ''),
 ('LOSM', 'Flugplatz Mauterndorf', '47.131995', '13.695867', '3642.0', 'AT', ''),
 ('LOWG', 'Graz Airport', '46.9911', '15.4396', '1115.0', 'AT', 'GRZ'),
-('LOWI', 'Innsbruck Airport', '47.260201', '11344.0', '1907.0', 'AT', 'INN'),
+('LOWI', 'Innsbruck Airport', '47.260201', '11.344.0', '1907.0', 'AT', 'INN'),
 ('LOWK', 'Klagenfurt Airport', '46.642502', '14.3377', '1472.0', 'AT', 'KLU'),
 ('LOWL', 'Linz-Hörsching Airport / Vogler Air Base', '48.2332', '14.1875', '980.0', 'AT', 'LNZ'),
 ('LOWS', 'Salzburg Airport', '47.793301', '13.0043', '1411.0', 'AT', 'SZG'),
