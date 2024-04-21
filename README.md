@@ -68,6 +68,7 @@ The auth tokens for developing the API are issued on the db:seed command and pri
 
 * [laravel-permission](https://github.com/spatie/laravel-permission)
 * [laravel-sanctum](https://laravel.com/docs/11.x/sanctum)
+* [laravel-maps](https://github.com/LarsWiegers/laravel-maps)
 
 ## Open Source
 
