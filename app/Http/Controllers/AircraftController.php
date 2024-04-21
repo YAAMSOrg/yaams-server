@@ -71,7 +71,7 @@ class AircraftController extends Controller
         $currentActiveAirline = $request->session()->get('activeairline');
 
         //Check if users airline owns the aircraft
-        if($currentActiveAirline->id !== $aircraft->airline->id) {
+        if(!$aircraft->ownedBy($currentActiveAirline)) {
             return redirect()->route('dashboard')->with('error', 'You did something nasty!');
         } else {
             /**
@@ -130,14 +130,15 @@ class AircraftController extends Controller
     }
 
     public function view(Aircraft $aircraft) {
-        $currentActiveAirline = Session::get('activeairline');
+        // Get the current active airline
+        $currentActiveAirline = Session()->get('activeairline');
 
-        //Check if users airline owns the aircraft
-        if($currentActiveAirline->id !== $aircraft->airline->id) {
-            return redirect()->route('dashboard')->with('error', 'You did something nasty!');
-        } else {
-            return view('fleet.detail', ['aircraft' => $aircraft ]);
+        // Check if the aircraft is indeed part of the active airline
+        if (!$aircraft->ownedBy($currentActiveAirline)) {
+            return redirect()->route('dashboard')->with('error', 'The aircraft you tried to edit is not owned by the current active airline.');
         }
+
+        return view('fleet.detail', ['aircraft' => $aircraft ]);
     }
 }
 

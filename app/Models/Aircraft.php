@@ -62,4 +62,14 @@ class Aircraft extends Model
         return $hours;
     }
 
+    public function activeAndOwnedBy(Airline $airline)
+    {
+        return $this->used_by === $airline->id && $this->active == 1;
+    }
+
+    public function ownedBy(Airline $airline): bool
+    {
+        return $this->used_by === $airline->id;
+    }
+
 }
