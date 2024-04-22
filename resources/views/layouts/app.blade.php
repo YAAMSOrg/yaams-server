@@ -24,17 +24,11 @@
                 <a class="navbar-brand" href="{{ route('home') }}">
                     <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="YAAMS Logo" height="40">
                 </a>
-                
+
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('home') }}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('fleetmanager') }}"><i class="bi bi-airplane-fill"></i> Fleet</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#"><i class="bi bi-globe-americas"></i> Live Map</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFlights" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -44,9 +38,15 @@
                                 <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
                                 <li><a class="dropdown-item" href="{{ route('addflight') }}">File a PIREP</a></li>
                             </ul>
-                        </li>                        
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('fleetmanager') }}"><i class="bi bi-airplane-fill"></i> Fleet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="bi bi-globe-americas"></i> Live Map</a>
+                        </li>
                     </ul>
-                    
+
                     <!-- User Auth -->
                     <ul class="navbar-nav">
                         @guest
@@ -57,7 +57,7 @@
                                 <a class="nav-link btn btn-primary btn-sm" href="{{ route('register') }}">Sign Up</a>
                             </li>
                         @endguest
-                        
+
                         @auth
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -86,12 +86,12 @@
                 </div>
             </div>
         </header>
-        
+
         <!-- Main Content -->
         <div class="container mt-4">
             @yield('content')
         </div>
-        
+
         <!-- Footer -->
         <footer class="bg-dark text-white mt-auto py-3">
             <div class="container text-center">
