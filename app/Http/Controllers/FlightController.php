@@ -26,17 +26,30 @@ class FlightController extends Controller
         return view('flights.list', ['flights' => $flights]);
     }
 
-    public function displayFlightsForUser() {
+    public function displayFlightsForUser(Request $request) {
         $current_auth_user_id = auth()->id();
         $currentActiveAirline = Session()->get('activeairline');
+
+        // This is pagination voodo.
+        $limit = max(env('FLIGHT_PAGE_LIMIT'), 1);
+        $maxEntries = Flight::query()
+            ->where('pilot_id', $current_auth_user_id)
+            ->where('airline_id', $currentActiveAirline->id)
+            ->count();
+        $maxPages = (int)ceil($maxEntries/$limit);
+        $page = (int)$request->get('page', 1);
+        $page = min(max(1, $page), $maxPages);
+        $offset = ($page -1) * $limit;
 
         $flights = Flight::query()
         ->where('pilot_id', $current_auth_user_id)
         ->where('airline_id', $currentActiveAirline->id)
         ->orderBy('created_at', 'DESC')
+        ->offset($offset)
+        ->limit($limit)
         ->get();
 
-        return view('flights.list', ['flights' => $flights]);
+        return view('flights.list', ['flights' => $flights, 'maxPages' => $maxPages, 'currentPage' => $page]);
     }
 
     public function addFlight(Request $request){

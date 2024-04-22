@@ -27,7 +27,7 @@
                         </thead>
                         <tbody>
                             @foreach($flights as $flight)
-                            <tr>  
+                            <tr>
                                 <td class="text-center"><a href="{{ route('viewflight', $flight->id) }}">{{ $flight->id }}</a></td>
                                 <td class="text-center">{{ $flight->full_flight_number }}</td>
                                 <td class="text-center">{{ $flight->full_icao_callsign }}</td>
@@ -40,6 +40,27 @@
                             @endforeach
                         </tbody>
                     </table>
+                @if($maxPages > 1)
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item">
+                                <a class="page-link" href="{{ route('flightlist', ['page' => $currentPage-1], false)}}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+
+                            @for($page=1;$page<=$maxPages;$page++)
+                                <li class="page-item @if($page === $currentPage) active @endif"><a class="page-link" href="{{ route('flightlist', ['page' => $page], false)}}">{{ $page }}</a></li>
+                            @endfor
+
+                            <li class="page-item">
+                                <a class="page-link" href="{{ route('flightlist', ['page' => $currentPage+1], false)}}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                @endif
                 @endif
 @endsection
 
