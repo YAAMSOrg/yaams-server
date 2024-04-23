@@ -49,6 +49,10 @@ class FlightController extends Controller
         ->limit($limit)
         ->get();
 
+        foreach ($flights as $flight) {
+            dump($flight->status);
+        }
+
         return view('flights.list', ['flights' => $flights, 'maxPages' => $maxPages, 'currentPage' => $page]);
     }
 

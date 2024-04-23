@@ -27,6 +27,7 @@ class Flight extends Model
         'route',
         'online_network_id',
         'pilot_id',
+        'status',
         'remarks'
     ];
 
@@ -44,6 +45,10 @@ class Flight extends Model
 
     public function aircraft() {
         return $this->belongsTo(Aircraft::class, 'aircraft_id');
+    }
+
+    public function status() {
+        return $this->belongsTo(FlightStatus::class, 'id');
     }
 
     public function departure_airport() {

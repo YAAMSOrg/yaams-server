@@ -34,6 +34,8 @@ class CreateFlightsTable extends Migration
             $table->foreign('online_network_id')->references('id')->on('online_networks');
             $table->foreignId('pilot_id');
             $table->foreign('pilot_id')->references('id')->on('users');
+            $table->foreignId('status_id')->default(1);
+            $table->foreign('status_id')->references('id')->on('flight_statuses');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });

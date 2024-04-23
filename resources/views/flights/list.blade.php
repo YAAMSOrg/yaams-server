@@ -5,6 +5,18 @@
         <h1 class="display-4 mb-4">My flights</h1>
         <p class="lead">Here is a list of your filed flights and their PIREP status. Keep in mind, that this is only for your active airline: {{ session('activeairline')->name }}</p>
         <hr>
+        @if($errors->any())
+        <div class="alert alert-danger">
+            Error during request:
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
+        <button type="button" class="btn btn-success" style="margin-bottom: 5px; float: right" onclick="window.location.href='{{ route('addflight') }}'">File PIREP</button>
 
                 @if ($flights->isEmpty())
                 <div class="alert alert-warning" role="alert">
@@ -35,7 +47,7 @@
                                 <td class="text-center">{{ $flight->flight_duration }}</td>
                                 <td class="text-center"><abbr title="{{ $flight->aircraft->full_type }}">{{ $flight->aircraft->registration }}</abbr></td>
                                 <td class="text-center">{{ $flight->flight_date }}</td>
-                                <td class="text-center">TODO</td>
+                                <td class="text-center">{{ $flight->status->name }}</td>
                             </tr>
                             @endforeach
                         </tbody>
