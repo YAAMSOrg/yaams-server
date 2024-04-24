@@ -16,10 +16,11 @@ YAAMS is an alternative to PHPvms or Virtual Airline Manager. YAAMS takes a more
 
 ## Current status
 
-The main priority, in order, as of now is the following:
-
-* Finalize the database model
-* Get the API working for read and write access
+What works already:
+* Add aircrafts
+* Add airlines via API
+* Create users and login
+* Add flights
 
 ### Showcase
 
@@ -57,8 +58,9 @@ This will change in the future, since we then start migrations the way they shou
 #### Example users
 
 The default users and password for testing are: 
-* test@test.com / start
-* homer@test.com / start
+* homer@test.com / start (Role: Pilot)
+* test@test.com / start (Role: Manager)
+* admin@test.com / start (Role: Admin)
 
 The auth tokens for developing the API are issued on the db:seed command and printed out. 
 
