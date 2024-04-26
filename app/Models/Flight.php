@@ -48,7 +48,7 @@ class Flight extends Model
     }
 
     public function status() {
-        return $this->belongsTo(FlightStatus::class, 'id');
+        return $this->belongsTo(FlightStatus::class, 'status_id');
     }
 
     public function departure_airport() {
