@@ -36,7 +36,10 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdownFlights">
                                 <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
-                                <li><a class="dropdown-item" href="{{ route('addflight') }}">File a PIREP</a></li>
+                                <li><a class="dropdown-item" href="{{ route('flightadd') }}">File a PIREP</a></li>
+                                @can('review flight')
+                                <li><a class="dropdown-item" href="{{ route('flightreviewindex') }}">Review flights</a></li>
+                                @endcan
                             </ul>
                         </li>
                         <li class="nav-item">

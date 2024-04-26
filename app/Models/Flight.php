@@ -51,6 +51,10 @@ class Flight extends Model
         return $this->belongsTo(FlightStatus::class, 'status_id');
     }
 
+    public function pilot(){
+        return $this->belongsTo(User::class, 'pilot_id');
+    }
+
     public function departure_airport() {
         return $this->belongsTo(Airport::class, 'departure_icao');
     }

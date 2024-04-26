@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Flight list')
+@section('title', 'YAAMS: Review flights')
 @section('content')
 
-        <h1 class="display-4 mb-4">My flights</h1>
-        <p class="lead">Here is a list of your filed flights and their PIREP status. Keep in mind, that this is only for your active airline: {{ session('activeairline')->name }}</p>
+        <h1 class="display-4 mb-4">Review flights</h1>
+        <p class="lead">Here is a list of flights from {{ session('activeairline')->name }} that you can review and accept/reject.</p>
         <hr>
         @if($errors->any())
         <div class="alert alert-danger">
@@ -34,7 +34,7 @@
                             <th scope="col" class="text-center">Duration</th>
                             <th scope="col" class="text-center">Aircraft</th>
                             <th scope="col" class="text-center">Date</th>
-                            <th scope="col" class="text-center">Status</th>
+                            <th scope="col" class="text-center">Pilot</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -47,32 +47,11 @@
                                 <td class="text-center">{{ $flight->flight_duration }}</td>
                                 <td class="text-center"><abbr title="{{ $flight->aircraft->full_type }}">{{ $flight->aircraft->registration }}</abbr></td>
                                 <td class="text-center">{{ $flight->flight_date }}</td>
-                                <td class="text-center">{{ $flight->status->name }}</td>
+                                <td class="text-center">{{ $flight->pilot->name }}</td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
-                @if($maxPages > 1)
-                    <nav>
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item">
-                                <a class="page-link" href="{{ route('flightlist', ['page' => $currentPage-1], false)}}" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-
-                            @for($page=1;$page<=$maxPages;$page++)
-                                <li class="page-item @if($page === $currentPage) active @endif"><a class="page-link" href="{{ route('flightlist', ['page' => $page], false)}}">{{ $page }}</a></li>
-                            @endfor
-
-                            <li class="page-item">
-                                <a class="page-link" href="{{ route('flightlist', ['page' => $currentPage+1], false)}}" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                @endif
                 @endif
 @endsection
 

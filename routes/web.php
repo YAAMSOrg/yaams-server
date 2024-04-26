@@ -20,7 +20,8 @@ Route::post('/auth/logout', [LogoutController::class, 'store'])->name('logout');
 
 Route::get('/user/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::match(['GET', 'POST'], '/user/switchactiveairline', [AirlineMembershipController::class, 'changeActiveAirline'])->name('changeactiveairline');
-Route::match(['GET', 'POST'], '/user/flights/add', [FlightController::class, 'addFlight'])->name('addflight');
+Route::match(['GET', 'POST'], '/user/flights/add', [FlightController::class, 'addFlight'])->name('flightadd');
+Route::get('/user/flights/review', [FlightController::class, 'listReviewFlights'])->name('flightreviewindex');
 Route::get('/user/flights/list', [FlightController::class, 'displayFlightsForUser'])->name('flightlist');
 Route::get('/user/flights/view/{flight}', [FlightController::class, 'view'])->name('viewflight');
 Route::get('/user/notifications', [NotificationsController::class, 'viewNotifications'])->name('usernotifications');

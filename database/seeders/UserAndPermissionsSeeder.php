@@ -22,6 +22,7 @@ class UserAndPermissionsSeeder extends Seeder
         // create permissions
         Permission::create(['name' => 'add aircraft']);
         Permission::create(['name' => 'edit aircraft']);
+        Permission::create(['name' => 'review flight']);
 
         // create roles and assign existing permissions
 
@@ -32,6 +33,7 @@ class UserAndPermissionsSeeder extends Seeder
         $role2 = Role::create(['name' => 'Manager']);
         $role2->givePermissionTo('add aircraft');
         $role2->givePermissionTo('edit aircraft');
+        $role2->givePermissionTo('review flight');
 
         // Super-Admin, which will get all permissions
         // gets all permissions via Gate::before rule; see AuthServiceProvider

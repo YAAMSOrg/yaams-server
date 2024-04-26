@@ -120,4 +120,18 @@ class FlightController extends Controller
             return view('flights.detail', ['flight' => $flight ]);
         }
     }
+
+    public function listReviewFlights() {
+        $currentActiveAirline = Session::get('activeairline');
+        $current_auth_user_id = auth()->user()->id;
+
+        $flights = Flight::query()
+        ->where('pilot_id', $current_auth_user_id)
+        ->where('airline_id', $currentActiveAirline->id)
+        ->where('status_id', '=', '1')
+        ->orderBy('created_at', 'DESC')
+        ->get();
+
+        return view('flights.review', ['flights' => $flights ]);
+    }
 }
