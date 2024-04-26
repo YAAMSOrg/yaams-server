@@ -67,7 +67,7 @@
                                     <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
                                     @role('Manager')
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="#">Notifications</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('usernotifications') }}">Notifications</a></li>
                                         <li><a class="dropdown-item" href="#">Manage Pilots</a></li>
                                     @endrole
                                     <li><hr class="dropdown-divider"></li>
