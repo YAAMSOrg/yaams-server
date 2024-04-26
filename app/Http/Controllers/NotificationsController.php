@@ -13,7 +13,7 @@ class NotificationsController extends Controller
     }
 
     public function viewNotifications() {
-        $notifications = Notification::all();
+        $notifications = Notification::where('target_id', '=', auth()->user()->id)->where('acknowledged', '=', '0')->get();
 
         return view('dashboard.notifications', ['notifications' => $notifications]);
     }

@@ -25,8 +25,16 @@
             @foreach ($notifications as $notification)
                 <div class="col-md-12 mb-3">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="card-title">{{ $notification->title }}</h5>
+                            <div>
+                                <button class="btn btn-success btn-sm" title="Review">
+                                    <i class="bi bi-airplane-fill"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" title="Delete notification">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <p class="card-text">{{ $notification->message }}</p>
