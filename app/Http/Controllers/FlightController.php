@@ -10,6 +10,7 @@ use App\Models\Aircraft;
 use App\Models\Airport;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
+use App\Events\FlightFiled;
 
 class FlightController extends Controller
 {
@@ -92,6 +93,8 @@ class FlightController extends Controller
 
             // All checks passed, so create the flight.
             Flight::create($validated + ['airline_id' => $currentActiveAirline->id, 'pilot_id' => auth()->user()->id]);
+
+            event(new FlightFiled(auth()->user()));
 
             // And redirect the user.
             return redirect()->route('flightlist');
