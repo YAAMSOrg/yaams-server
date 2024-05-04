@@ -97,7 +97,7 @@ class FlightController extends Controller
 
             //This does not work yet?
 //            dd(new FlightFiled(auth()->user()));
-            event(new FlightFiled(auth()->user()));
+            //event(new FlightFiled(auth()->user()));
 
             // And redirect the user.
             return redirect()->route('flightlist');
