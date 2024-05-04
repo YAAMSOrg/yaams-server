@@ -31,7 +31,7 @@
                                 <button class="btn btn-success btn-sm" title="Review">
                                     <i class="bi bi-airplane-fill"></i>
                                 </button>
-                                <button class="btn btn-danger btn-sm" title="Delete notification">
+                                <button class="btn btn-danger btn-sm" title="Delete notification" onclick="window.location.href='{{ route('fleetmanager') }}'">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </div>

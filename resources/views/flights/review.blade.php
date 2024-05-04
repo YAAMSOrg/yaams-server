@@ -20,7 +20,7 @@
 
                 @if ($flights->isEmpty())
                 <div class="alert alert-warning" role="alert">
-                    You have not logged any flights yet. Go ahead and <a href="{{ route('flightadd') }}">file a PIREP.
+                    No flights have been logged by your pilots, yet.
                 </div>
                 @else
                 <h2 class="h4">Flight list</h2>

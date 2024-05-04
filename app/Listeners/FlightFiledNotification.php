@@ -6,14 +6,14 @@ use App\Events\FlightFiled;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class StoreFlightFiledNotification
+class FlightFiledNotification
 {
     /**
      * Create the event listener.
      */
     public function __construct()
     {
-        //
+        dd('Notification trigger');
     }
 
     /**
@@ -21,6 +21,6 @@ class StoreFlightFiledNotification
      */
     public function handle(FlightFiled $event): void
     {
-        Log::info('This is some useful information.');
+        dd('Notification trigger');
     }
 }

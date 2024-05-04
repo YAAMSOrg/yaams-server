@@ -24,7 +24,7 @@
             <!-- Aircraft Information -->
             <div class="card">
                 <div class="card-header">
-                    <strong>Aircraft Information</strong>
+                    <strong>Aircraft information</strong>
                 </div>
                 <div class="card-body">
                     <p><strong>Owner:</strong> {{ $aircraft->airline->name }}</p>
@@ -45,7 +45,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <strong>Current Location</strong>
+                    <strong>Current location</strong>
                 </div>
                 <div class="card-body">
                     <x-maps-leaflet style="height: 300px; width: 100%;" :zoomLevel="11" :markers="[['lat' => $lat, 'long' => $lon]]" :centerPoint="['lat' => $lat, 'long' => $lon]"></x-maps-leaflet>

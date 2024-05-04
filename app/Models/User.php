@@ -85,4 +85,8 @@ class User extends Authenticatable
         return $this->airlines()->where('airline_id', $airline->id)->exists();
     }
 
+    public function countNewNotifications() {
+        return Notification::query()->where('target_id', '=', $this->id)->where('acknowledged', '=', '0')->get()->count();
+    }
+
 }
