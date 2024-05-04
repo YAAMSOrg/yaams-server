@@ -16,7 +16,7 @@
                 </div>
                 @endif
 
-                <form action="{{ route('addflight') }}" method="POST" class="row g-3">
+                <form action="{{ route('flightadd') }}" method="POST" class="row g-3">
                     @csrf
                     <div class="col-md-1">
                         <label for="pilotid" class="form-label">Pilot ID</label>

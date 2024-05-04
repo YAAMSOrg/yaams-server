@@ -8,8 +8,10 @@ use App\Models\Airline;
 use App\Models\OnlineNetwork;
 use App\Models\Aircraft;
 use App\Models\Airport;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
+use App\Events\FlightFiled;
 
 class FlightController extends Controller
 {
@@ -93,6 +95,10 @@ class FlightController extends Controller
             // All checks passed, so create the flight.
             Flight::create($validated + ['airline_id' => $currentActiveAirline->id, 'pilot_id' => auth()->user()->id]);
 
+            //This does not work yet?
+//            dd(new FlightFiled(auth()->user()));
+            //event(new FlightFiled(auth()->user()));
+
             // And redirect the user.
             return redirect()->route('flightlist');
         }
@@ -116,5 +122,19 @@ class FlightController extends Controller
         } else {
             return view('flights.detail', ['flight' => $flight ]);
         }
+    }
+
+    public function listReviewFlights() {
+        $currentActiveAirline = Session::get('activeairline');
+        $current_auth_user_id = auth()->user()->id;
+
+        $flights = Flight::query()
+        ->where('pilot_id', $current_auth_user_id)
+        ->where('airline_id', $currentActiveAirline->id)
+        ->where('status_id', '=', '1')
+        ->orderBy('created_at', 'DESC')
+        ->get();
+
+        return view('flights.review', ['flights' => $flights ]);
     }
 }

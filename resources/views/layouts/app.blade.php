@@ -36,7 +36,10 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdownFlights">
                                 <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
-                                <li><a class="dropdown-item" href="{{ route('addflight') }}">File a PIREP</a></li>
+                                <li><a class="dropdown-item" href="{{ route('flightadd') }}">File a PIREP</a></li>
+                                @can('review flight')
+                                <li><a class="dropdown-item" href="{{ route('flightreviewindex') }}">Review flights</a></li>
+                                @endcan
                             </ul>
                         </li>
                         <li class="nav-item">
@@ -67,7 +70,7 @@
                                     <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
                                     @role('Manager')
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="#">Notifications</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('usernotifications') }}">Notifications ({{ auth()->user()->countNewNotifications() }})</a></li>
                                         <li><a class="dropdown-item" href="#">Manage Pilots</a></li>
                                     @endrole
                                     <li><hr class="dropdown-divider"></li>

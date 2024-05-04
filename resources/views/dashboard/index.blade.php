@@ -27,7 +27,6 @@
                     <p>Feature not yet implemented.</p>
                 </div>
             </div>
-
             <ul>
             </ul>
             <div class="my-4">
