@@ -43,6 +43,10 @@ For example, this is the file PIREP form. This is all a WIP.
 
 Notice: When you run a dev container, please use `$ php artisan serve --host="0.0.0.0"` as command.
 
+### Using NixOS flakes
+
+If you are running NixOS on your machine, you can enter a dev shell using the provided NixOS flake by running `nix develop`. This will provide composer and php in a temporary dev shell. However, as of right now, you still need to use Docker for the db and phpMyAdmin.
+
 ### Native
 * Install a Laravel development environment (with a DB, composer and PHP)
 * `git clone https://github.com/YAAMSOrg/yaams-server.git` in your directory
