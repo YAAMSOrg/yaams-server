@@ -21,6 +21,10 @@
             <!-- Aircraft Registration -->
             <h2 class="display-4">{{ $aircraft->registration }}</h2>
 
+            @if($aircraft->active == 0)
+            <p class="alert alert-info">This aircraft is currently inactive and can not be used for flights!</p>
+            @endif
+            
             <!-- Aircraft Information -->
             <div class="card">
                 <div class="card-header">
