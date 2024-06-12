@@ -35,8 +35,11 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
+             <!-- Action Buttons -->
             <div class="mt-3">
+                @can('edit aircraft')
+                <button class="btn btn-primary" onclick="window.location.href='{{ route('editaircraft', $aircraft->id) }}'">Edit</button>
+                @endcan
                 <button class="btn btn-secondary" onclick="window.location.href='{{ route('fleetmanager') }}'">Back</button>
             </div>
         </div>
