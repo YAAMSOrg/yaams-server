@@ -15,9 +15,6 @@
             </ul>
         </div>
         @endif
-
-        <button type="button" class="btn btn-success" style="margin-bottom: 5px; float: right" onclick="window.location.href='{{ route('flightadd') }}'">File PIREP</button>
-
                 @if ($flights->isEmpty())
                 <div class="alert alert-warning" role="alert">
                     No flights have been logged by your pilots, yet.
