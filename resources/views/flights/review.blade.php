@@ -32,6 +32,7 @@
                             <th scope="col" class="text-center">Aircraft</th>
                             <th scope="col" class="text-center">Date</th>
                             <th scope="col" class="text-center">Pilot</th>
+                            <th scope="col" class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -45,10 +46,10 @@
                                 <td class="text-center"><abbr title="{{ $flight->aircraft->full_type }}">{{ $flight->aircraft->registration }}</abbr></td>
                                 <td class="text-center">{{ $flight->flight_date }}</td>
                                 <td class="text-center">{{ $flight->pilot->name }}</td>
+                                <td class="text-center"><a href="test"><i class="bi bi-check-circle"></i></a> / <a href="test"><i class="bi bi-x-circle"></i></a></td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 @endif
 @endsection
-
