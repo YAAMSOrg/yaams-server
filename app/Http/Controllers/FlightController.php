@@ -174,4 +174,14 @@ class FlightController extends Controller
 
         return view("flights.review", ["flights" => $flights]);
     }
+
+    public function acceptFlight(Flight $flight)
+    {
+        // Todo
+    }
+
+    public function denyFlight(Flight $flight)
+    {
+        // Todo
+    }
 }
