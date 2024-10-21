@@ -1,13 +1,11 @@
 # Docker Compose file for the dev environment.
 
-version: '3.1'
-
 services:
   db:
     image: docker.io/mariadb:lts
     container_name: yaams-db
     networks:
-      -  "yaams"
+      - "yaams"
     ports:
       - 3306:3306
     environment:
@@ -16,7 +14,7 @@ services:
   phpmyadmin:
     image: docker.io/phpmyadmin:latest
     container_name: yaams-phpmyadmin
-    networks: 
+    networks:
       - "yaams"
     ports:
       - 8080:80
