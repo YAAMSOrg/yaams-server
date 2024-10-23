@@ -12,10 +12,14 @@ use App\Http\Controllers\AirlineController;
 use App\Http\Controllers\AirlineMembershipController;
 use App\Http\Controllers\NotificationsController;
 
-Route::get('/auth/register', [RegisterController::class, 'index'])->name('register');
-Route::post('/auth/register', [RegisterController::class, 'store']);
+/*
+ * Moved to Laravel Fortify!
+ */
+
+//Route::get('/auth/register', [RegisterController::class, 'index'])->name('register');
+//Route::post('/auth/register', [RegisterController::class, 'store']);
 //Route::get('/auth/login', [LoginController::class, 'index'])->name('login');
-Route::post('/auth/login', [LoginController::class, 'store']);
+//Route::post('/auth/login', [LoginController::class, 'store']);
 //Route::post('/auth/logout', [LogoutController::class, 'store'])->name('logout');
 
 Route::get('/user/dashboard', [DashboardController::class, 'index'])->name('dashboard');
