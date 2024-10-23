@@ -1,7 +1,5 @@
 # Docker Compose file for the dev environment.
 
-version: '3.1'
-
 services:
   db:
     image: docker.io/mariadb:lts
@@ -16,13 +14,22 @@ services:
   phpmyadmin:
     image: docker.io/phpmyadmin:latest
     container_name: yaams-phpmyadmin
-    networks: 
+    networks:
       - "yaams"
     ports:
       - 8080:80
     environment:
       - PMA_USER=root
       - UPLOAD_LIMIT=300M
+
+  smtp4dev:
+    image: docker.io/rnwood/smtp4dev:latest
+    container_name: yaams-mailserver
+    networks:
+      - "yaams"
+    ports:
+      - 2525:25
+      - 8081:80
 
 networks:
   yaams:
