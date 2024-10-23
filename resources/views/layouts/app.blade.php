@@ -64,7 +64,7 @@
                         @auth
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-person-circle"></i> {{ Auth::user()->name }} | {{ session('activeairline')->icao_callsign }}
+                                    <i class="bi bi-person-circle"></i> {{ Auth::user()->name }} @if(!empty(session('activeairline'))) |  {{ session('activeairline')->icao_callsign }} @endif
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                                     <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
@@ -75,7 +75,7 @@
                                     @endrole
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="#">Settings</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('changeactiveairline') }}">Current airline: {{ session('activeairline')->name }}</a></li>
+                                    @if(!empty(session('activeairline')))<li><a class="dropdown-item" href="{{ route('changeactiveairline') }}">Current airline: {{ session('activeairline')->name }}</a></li>@endif
                                     <li>
                                         <form action="{{ route('logout') }}" method="POST">
                                             @csrf

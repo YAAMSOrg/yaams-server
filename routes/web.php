@@ -14,9 +14,9 @@ use App\Http\Controllers\NotificationsController;
 
 Route::get('/auth/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/auth/register', [RegisterController::class, 'store']);
-Route::get('/auth/login', [LoginController::class, 'index'])->name('login');
+//Route::get('/auth/login', [LoginController::class, 'index'])->name('login');
 Route::post('/auth/login', [LoginController::class, 'store']);
-Route::post('/auth/logout', [LogoutController::class, 'store'])->name('logout');
+//Route::post('/auth/logout', [LogoutController::class, 'store'])->name('logout');
 
 Route::get('/user/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::match(['GET', 'POST'], '/user/switchactiveairline', [AirlineMembershipController::class, 'changeActiveAirline'])->name('changeactiveairline');

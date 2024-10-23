@@ -3,9 +3,12 @@
 @section('content')
             <h1 class="display-4 mb-4">Switch active airline</h1>
             <p class="lead">Change the current airline for your active session.</p>
+
+            @if(!empty($current_active))
             <p>
                 Current active airline: <b>{{ session('activeairline')->name }}</b>
             </p>
+            @endif
 
             @if($errors->any())
             <div class="alert alert-danger">

@@ -31,6 +31,8 @@ class DashboardController extends Controller
         $flightCount = auth()->user()->logged_flights($currentActiveAirline);
         $flightHours = auth()->user()->logged_hours($currentActiveAirline);
 
+        dump($currentActiveAirline->icao_callsign);
+
         return view('dashboard.index', ['flights' => $airlineFlights, 'flight_count' => $flightCount, 'flight_hours' => $flightHours]);
     }
 }
