@@ -28,7 +28,7 @@ class AircraftController extends Controller
             // Validate form input
             $validated = $request->validate([
                 'registration' => 'required|max:9|regex:/^[A-Z0-9]{1,2}-?[A-Z0-9]{3,5}$/i',
-                'manufacturer' => 'required',
+                'manufacturer' => 'required|alphanum',
                 'model' => 'required',
                 'current_loc' => 'required|max:4',
                 'remarks' => 'alphanum|nullable',
