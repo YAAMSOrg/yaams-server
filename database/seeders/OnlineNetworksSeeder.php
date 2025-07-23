@@ -26,12 +26,12 @@ class OnlineNetworksSeeder extends Seeder
             'updated_at' => Carbon::now()->toDateTimeString()
         ]);
         DB::table('online_networks')->insert([
-            'networkname' => "POSCON",
+            'networkname' => "PilotEdge",
             'created_at' => Carbon::now()->toDateTimeString(),
             'updated_at' => Carbon::now()->toDateTimeString()
         ]);
         DB::table('online_networks')->insert([
-            'networkname' => "OFFLINE",
+            'networkname' => "Offline (None)",
             'created_at' => Carbon::now()->toDateTimeString(),
             'updated_at' => Carbon::now()->toDateTimeString()
         ]);

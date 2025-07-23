@@ -36,6 +36,7 @@
                     <p><strong>Remarks:</strong> {{ $aircraft->remarks }}</p>
                     <p><strong>Total Flights:</strong> {{ $aircraft->total_flights_count }}</p>
                     <p><strong>Total Flight Hours:</strong> {{ $aircraft->total_flights_hours }} hours</p>
+                    <p><strong>In service since:</strong> {{ $aircraft->created_at }}</p>
                 </div>
             </div>
 
@@ -56,7 +57,7 @@
                 </div>
                 <div class="card-body">
                     <x-maps-leaflet style="height: 300px; width: 100%;" :zoomLevel="11" :markers="[['lat' => $lat, 'long' => $lon]]" :centerPoint="['lat' => $lat, 'long' => $lon]"></x-maps-leaflet>
-                    <p class="text-center">Currently standing at {{ $aircraft->location->icao_code }}</p>
+                    <p class="text-center">Currently on ground at {{ $aircraft->location->icao_code }}</p>
                 </div>
             </div>
         </div>

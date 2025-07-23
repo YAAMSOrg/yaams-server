@@ -44,29 +44,38 @@ class Aircraft extends Model
         return $this->belongsTo(Airline::class, 'used_by');
     }
 
+    // This is a dynamic attribute, which simply adds the occurances of a flight entry with the specific $aicraft->id
     public function getTotalFlightsCountAttribute() {
         return Flight::where('aircraft_id', '=', $this->id)->count();
     }
 
     public function getTotalFlightsHoursAttribute() {
+        // Get all flights with the aircraft_id
         $flights = Flight::where('aircraft_id', '=', $this->id)->get();
 
+        // Initialize a var
         $totalFlightMinutes = 0;
 
+        // Loop through each found flight and add it
         foreach ($flights as $flight) {
             $totalFlightMinutes += $flight->flight_duration_minutes;
         }
+
+        // Convert to hours
         $hours = floor($totalFlightMinutes / 60);
         $minutes = $totalFlightMinutes % 60;
 
         return $hours;
     }
 
+    /* Why do we need this?
     public function activeAndOwnedBy(Airline $airline)
     {
         return $this->used_by === $airline->id && $this->active == 1;
     }
+    */
 
+    // Returns a bool if an aircraft is owned by $airline
     public function ownedBy(Airline $airline): bool
     {
         return $this->used_by === $airline->id;
