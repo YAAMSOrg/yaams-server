@@ -16,4 +16,6 @@ yarn-error.log
 /.idea/php.xml
 /.idea/phpunit.xml
 /.idea/vcs.xml
-/.idea/yaams-server.iml
+/.idea/yaams-server.imla
+.bash_history
+.composer/
