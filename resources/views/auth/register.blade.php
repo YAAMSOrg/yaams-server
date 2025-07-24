@@ -45,7 +45,7 @@
           {{ $message }}
       </div>
       @enderror
-      <input type="password" name="password" id="password" placeholder="Your password" class="form-control" value="">
+      <input type="password" name="password" id="password" placeholder="Your password" class="form-control rounded-top" value="">
 
       <label for="password_confirmation" class="sr-only">Confirm your password</label>
       @error('password')
