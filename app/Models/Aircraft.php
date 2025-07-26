@@ -44,14 +44,14 @@ class Aircraft extends Model
         return $this->belongsTo(Airline::class, 'used_by');
     }
 
-    // This is a dynamic attribute, which simply adds the occurances of a flight entry with the specific $aicraft->id
+    // This is a dynamic attribute, which simply adds the occurances of a flight entry with the specific $aicraft->id and all accepted flights.
     public function getTotalFlightsCountAttribute() {
-        return Flight::where('aircraft_id', '=', $this->id)->count();
+        return Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->count();
     }
 
     public function getTotalFlightsHoursAttribute() {
-        // Get all flights with the aircraft_id
-        $flights = Flight::where('aircraft_id', '=', $this->id)->get();
+        // Get all flights with the aircraft_id and where the flight is marked as accepted.
+        $flights = Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->get();
 
         // Initialize a var
         $totalFlightMinutes = 0;
