@@ -1,111 +1,157 @@
 @extends('layouts.app')
 @section('title', 'YAAMS: File PIREP')
+
 @section('content')
-
-                <h1 class="display-4 mb-4">File a PIREP</h1>
-                <p class="lead">Here you can manually file a PIREP. Please fill out all the fields.</p>
-
-                @if($errors->any())
-                <div class="alert alert-danger">
-                    Error during request:
-                    <ul>
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
-
-                <form action="{{ route('flightadd') }}" method="POST" class="row g-3">
-                    @csrf
-                    <div class="col-md-1">
-                        <label for="pilotid" class="form-label">Pilot ID</label>
-                        <p id="pilot_id" style="font-family: 'Courier New', Courier, monospace">{{ Auth::user()->id }}</p>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="pilot" class="form-label">Pilot</label>
-                        <p id="pilot_name" style="font-family: 'Courier New', Courier, monospace">{{ Auth::user()->name }}</p>
-                    </div>
-                    <hr>
-                    <h3>Flight details</h3>
-                    <div class="col-md-2">
-                        <label for="airline" class="form-label">Airline</label>
-                        <p id="airline" style="margin-top: 10px;">{{ session('activeairline')->name }}</p>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="flightnumber" class="form-label">Flight number</label>
-                        <div class="input-group">
-                            <span class="input-group-text" id="flightnumber_prefix">{{ session('activeairline')->prefix }}</span>
-                            <input type="text" name="flightnumber" class="form-control" id="flightnumber" required maxlength="4" minlength="1" placeholder="1234" aria-describedby="basic-addon3 basic-addon4" value="{{ old('flightnumber') }}" >
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="departure" class="form-label">Departure</label>
-                        <input type="text" name="departure_icao" style="text-transform:uppercase" class="form-control" id="departure" required placeholder="EDDK" minlength="4" maxlength="4" value="{{ old('departure_icao') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="arrival" class="form-label">Arrival</label>
-                        <input type="text" name="arrival_icao" style="text-transform:uppercase" class="form-control" id="arrival" required placeholder="EDDM" minlength="4" maxlength="4" value="{{ old('arrival_icao') }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="aircraft" class="form-label">Aircraft</label>
-                        <select id="aircraft_id" name="aircraft_id" class="form-select" aria-label="Select the aircraft" required>
-                            @foreach($prefill_aircraft as $prefill_aircraft_item)
-                                <option {{ old('aircraft_id') == $prefill_aircraft_item->id ? "selected" : "" }} value="{{ $prefill_aircraft_item->id }}">{{ $prefill_aircraft_item->registration }} ({{ $prefill_aircraft_item->full_type }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="callsign" class="form-label">Callsign</label>
-                        <div class="input-group">
-                            <span class="input-group-text" id="callsign_prefix">{{ session('activeairline')->icao_callsign }}</span>
-                            <input type="text" class="form-control" id="callsign" name="callsign" style="text-transform:uppercase" required minlength="1" maxlength="4" placeholder="443" value="{{ old('callsign') }}">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="crzalt" class="form-label">Cruise altitude</label>
-                        <input type="number" class="form-control" min="0" max="50000" style="text-transform:uppercase" step="1000" name="crzalt" id="crzalt" required minlength="4"  required placeholder="33000" maxlength="7" value="{{ old('crzalt') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="blockoff" class="form-label">Block off time (UTC)</label>
-                        <input type="datetime-local" class="form-control" required name="blockoff" id="blockoff" value="{{ old('blockoff') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="blockon" class="form-label">Block on time (UTC)</label>
-                        <input type="datetime-local" class="form-control"  required name="blockon" id="blockon" value="{{ old('blockon') }}">
-                    </div>
-                    @if ( session('activeairline')->unit_is_lbs == true )
-                    <div class="col-md-2">
-                        <label for="burned_fuel" class="form-label">Burned Fuel (LBS)</label>
-                        <input type="number" class="form-control"  min="0" placeholder="36000" required name="burned_fuel" id="burned_fuel" value="{{ old('burned_fuel') }}">
-                    </div>
-                    @else
-                    <div class="col-md-2">
-                        <label for="burned_fuel" class="form-label">Burned Fuel (KG)</label>
-                        <input type="number" class="form-control"  min="0" placeholder="5900" required name="burned_fuel" id="burned_fuel" value="{{ old('burned_fuel') }}">
-                    </div>
-                    @endif
-                    <div class="col-md-12">
-                        <label for="route" class="form-label">Route</label>
-                        <textarea class="form-control" style="font-family: monospace; font-size: 18px; text-transform:uppercase" aria-label="With textarea" name="route" id="route" placeholder="KUMIK Y854 BOMBI T104 ROKIL" required>{{ old('route') }}</textarea>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="online_network" class="form-label">Online network</label>
-                        <select id="online_network_id" name="online_network_id" class="form-select" required aria-label="Select the online network">
-                            @foreach($prefill_online_network as $prefill_online_network_item)
-                                <option {{ old('online_network_id') == $prefill_online_network_item->id ? "selected" : "" }} value="{{ $prefill_online_network_item->id }}">{{ $prefill_online_network_item->networkname }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-8">
-                        <label for="remarks" class="form-label">Remarks</label>
-                        <input type="text" class="form-control" name="remarks" id="remarks" placeholder="Landing was a bit hard ... "  value="{{ old('remarks') }}">
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">File PIREP</button>
-                        <button type="reset" class="btn btn-secondary">Clear fields</button>
-                    </div>
-                </form>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="bg-primary text-white p-3 rounded-3 shadow-sm">
+                <i class="bi bi-airplane-engines fs-3"></i>
+            </div>
+            <div>
+                <h1 class="h3 mb-0 fw-bold">File a PIREP</h1>
+                <p class="text-muted mb-0">Manually submit your flight report below.</p>
             </div>
         </div>
+
+        @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <h4 class="alert-heading fs-6 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Submission Failed</h4>
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        <form action="{{ route('flightadd') }}" method="POST">
+            @csrf
+            
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-person-badge"></i> Pilot & Airline Context
+                </div>
+                <div class="card-body bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Pilot ID & Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text font-monospace">{{ Auth::user()->id }}</span>
+                                <input type="text" class="form-control" value="{{ Auth::user()->name }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Active Airline</label>
+                            <input type="text" class="form-control" value="{{ session('activeairline')->name ?? 'None' }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="online_network_id" class="form-label">Online Network</label>
+                            <select id="online_network_id" name="online_network_id" class="form-select" required>
+                                <option value="" disabled selected>Select Network...</option>
+                                @foreach($prefill_online_network as $network)
+                                    <option {{ old('online_network_id') == $network->id ? "selected" : "" }} value="{{ $network->id }}">{{ $network->networkname }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-geo-alt"></i> Flight Details
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        
+                        <div class="col-md-4">
+                            <label for="flightnumber" class="form-label">Flight Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text">{{ session('activeairline')->prefix }}</span>
+                                <input type="text" name="flightnumber" class="form-control text-uppercase font-monospace" id="flightnumber" required maxlength="4" placeholder="1234" value="{{ old('flightnumber') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="callsign" class="form-label">ATC Callsign</label>
+                            <div class="input-group">
+                                <span class="input-group-text">{{ session('activeairline')->icao_callsign }}</span>
+                                <input type="text" class="form-control text-uppercase font-monospace" id="callsign" name="callsign" required maxlength="4" placeholder="443" value="{{ old('callsign') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="aircraft_id" class="form-label">Aircraft</label>
+                            <select id="aircraft_id" name="aircraft_id" class="form-select" required>
+                                <option value="" disabled selected>Select Aircraft...</option>
+                                @foreach($prefill_aircraft as $aircraft)
+                                    <option {{ old('aircraft_id') == $aircraft->id ? "selected" : "" }} value="{{ $aircraft->id }}">
+                                        {{ $aircraft->registration }} ({{ $aircraft->full_type }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="departure" class="form-label">Departure ICAO</label>
+                            <input type="text" name="departure_icao" class="form-control text-uppercase font-monospace fs-5" id="departure" required placeholder="EDDK" minlength="4" maxlength="4" value="{{ old('departure_icao') }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="arrival" class="form-label">Arrival ICAO</label>
+                            <input type="text" name="arrival_icao" class="form-control text-uppercase font-monospace fs-5" id="arrival" required placeholder="EDDM" minlength="4" maxlength="4" value="{{ old('arrival_icao') }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="crzalt" class="form-label">Cruise Altitude (FT)</label>
+                            <input type="number" class="form-control font-monospace" step="1000" min="0" max="60000" name="crzalt" id="crzalt" required placeholder="33000" value="{{ old('crzalt') }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label for="route" class="form-label">Flight Route</label>
+                            <textarea class="form-control text-uppercase font-monospace" name="route" id="route" rows="2" placeholder="KUMIK Y854 BOMBI T104 ROKIL" required>{{ old('route') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-clock-history"></i> Block Times & Fuel
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label for="blockoff" class="form-label">Block Off (UTC)</label>
+                            <input type="datetime-local" class="form-control" required name="blockoff" id="blockoff" value="{{ old('blockoff') }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="blockon" class="form-label">Block On (UTC)</label>
+                            <input type="datetime-local" class="form-control" required name="blockon" id="blockon" value="{{ old('blockon') }}">
+                        </div>
+                        <div class="col-md-4">
+                            @php $isLbs = session('activeairline')->unit_is_lbs; @endphp
+                            <label for="burned_fuel" class="form-label">Burned Fuel ({{ $isLbs ? 'LBS' : 'KG' }})</label>
+                            <input type="number" class="form-control font-monospace" min="0" placeholder="{{ $isLbs ? '36000' : '5900' }}" required name="burned_fuel" id="burned_fuel" value="{{ old('burned_fuel') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-chat-left-text"></i> Additional Remarks
+                </div>
+                <div class="card-body">
+                    <input type="text" class="form-control" name="remarks" id="remarks" placeholder="Any issues during flight? Landing rate? etc." value="{{ old('remarks') }}">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mb-5">
+                <button type="reset" class="btn btn-light border px-4">Clear Form</button>
+                <button type="submit" class="btn btn-primary px-5 fw-bold"><i class="bi bi-send-fill me-2"></i> Submit PIREP</button>
+            </div>
+
+        </form>
+    </div>
+</div>
 @endsection

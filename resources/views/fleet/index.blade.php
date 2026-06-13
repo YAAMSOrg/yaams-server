@@ -1,152 +1,220 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Fleet overview')
+@section('title', 'YAAMS: Fleet Overview')
+
 @section('content')
+<div class="row justify-content-center">
+    <div class="col-xl-11 col-lg-12">
 
-            <h1 class="display-4 mb-4">Fleet overview</h1>
-            <p class="lead">Here is a list of all aircraft and their current locations according to their last flight.</p>
-            <hr>
-            @if($errors->any())
-            <div class="alert alert-danger">
-                Error during request:
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h1 class="display-5 fw-bold text-dark tracking-tight mb-1">Fleet Overview</h1>
+                <p class="text-muted lead mb-0 fs-6">Monitor all operational aircraft and their current hubs based on recent flight logs.</p>
             </div>
-            @endif
-
             @can('add aircraft')
-                <button type="button" class="btn btn-success" style="float: right" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add aircraft</button>
+                <div>
+                    <button type="button" class="btn btn-success px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#addAircraftModal">
+                        <i class="bi bi-plus-circle"></i> Add Aircraft
+                    </button>
+                </div>
             @endcan
-            @can('add aircraft')
-            
-            <!-- Modal -->
-            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Add aircraft</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="{{ route('fleetmanager') }}" method="post" style="display: inline">
-                            @csrf
-                            <input type="hidden" id="in_service_since" name="in_service_since" value="2023-05-05" hidden
-                                required>
-                            <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->id }}" hidden required>
-                            <div class="row">
-                                <div class="mb-3">
-                                    <label for="registration" class="form-label">Registration (tail number)</label>
-                                    <input type="text" id="registration" name="registration"
-                                        style="text-transform:uppercase" class="form-control" required placeholder="D-EXAM"
-                                        minlength="4" maxlength="6">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="manufacturer" class="form-label">Manufacturer</label>
-                                    <input type="text" class="form-control" id="manufacturer" name="manufacturer"
-                                        maxlength="100" required placeholder="Boeing">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="model" class="form-label">Model</label>
-                                    <input type="text" class="form-control" id="model" name="model" maxlength="100" required
-                                        placeholder="737-800WL">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="current_loc" class="form-label">First location</label>
-                                    <input type="text" class="form-control" id="current_loc" name="current_loc"
-                                        minlength="4" maxlength="4" pattern="[A-Z]+" required placeholder="EDDL">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="remarks" class="form-label">Remarks / Description</label>
-                                    <textarea class="form-control" style="font-family: monospace; font-size: 18px;"
-                                        aria-label="With textarea" id="remarks" name="remarks"
-                                        placeholder="Split scimitar winglet variant"></textarea>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-success">Add aircraft</button>
-                                </div>
-                            </div>
-                        </form>
+        </div>
+
+        @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <h4 class="alert-heading fs-6 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Error during request</h4>
+            <ul class="mb-0 small">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        @if($fleet->count() > 0)
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light border-bottom text-secondary small text-uppercase tracking-wider">
+                                <tr>
+                                    <th scope="col" class="py-3 ps-4">Tail Number</th>
+                                    <th scope="col" class="py-3">Type</th>
+                                    <th scope="col" class="py-3 text-center">Current Location</th>
+                                    <th scope="col" class="py-3 text-end">Logged Hours</th>
+                                    <th scope="col" class="py-3 text-center">Status</th>
+                                    @can('edit aircraft')
+                                    <th scope="col" class="py-3 text-end pe-4">Actions</th>
+                                    @endcan
+                                </tr>
+                            </thead>
+                            <tbody class="fs-6">
+                                @foreach($fleet as $aircraft)
+                                    <tr class="{{ $aircraft->active == 0 ? 'bg-light bg-opacity-50 text-muted' : '' }}">
+                                        <td class="py-3 ps-4 fw-bold font-monospace">
+                                            <a href="{{ route('viewaircraft', $aircraft->id) }}" class="{{ $aircraft->active == 0 ? 'link-secondary text-decoration-line-through' : 'link-primary text-decoration-none' }}">
+                                                {{ $aircraft->registration }}
+                                            </a>
+                                        </td>
+                                        
+                                        <td class="py-3">
+                                            <span class="fw-semibold text-dark">{{ $aircraft->full_type }}</span>
+                                        </td>
+                                        
+                                        <td class="py-3 text-center">
+                                            @if(is_null($aircraft->current_loc))
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 small" data-bs-toggle="tooltip" title="Aircraft just got initialized and has no registered flights.">
+                                                    <i class="bi bi-geo-alt-fill me-1"></i> No Location
+                                                </span>
+                                            @else
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 font-monospace" data-bs-toggle="tooltip" title="{{ $aircraft->location->name }}">
+                                                    <i class="bi bi-geo-alt-fill me-1"></i> {{ $aircraft->location->icao_code }}
+                                                </span>
+                                            @endif
+                                        </td>
+                                        
+                                        <td class="py-3 text-end font-monospace fw-semibold text-dark">
+                                            {{ $aircraft->total_flights_hours }} hrs
+                                        </td>
+
+                                        <td class="py-3 text-center">
+                                            @if($aircraft->active == 1)
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">Active</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 small">Inactive</span>
+                                            @endif
+                                        </td>
+                                        
+                                        @can('edit aircraft')
+                                            <td class="py-3 text-end pe-4">
+                                                <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary px-2.5 py-1 shadow-xs fs-7">
+                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                </a>
+                                            </td>
+                                        @endcan
+                                    </tr>
+                                @endforeach
+                            </tbody>                    
+                        </table>
                     </div>
                 </div>
-            </div>
-        </div>
-        @endcan
-        @if(!$fleet->count() == 0)
-            <div class="my-4">
-                <h2 class="h4">Current active fleet</h2>
-                <table class="table table-sm">
-                    <thead class="table-dark">
-                        <tr>
-                            <th scope="col" class="text-center">Tail number</th>
-                            <th scope="col" class="text-center">Type</th>
-                            <th scope="col" class="text-center">Current location</th>
-                            <th scope="col" class="text-center">Total logged hours</th>
-                            @can('edit aircraft')
-                            <th scope="col" class="text-center">Actions</th>
-                            @endcan
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($fleet as $aircraft)
-                            <tr @if($aircraft->active == 0) style="background-color: #f0f0f0;" @endif>
-                                <th scope="row" class="text-center">
-                                    <a href="{{ route('viewaircraft', $aircraft->id) }}" @if($aircraft->active == 0) class="text-muted" @endif>
-                                        {{ $aircraft->registration }}
-                                    </a>
-                                </th>
-                                <td class="text-center" @if($aircraft->active == 0) class="text-muted" @endif>
-                                    {{ $aircraft->full_type }}
-                                </td>
-                                <td class="text-center" @if($aircraft->active == 0) class="text-muted" @endif>
-                                    @if(is_null($aircraft->current_loc))
-                                        <abbr title="This might be because the aircraft just got initialized.">No location found</abbr>
-                                    @else
-                                        <abbr title="{{ $aircraft->location->name }}">{{ $aircraft->location->icao_code }}</abbr>
-                                    @endif
-                                </td>
-                                <td class="text-center" @if($aircraft->active == 0) class="text-muted" @endif>
-                                    {{ $aircraft->total_flights_hours }}
-                                </td>
-                                @can('edit aircraft')
-                                    <td class="text-center">
-                                        <a href="{{ route('editaircraft', $aircraft->id) }}" @if($aircraft->active == 0) class="text-muted" @endif>Edit</a>
-                                    </td>
-                                @endcan
-                            </tr>
-                        @endforeach
-                    </tbody>                    
-                </table>
+
                 @if($maxPages > 1)
-                <nav>
-                    <ul class="pagination justify-content-center">
-                      <li class="page-item">
-                        <a class="page-link" href="{{ route('fleetmanager', ['page' => $currentPage-1], false)}}" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                      </li>
-        
-                      @for($page=1;$page<=$maxPages;$page++)
-                        <li class="page-item @if($page === $currentPage) active @endif"><a class="page-link" href="{{ route('fleetmanager', ['page' => $page], false)}}">{{ $page }}</a></li>
-                      @endfor
-                      
-                      <li class="page-item">
-                        <a class="page-link" href="{{ route('fleetmanager', ['page' => $currentPage+1], false)}}" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                      </li>
-                    </ul>
-                </nav>
+                <div class="card-footer bg-white border-top-0 py-3">
+                    <nav aria-label="Fleet navigation">
+                        <ul class="pagination pagination-sm justify-content-center mb-0 gap-1">
+                            <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
+                                <a class="page-link rounded" href="{{ route('fleetmanager', ['page' => $currentPage - 1], false) }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+            
+                            @for($page = 1; $page <= $maxPages; $page++)
+                                <li class="page-item {{ $page === $currentPage ? 'active' : '' }}">
+                                    <a class="page-link rounded" href="{{ route('fleetmanager', ['page' => $page], false) }}">{{ $page }}</a>
+                                </li>
+                            @endfor
+                          
+                            <li class="page-item {{ $currentPage >= $maxPages ? 'disabled' : '' }}">
+                                <a class="page-link rounded" href="{{ route('fleetmanager', ['page' => $currentPage + 1], false) }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
                 @endif
             </div>
         @else
-            <br><br><!-- This is ugly. Fix it! FIXME-->
-            <div class="alert alert-info center-block">No aircraft has been added yet.</p> 
+            <div class="card border-0 shadow-sm my-5">
+                <div class="card-body p-5 text-center">
+                    <div class="text-muted mb-3">
+                        <i class="bi bi-airplane fs-1 text-secondary opacity-50"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">No Aircraft Found</h5>
+                    <p class="text-secondary small max-w-md mx-auto mb-3">Your airline fleet is currently empty. Get started by registering your first airframe.</p>
+                    @can('add aircraft')
+                        <button type="button" class="btn btn-sm btn-success px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addAircraftModal">
+                            Add First Aircraft
+                        </button>
+                    @endcan
+                </div>
+            </div>
         @endif
+
+    </div>
+</div>
+
+@can('add aircraft')
+<div class="modal fade" id="addAircraftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addAircraftModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-bottom-0 py-3 px-4">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="addAircraftModalLabel">
+                    <i class="bi bi-airplane-fill text-success"></i> Add New Aircraft
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('fleetmanager') }}" method="post">
+                @csrf
+                <div class="modal-body p-4">
+                    <input type="hidden" id="in_service_since" name="in_service_since" value="{{ date('Y-m-d') }}">
+                    <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->id }}">
+
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label for="registration" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Registration</label>
+                            <input type="text" id="registration" name="registration" style="text-transform:uppercase" class="form-control font-monospace" required placeholder="D-EXAM" minlength="4" maxlength="6">
+                            <div class="form-text fs-7">Tail number (e.g. N172VA)</div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="current_loc" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">First Location</label>
+                            <input type="text" class="form-control font-monospace text-uppercase" id="current_loc" name="current_loc" minlength="4" maxlength="4" pattern="[A-Za-z]+" required placeholder="EDDL">
+                            <div class="form-text fs-7">4-Letter ICAO hub</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="manufacturer" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Manufacturer</label>
+                            <input type="text" class="form-control" id="manufacturer" name="manufacturer" maxlength="100" required placeholder="Boeing">
+                        </div>
+
+                        <div class="col-12">
+                            <label for="model" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Model Variant</label>
+                            <input type="text" class="form-control" id="model" name="model" maxlength="100" required placeholder="737-800WL">
+                        </div>
+
+                        <div class="col-12">
+                            <label for="remarks" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Remarks / Description</label>
+                            <textarea class="form-control" style="font-size: 14px;" rows="3" id="remarks" name="remarks" placeholder="Optional notes, winglet configuration, special livery, etc."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0 py-3 px-4">
+                    <button type="button" class="btn btn-outline-secondary px-3 py-1.5 fs-6" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success px-4 py-1.5 fs-6 shadow-sm">Save Airframe</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+@endcan
 
+<style>
+    /* Zusätzlicher nützlicher Hilfsstyle für kleinere Controls */
+    .fs-7 { font-size: 0.775rem !important; }
+    .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .max-w-md { max-width: 450px; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+</style>
+
+<script>
+    // Tooltips initialisieren, falls Bootstrap Tooltips genutzt werden
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 @endsection

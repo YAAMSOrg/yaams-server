@@ -30,31 +30,46 @@ class FlightController extends Controller
     public function displayFlightsForUser(Request $request)
     {
         $current_auth_user_id = auth()->id();
-        $currentActiveAirline = Session()->get("activeairline");
+        $currentActiveAirline = session()->get('activeairline'); // Kleingeschrieben "session()" nutzen oder Session::get()
 
-        // This is pagination voodo.
-        $limit = max(env("FLIGHT_PAGE_LIMIT"), 1);
+        // 1. Limit sicherstellen (Fallback auf 10, falls env() null oder nicht numerisch ist)
+        $limit = (int) env('FLIGHT_PAGE_LIMIT', 10);
+        if ($limit < 1) {
+            $limit = 1;
+        }
+
+        // 2. Einträge zählen
         $maxEntries = Flight::query()
-            ->where("pilot_id", $current_auth_user_id)
-            ->where("airline_id", $currentActiveAirline->id)
+            ->where('pilot_id', $current_auth_user_id)
+            ->where('airline_id', $currentActiveAirline->id)
             ->count();
+
+        // 3. Seiten berechnen – Sicherstellen, dass maxPages mindestens 1 ist!
         $maxPages = (int) ceil($maxEntries / $limit);
-        $page = (int) $request->get("page", 1);
+        if ($maxPages < 1) {
+            $maxPages = 1;
+        }
+
+        // 4. Aktuelle Seite validieren
+        $page = (int) $request->get('page', 1);
         $page = min(max(1, $page), $maxPages);
+
+        // 5. Offset berechnen
         $offset = ($page - 1) * $limit;
 
+        // 6. Daten holen
         $flights = Flight::query()
-            ->where("pilot_id", $current_auth_user_id)
-            ->where("airline_id", $currentActiveAirline->id)
-            ->orderBy("created_at", "DESC")
+            ->where('pilot_id', $current_auth_user_id)
+            ->where('airline_id', $currentActiveAirline->id)
+            ->orderBy('created_at', 'DESC')
             ->offset($offset)
             ->limit($limit)
             ->get();
 
-        return view("flights.list", [
-            "flights" => $flights,
-            "maxPages" => $maxPages,
-            "currentPage" => $page,
+        return view('flights.list', [
+            'flights'     => $flights,
+            'maxPages'    => $maxPages,
+            'currentPage' => $page
         ]);
     }
 

@@ -1,42 +1,192 @@
 @extends('layouts.app')
-@section('title', 'View flight')
+@section('title', 'YAAMS: View Flight #' . $flight->id)
+
 @section('content')
+<div class="row justify-content-center">
+    <div class="col-xl-10 col-lg-12">
 
-            @if($errors->any())
-            <div class="alert alert-danger">
-                Error during request:
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <a href="{{ route('flightlist') }}" class="btn btn-outline-secondary btn-sm px-3 d-inline-flex align-items-center gap-1.5 shadow-sm">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <h4 class="alert-heading fs-6 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Error during request</h4>
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        <div class="card border-0 shadow-sm bg-dark text-white overflow-hidden mb-4 position-relative" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+            <div class="card-body p-4 p-md-5 position-relative z-1">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+                    
+                    <div>
+                        <span class="text-primary-emphasis text-uppercase fw-bold tracking-wider small d-block mb-1 font-monospace">
+                            Flight {{ $flight->full_flight_number }} // ATC: {{ $flight->full_icao_callsign }}
+                        </span>
+                        
+                        <div class="d-flex align-items-center gap-3 my-2 flex-wrap">
+                            <div class="text-center bg-white bg-opacity-10 px-3 py-2 rounded border border-white border-opacity-10">
+                                <h1 class="h2 mb-0 fw-bold tracking-tight font-monospace">{{ $flight->departure_airport->icao_code }}</h1>
+                                <span class="small text-white-50 text-truncate d-block" style="max-width: 150px;">{{ $flight->departure_airport->name }}</span>
+                            </div>
+                            
+                            <div class="d-flex flex-column align-items-center flex-grow-1 px-2 text-center" style="max-width: 120px;">
+                                <i class="bi bi-airplane fs-4 text-primary animate-fly"></i>
+                                <div class="w-100 border-top border-dashed border-white border-opacity-25 my-2"></div>
+                                <span class="small text-white-50 font-monospace"><i class="bi bi-clock me-1"></i>{{ $flight->flight_duration }}</span>
+                            </div>
+
+                            <div class="text-center bg-white bg-opacity-10 px-3 py-2 rounded border border-white border-opacity-10">
+                                <h1 class="h2 mb-0 fw-bold tracking-tight font-monospace">{{ $flight->arrival_icao }}</h1>
+                                <span class="small text-white-50 text-truncate d-block" style="max-width: 150px;">{{ $flight->arrival_airport->name }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-md-end d-flex flex-row flex-md-column justify-content-between align-items-center align-items-md-end gap-2 bg-black bg-opacity-20 p-3 rounded border border-white border-opacity-5">
+                        <div>
+                            <span class="text-white-50 small d-block">PIREP ID</span>
+                            <span class="font-monospace fw-bold fs-5 text-white">#{{ $flight->id }}</span>
+                        </div>
+                        <div class="mt-md-2">
+                            @php
+                                $statusName = strtolower($flight->status->name);
+                                $badgeClass = 'bg-secondary';
+                                if (str_contains($statusName, 'accept') || str_contains($statusName, 'approv')) $badgeClass = 'bg-success';
+                                elseif (str_contains($statusName, 'pend') || str_contains($statusName, 'review')) $badgeClass = 'bg-warning text-dark';
+                                elseif (str_contains($statusName, 'reject') || str_contains($statusName, 'deni')) $badgeClass = 'bg-danger';
+                            @endphp
+                            <span class="badge {{ $badgeClass }} px-3 py-2 fw-bold text-uppercase tracking-wider">
+                                {{ $flight->status->name }}
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            @endif
+        </div>
 
-            <h5 class="display-5">Viewing Flight <i>{{ $flight->full_flight_number }} / {{ $flight->full_icao_callsign }}</i></h5>
-            <h6 class="display-6">{{ $flight->departure_icao }} <i class="bi-arrow-right-square-fill"></i> {{ $flight->arrival_icao }}
-                <small class="text-body-secondary">Unique PIREP ID: {{ $flight->id }}</small>
-            </h6>
+        <div class="row g-4">
+            
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-journal-text text-primary"></i>
+                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">Flight Log Metrics</h2>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                                <tbody class="fs-6">
+                                    <tr class="border-bottom">
+                                        <td class="py-2.5 text-muted w-40"><i class="bi bi-calendar3 me-2"></i>Flight Date</td>
+                                        <td class="py-2.5 fw-semibold text-dark">{{ $flight->flight_date }}</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-2.5 text-muted"><i class="bi bi-alt me-2"></i>Cruise Altitude</td>
+                                        <td class="py-2.5 font-monospace fw-semibold text-dark">{{ number_format($flight->crzalt) }} ft (FL{{ round($flight->crzalt / 100) }})</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-2.5 text-muted"><i class="bi bi-fuel-pump me-2"></i>Fuel Burned</td>
+                                        <td class="py-2.5 font-monospace fw-semibold text-dark">{{ number_format($flight->burned_fuel) }} kg</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-2.5 text-muted"><i class="bi bi-box-arrow-right me-2"></i>Block Off</td>
+                                        <td class="py-2.5 font-monospace text-secondary">{{ $flight->blockoff }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2.5 text-muted"><i class="bi bi-box-arrow-in-right me-2"></i>Block On</td>
+                                        <td class="py-2.5 font-monospace text-secondary">{{ $flight->blockon }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <dl class="row">
-                <dt class="col-sm-3">Date</dt>
-                <dd class="col-sm-9">{{ $flight->flight_date }}</dd>
-              
-                <dt class="col-sm-3">In service since</dt>
-                <dd class="col-sm-9">TODO</dd>
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-airplane-fill text-primary"></i>
+                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">Aircraft Assignment</h2>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="p-3 bg-light rounded border border-dashed mb-3">
+                            <span class="text-muted small d-block mb-1">Registration & Type</span>
+                            <h3 class="h5 font-monospace fw-bold text-dark mb-1">{{ $flight->aircraft->registration }}</h3>
+                            <p class="text-secondary small mb-0">{{ $flight->aircraft->full_type }}</p>
+                        </div>
 
-                <dt class="col-sm-3">First flight</dt>
-                <dd class="col-sm-9">TODO</dd>
-            </dl>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless align-middle mb-0 small">
+                                <tbody>
+                                    <tr class="border-bottom">
+                                        <td class="py-2 text-muted">In service since</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->aircraft->in_service_since ?? $flight->aircraft->created_at->format('Y-m-d') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 text-muted">First flight</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->aircraft->first_flight ?? 'N/A' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <b>I like the idea of this page, so I'm keeping it. But it needs to be filled.</b>
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-map text-primary"></i>
+                            <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">ATC Route & Remarks</h2>
+                        </div>
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-2.5 py-1">
+                                <i class="bi bi-globe me-1"></i>{{ $flight->online_network->name ?? 'Offline' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase tracking-wider mb-1">Filed ATC Route</label>
+                            <div class="p-3 bg-light font-monospace rounded border text-dark fs-6 text-uppercase" style="letter-spacing: 0.5px; line-height: 1.6; word-break: break-all;">
+                                {{ $flight->route }}
+                            </div>
+                        </div>
 
-            TODO
+                        @if($flight->remarks)
+                            <div>
+                                <label class="form-label text-muted small fw-bold text-uppercase tracking-wider mb-1">Pilot Remarks</label>
+                                <div class="p-3 bg-light-subtle rounded border text-secondary italic small">
+                                    <i class="bi bi-chat-quote me-1 text-muted"></i> "{{ $flight->remarks }}"
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
 
-            <h6 class="display-6">What to do here</h6>
+        </div> </div>
+</div>
 
-            TODO
-            <br>
-
-            <input type="button" class="btn btn-secondary" value="Back" onclick="window.location.href='{{ route('flightlist') }}'">
+<style>
+    /* Ein kleiner, feiner CSS-Dashed-Border-Effekt für die Route */
+    .border-dashed {
+        border-style: dashed !important;
+    }
+    .w-40 {
+        width: 40%;
+    }
+</style>
 @endsection
