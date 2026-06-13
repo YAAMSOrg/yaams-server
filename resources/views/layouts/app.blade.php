@@ -87,7 +87,7 @@
                     </li>
                 </ul>
 
-                <ul class="navbar-nav">
+<ul class="navbar-nav align-items-center">
                     @guest
                         <li class="nav-item me-2">
                             <a class="nav-link btn btn-outline-light btn-sm px-3" href="{{ route('login') }}">Login</a>
@@ -98,12 +98,46 @@
                     @endguest
 
                     @auth
+                        @php
+                            $activeAirline = session('activeairline');
+                            // Fallback to empty collection if relation is not loaded or user has no airlines
+                            $userAirlines = auth()->user()->airlines ?? collect(); 
+                        @endphp
+
+                        @if($userAirlines->count() > 0)
+                            <li class="nav-item dropdown me-2 border-end border-secondary pe-3 border-opacity-25">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="airlineDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-2 font-monospace">{{ $activeAirline ? $activeAirline->icao_callsign : 'N/A' }}</span>
+                                    <span class="d-none d-md-inline small fw-semibold text-white-50">{{ $activeAirline ? $activeAirline->name : 'Select Airline' }}</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="airlineDropdown">
+                                    <li><h6 class="dropdown-header text-uppercase tracking-wider">Switch Active Airline</h6></li>
+                                    
+                                    @foreach($userAirlines as $airline)
+                                        <li>
+                                            <a class="dropdown-item d-flex justify-content-between align-items-center py-2 @if($activeAirline && $activeAirline->id === $airline->id) bg-light text-dark disabled @endif" 
+                                               href="#" 
+                                               onclick="event.preventDefault(); document.getElementById('switch-airline-form-{{ $airline->id }}').submit();">
+                                                
+                                                <span class="fw-medium @if($activeAirline && $activeAirline->id === $airline->id) fw-bold text-primary @endif">{{ $airline->name }}</span>
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-3 font-monospace">{{ $airline->icao_callsign }}</span>
+                                            </a>
+                                            
+                                            <form id="switch-airline-form-{{ $airline->id }}" action="{{ route('changeactiveairline') }}" method="POST" class="d-none">
+                                                @csrf
+                                                <input type="hidden" name="airline_id" value="{{ $airline->id }}">
+                                            </form>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </li>
+                        @endif
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle fs-5"></i> 
-                                <span>{{ Auth::user()->name }} <small class="text-white-50">({{ session('activeairline')->icao_callsign ?? 'N/A' }})</small></span>
+                                <span>{{ Auth::user()->name }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="navbarDropdownUser">
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdownUser">
                                 <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2 me-2 text-secondary"></i> Dashboard</a></li>
                                 @role('Manager')
                                     <li><hr class="dropdown-divider"></li>
@@ -117,7 +151,6 @@
                                 @endrole
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>
-                                <li><a class="dropdown-item text-muted" href="{{ route('changeactiveairline') }}"><i class="bi bi-building me-2"></i> {{ session('activeairline')->name ?? 'Switch Airline' }}</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST">
