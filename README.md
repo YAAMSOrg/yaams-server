@@ -1,81 +1,77 @@
 # YAAMS - Yet Another Airline Management System
 
-YAAMS is an alternative to PHPvms or Virtual Airline Manager. YAAMS takes a more modern approach to virtual airlines software by using new technologies and going by the standard of "API first". It is at a very early development stage and not ready for production use.
+YAAMS is a modern, high-performance Virtual Airline Management System built with a strict "API-first" philosophy. Designed as a flexible alternative to legacy systems, YAAMS provides a robust foundation for virtual aviation organizations to manage their operations, fleets, and pilot communities through modern web technologies and a powerful RESTful interface.
 
-## Planned features
+## Core Pillars
 
-* API first, so you can build your own client easily
-* A built in client written in form of a web interface
-* Fleet management
-* Pilot management
-* PIREP filing
-* Tenant aware (multiple VAs on one system)
-* Authentification system with user groups
-* A multi platform ACARS (for Linux, Windows & Mac OS) - Help needed!
-* SaaS hosted for a small fee, when it's stable
+### API-First Architecture
+Every feature available in the web interface is backed by a fully documented RESTful API (v1). This allows developers to build custom ACARS clients, mobile apps, or specialized flight tracking tools that integrate seamlessly with the YAAMS ecosystem.
 
-## Current status
+### Comprehensive PIREP Workflow
+YAAMS features a sophisticated Flight Reporting (PIREP) system:
+* Automated notification system for airline managers when new flights are filed.
+* Detailed validation interface for reviewers to accept or reject flights.
+* Support for rejection remarks to provide clear feedback to pilots.
+* Real-time notification updates for pilots regarding their flight status.
 
-What works already:
-* Add aircrafts
-* Add airlines via API
-* Create users and login
-* Add flights
+### Professional Fleet Management
+Manage your airline's assets with precision:
+* Detailed aircraft tracking including service dates and airframe history.
+* Status-aware fleet listings (Active/Inactive).
+* Automated airframe metrics based on validated flight hours.
 
-### Showcase
+### Pilot Experience
+A clean, responsive dashboard designed for clarity:
+* Personalized statistics including verified flight hours and count.
+* Real-time notification center for operation updates.
+* Integrated airline switching for pilots flying for multiple organizations.
 
-For example, this is the file PIREP form. This is all a WIP.
+## Technical Foundation
 
-![PIREP filing demo](https://github.com/YAAMSOrg/yaams-server/blob/main/Docs/res/file_pirep_showcase.gif)
+* Framework: Laravel 12.x
+* Frontend: Bootstrap 5.3.3 / Blade / Vanilla CSS
+* Authentication: Laravel Sanctum & Fortify
+* Permissions: Spatie Laravel Permission
+* Environment: Docker-ready and NixOS support
 
-## Setting up dev environment
+## Development Setup
 
-### Using containers (Docker, Podman, etc.)
+### Containerized Environment (Docker/Podman)
 
-* Install Docker / Podman
-* Build the YAAMS docker image, which is located under `Docker/Dockerfile` using `$ cd Docker; docker build . -t yaams-app:dev`
-* Create the docker network, which is needed for internal container communication: `$ docker network create yaams`
-* In the main folder, copy the `.env.example` to `.env`
-* Run the docker-compose.yml which is also located in the Docker folder using `$ cd Docker; docker-compose up -d`. These containers are the database and a GUI using phpMyAdmin.
-* Run php artisan commands using the newly built container: `$ docker run -it --rm --network yaams -u $(id -u):$(id -g) -v $(pwd):/app -p 8000:8000 yaams-app:dev bash`
-* Install the composer components: `$ composer install`
-* Run the migrations and seed the db with example data: `$ php artisan migrate && php artisan db:seed`
+1. Build the application image:
+   ```bash
+   cd Docker
+   docker build . -t yaams-app:dev
+   ```
+2. Setup the network and infrastructure:
+   ```bash
+   docker network create yaams
+   cd Docker
+   docker-compose up -d
+   ```
+3. Initialize the application:
+   ```bash
+   docker run -it --rm --network yaams -u $(id -u):$(id -g) -v $(pwd):/app -p 8000:8000 yaams-app:dev bash
+   composer install
+   cp .env.example .env
+   php artisan key:generate
+   php artisan migrate --seed
+   ```
 
-Notice: When you run a dev container, please use `$ php artisan serve --host="0.0.0.0"` as command.
+### Native Setup
+1. Ensure PHP 8.2+, Composer, and a MariaDB/MySQL database are installed.
+2. Clone the repository and install dependencies:
+   ```bash
+   composer install
+   php artisan migrate --seed
+   ```
 
-### Using NixOS flakes
+## Default Test Accounts
+The database seeder creates three tiers of users for testing (Password for all: `start`):
+* Pilot: `homer@test.com`
+* Manager: `test@test.com`
+* Super-Admin: `admin@test.com`
 
-If you are running NixOS on your machine, you can enter a dev shell using the provided NixOS flake by running `nix develop`. This will provide composer and php in a temporary dev shell. However, as of right now, you still need to use Docker for the db and phpMyAdmin.
+---
 
-### Native
-* Install a Laravel development environment (with a DB, composer and PHP)
-* `git clone https://github.com/YAAMSOrg/yaams-server.git` in your directory
-* Run a `composer install` to install the components
-* Done. Help by adding new features as you like and do a PR!
-
-## Developing
-
-Since this project is at a very early development stage, it can happen, that Laravel migrations are changed. So I recommend, that, before you start working on your tasks, you run a `php artisan migrate:fresh; php artisan db:seed` before starting your development.
-
-This will change in the future, since we then start migrations the way they should be used, but at this time it is way more practical to just edit the migrations that are already there.
-
-#### Example users
-
-The default users and password for testing are: 
-* homer@test.com / start (Role: Pilot)
-* test@test.com / start (Role: Manager)
-* admin@test.com / start (Role: Admin)
-
-The auth tokens for developing the API are issued on the db:seed command and printed out. 
-
-**Please store them somewhere, they are not shown again!**
-
-## Used libraries
-
-* [laravel-permission](https://github.com/spatie/laravel-permission)
-* [laravel-sanctum](https://laravel.com/docs/11.x/sanctum)
-* [laravel-maps](https://github.com/LarsWiegers/laravel-maps)
-
-## Open Source
-
-This software is open source with a reason: Because we want you to commit to the project!
+Note: This project was originally launched as a traditional development effort without the use of Artificial Intelligence. However, as the scope expanded, many of the current advanced features and architectural refinements were implemented with significant AI assistance to ensure modern standards and rapid delivery.
