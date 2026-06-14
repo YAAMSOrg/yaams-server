@@ -36,7 +36,8 @@ class Flight extends Model
         'full_icao_callsign',
         'flight_duration',
         'flight_duration_minutes',
-        'flight_date'
+        'flight_date',
+        'raw_distance'
     ];
 
     public function airline() {
@@ -107,4 +108,37 @@ class Flight extends Model
 
        return $blockontime->format('Y/m/d');
     }
+
+    public function getRawDistanceAttribute() 
+    {
+        // Flughäfen über die Beziehungen laden
+        $departure = $this->departure_airport;
+        $arrival = $this->arrival_airport;
+
+        // Sicherheitsprüfung: Fehlen Daten, geben wir null zurück
+        if (!$departure || !$arrival || !$departure->latitude_deg || !$departure->longitude_deg || !$arrival->latitude_deg || !$arrival->longitude_deg) {
+            return null;
+        }
+
+        // Koordinaten von Grad in Bogenmaß (Radiant) umwandeln
+        $lat1 = deg2rad($departure->latitude_deg);
+        $lon1 = deg2rad($departure->longitude_deg);
+        $lat2 = deg2rad($arrival->latitude_deg);
+        $lon2 = deg2rad($arrival->longitude_deg);
+
+        // Erdradius in nautischen Meilen (nm)
+        $earthRadiusNm = 3440.065;
+
+        // Differenzen berechnen
+        $latDelta = $lat2 - $lat1;
+        $lonDelta = $lon2 - $lon1;
+
+        // Haversine Formel
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($lat1) * cos($lat2) * pow(sin($lonDelta / 2), 2)));
+
+        // Distanz berechnen und auf ganze Meilen runden
+        return round($angle * $earthRadiusNm);
+    }
+
 }

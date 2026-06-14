@@ -90,9 +90,10 @@ class FlightController extends Controller
                 "arrival_icao" => "alpha|max:4|required",
                 "aircraft_id" => "numeric|required",
                 "callsign" => [
-                    'regex:/^(?:\d{1,4}|(?:\d{1}[A-Z]{2})|(?:\d{2}[A-Z]{2})|(?:\d{3}[A-Z]{1})|(?:\d{2}[A-Z]{1}))$/',
-                    "max:7",
                     "required",
+                    "max:4", // Angepasst an dein HTML maxlength="4"
+                    // ICAO Standard: 1-4 Ziffern, optional gefolgt von max 2 Buchstaben
+                    "regex:/^[0-9]{1,4}[A-Za-z]{0,2}$/",
                 ],
                 "crzalt" => "numeric|max:50000|digits_between:1,5|required",
                 "blockoff" => "required",
@@ -100,7 +101,11 @@ class FlightController extends Controller
                 "burned_fuel" => "numeric|required",
                 "route" => "required",
                 "online_network_id" => "required",
-                "remarks" => "nullable|regex:^[\pL\s\d]+",
+                "remarks" => [
+                    "nullable", 
+                    // Erlaubt: Buchstaben (inkl. Umlaute), Leerzeichen, Zahlen, Punkt, Komma, Bindestrich
+                    "regex:/^[\pL\s\d\.\,\-]+$/u"
+                ],
             ]);
 
             // Check if user given airport exists, if not throw an exception. We need to do this on the two fields, to display the error.

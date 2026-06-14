@@ -42,6 +42,7 @@
                                 <i class="bi bi-airplane fs-4 text-primary animate-fly"></i>
                                 <div class="w-100 border-top border-dashed border-white border-opacity-25 my-2"></div>
                                 <span class="small text-white-50 font-monospace"><i class="bi bi-clock me-1"></i>{{ $flight->flight_duration }}</span>
+                                <span class="small text-white-50 font-monospace"><i class="bi bi-geo-alt me-1"></i>{{ $flight->raw_distance }} nm</span>
                             </div>
 
                             <div class="text-center bg-white bg-opacity-10 px-3 py-2 rounded border border-white border-opacity-10">
