@@ -2,43 +2,72 @@
 @section('title', 'YAAMS Login')
 @section('content')
 
-    <div class="text-center">
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <div class="text-center mb-4">
+            <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="YAAMS Logo" height="60" class="mb-3">
+            <h1 class="h4 mb-3 fw-bold">Sign in to YAAMS</h1>
+        </div>
 
-    <form action="{{ route('login') }}" class="form-signin" method="post">
-        @csrf
-      <i class="fas fa-plane-departure fa-5x"></i>
-      <h1 class="h3 mb-3 font-weight-normal">Sign in to YAAMS</h1>
-        @if(session('status'))
-          <div class="alert alert-danger" role="alert">
-            {{ session('status') }}
-          </div>
-        @endif
+        <form action="{{ route('login') }}" method="post">
+            @csrf
 
-      <label for="email" class="sr-only">Email address</label>
-          @error('email')
-          <div class="alert alert-danger" role="alert" style="margin-top: 5px; margin-bottom: 5px;">
-              {{ $message }}
-          </div>
-          @enderror
-      <input type="email" id="email" class="form-control" name="email" placeholder="Email address" required autofocus value="{{ old('email') }}">
-      <label for="password" class="sr-only">Password</label>
-      @error('password')
-      <div class="alert alert-danger" role="alert" style="margin-top: 5px; margin-bottom: 5px;">
-          {{ $message }}
-      </div>
-      @enderror
-      <input type="password" name="password" id="password" placeholder="Your password" class="form-control form-control-lg" value="">
-      <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" name="remember" id="remember" class="form-check-input"> Remember me
-        </label>
-      </div>
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      <button type="submit" class="btn btn-lg btn-secondary btn-block">Forgot password?</button>
-      <p class="mt-5 mb-3 text-muted"><a href="{{ route('register') }}">Register here</a></p>
-    </form>
+            @if(session('status'))
+                <div class="alert alert-danger" role="alert">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope text-secondary"></i></span>
+                    <input type="email" id="email" class="form-control @error('email') is-invalid @enderror" name="email" placeholder="name@example.com" required autofocus value="{{ old('email') }}">
+                </div>
+                @error('email')
+                    <div class="invalid-feedback d-block mt-1">
+                        {{ $message }}
+                    </div>
+                @enderror
             </div>
-    </div>
 
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock text-secondary"></i></span>
+                    <input type="password" name="password" id="password" placeholder="Enter password" class="form-control @error('password') is-invalid @enderror" required>
+                </div>
+                @error('password')
+                    <div class="invalid-feedback d-block mt-1">
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+
+            <div class="form-check mb-4">
+                <input type="checkbox" name="remember" id="remember" class="form-check-input">
+                <label class="form-check-label text-muted small" for="remember">
+                    Remember me on this device
+                </label>
+            </div>
+
+            <button class="btn btn-primary w-100 mb-3" type="submit">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Sign in
+            </button>
+            
+            <a href="#" class="btn btn-outline-secondary w-100 btn-sm">
+                Forgot password?
+            </a>
+
+            <div class="text-center mt-4 pt-3 border-top">
+                <p class="mb-0 text-muted small">New pilot? <a href="{{ route('register') }}" class="text-primary fw-semibold text-decoration-none">Register here</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <small class="text-muted">&copy; {{ date('Y') }} YAAMS Virtual Airline Management</small>
+</div>
 
 @endsection
