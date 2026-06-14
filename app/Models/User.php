@@ -55,6 +55,7 @@ class User extends Authenticatable
         $flights = Flight::query()
         ->where('airline_id', '=', $airline->id)
         ->where('pilot_id', '=', $this->id)
+        ->where('status_id', '=', 2)
         ->get();
 
         $totalFlightMinutes = 0;
@@ -72,7 +73,8 @@ class User extends Authenticatable
         return Flight::query()
         ->where('airline_id', '=', $airline->id)
         ->where('pilot_id', '=', $this->id)
-        ->get()->count();
+        ->where('status_id', '=', 2)
+        ->count();
     }
 
     public function airlines(): BelongsToMany
@@ -85,8 +87,13 @@ class User extends Authenticatable
         return $this->airlines()->where('airline_id', $airline->id)->exists();
     }
 
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'target_id');
+    }
+
     public function countNewNotifications() {
-        return Notification::query()->where('target_id', '=', $this->id)->where('acknowledged', '=', '0')->get()->count();
+        return $this->notifications()->where('acknowledged', false)->count();
     }
 
 }

@@ -5,10 +5,51 @@
 <div class="row justify-content-center">
     <div class="col-xl-10 col-lg-12">
 
-        <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
             <a href="{{ route('flightlist') }}" class="btn btn-outline-secondary btn-sm px-3 d-inline-flex align-items-center gap-1.5 shadow-sm">
                 <i class="bi bi-arrow-left"></i> Back to List
             </a>
+
+            @if($flight->status_id == 1 && auth()->user()->can('review flight'))
+                <div class="d-flex gap-2">
+                    <form action="{{ route('flightreviewaccept', $flight->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-success btn-sm px-3 d-inline-flex align-items-center gap-1.5 shadow-sm">
+                            <i class="bi bi-check-lg"></i> Approve PIREP
+                        </button>
+                    </form>
+                    
+                    <button type="button" class="btn btn-danger btn-sm px-3 d-inline-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                        <i class="bi bi-x-lg"></i> Reject PIREP
+                    </button>
+                </div>
+
+                <!-- Reject Modal -->
+                <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title fw-bold" id="rejectModalLabel">Reject PIREP #{{ $flight->id }}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="{{ route('flightreviewreject', $flight->id) }}" method="POST">
+                                @csrf
+                                <div class="modal-body text-dark">
+                                    <p>Are you sure you want to reject this flight? You can optionally provide a reason below.</p>
+                                    <div class="mb-3">
+                                        <label for="rejection_remarks" class="form-label small fw-bold text-uppercase">Reason (optional)</label>
+                                        <textarea class="form-control" name="rejection_remarks" id="rejection_remarks" rows="3" placeholder="e.g. Invalid fuel consumption, wrong aircraft type..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-danger btn-sm px-4 fw-bold">Confirm Rejection</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
         @if($errors->any())
@@ -21,6 +62,16 @@
             </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        @endif
+
+        @if($flight->status_id == 3 && $flight->rejection_remarks)
+            <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center gap-3 mb-4" role="alert">
+                <i class="bi bi-x-octagon-fill fs-4"></i>
+                <div>
+                    <h6 class="alert-heading fw-bold mb-1">Rejection Reason</h6>
+                    <p class="small mb-0 opacity-75">{{ $flight->rejection_remarks }}</p>
+                </div>
+            </div>
         @endif
 
         <div class="card border-0 shadow-sm bg-dark text-white overflow-hidden mb-4 position-relative" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
@@ -115,7 +166,25 @@
             </div>
 
             <div class="col-md-5">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-person-badge text-primary"></i>
+                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">Pilot Information</h2>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light p-3 rounded-circle text-primary">
+                                <i class="bi bi-person-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <h3 class="h6 fw-bold text-dark mb-0">{{ $flight->pilot->name }}</h3>
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small mt-1">Base: {{ $flight->pilot->homebase }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
                         <i class="bi bi-airplane-fill text-primary"></i>
                         <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">Aircraft Assignment</h2>
@@ -132,7 +201,7 @@
                                 <tbody>
                                     <tr class="border-bottom">
                                         <td class="py-2 text-muted">In service since</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->aircraft->in_service_since ?? $flight->aircraft->created_at->format('Y-m-d') }}</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->aircraft->in_service_since ?? 'N/A' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="py-2 text-muted">First flight</td>

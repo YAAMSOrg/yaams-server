@@ -17,5 +17,17 @@ class NotificationsController extends Controller
 
         return view('dashboard.notifications', ['notifications' => $notifications]);
     }
+
+    public function acknowledge(Notification $notification)
+    {
+        // Ensure the notification belongs to the authenticated user
+        if ($notification->target_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        $notification->update(['acknowledged' => true]);
+
+        return redirect()->back()->with('success', 'Notification dismissed.');
+    }
     
 }

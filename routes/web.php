@@ -33,12 +33,12 @@ Route::get("/user/flights/review", [
     "listReviewFlights",
 ])->name("flightreviewindex");
 
-Route::post("/user/flights/review/{id}/accept", [
+Route::post("/user/flights/review/{flight}/accept", [
     FlightController::class,
     "acceptFlight",
 ])->name("flightreviewaccept");
 
-Route::post("/user/flights/review/{id}/reject", [
+Route::post("/user/flights/review/{flight}/reject", [
     FlightController::class,
     "rejectFlight",
 ])->name("flightreviewreject");
@@ -51,20 +51,16 @@ Route::get("/user/flights/view/{flight}", [
     FlightController::class,
     "view",
 ])->name("viewflight");
-Route::match(["GET", "POST"], "/user/flights/accept", [
-    FlightController::class,
-    "acceptFlight",
-])->name("flightaccept");
-Route::match(["GET", "POST"], "/user/flights/deny", [
-    FlightController::class,
-    "denyFlight",
-])->name("flightdeny");
 
 // User Notifications
 Route::get("/user/notifications", [
     NotificationsController::class,
     "viewNotifications",
 ])->name("usernotifications");
+Route::post("/user/notifications/{notification}/acknowledge", [
+    NotificationsController::class,
+    "acknowledge",
+])->name("notificationsacknowledge");
 
 // Airline Fleet Management
 Route::match(["GET", "POST"], "/airline/fleetmanager", [

@@ -75,7 +75,7 @@ class FlightController extends Controller
 
     public function addFlight(Request $request)
     {
-        $currentActiveAirline = Session()->get("activeairline");
+        $currentActiveAirline = session()->get("activeairline");
 
         //Reload airline since we sometimes saw
         $tempAirlineID = $currentActiveAirline->id;
@@ -134,16 +134,14 @@ class FlightController extends Controller
             }
 
             // All checks passed, so create the flight.
-            Flight::create(
+            $flight = Flight::create(
                 $validated + [
                     "airline_id" => $currentActiveAirline->id,
                     "pilot_id" => auth()->user()->id,
                 ]
             );
 
-            //This does not work yet?
-            //            dd(new FlightFiled(auth()->user()));
-            //event(new FlightFiled(auth()->user()));
+            event(new FlightFiled($flight));
 
             // And redirect the user.
             return redirect()->route("flightlist");
@@ -181,10 +179,8 @@ class FlightController extends Controller
     public function listReviewFlights()
     {
         $currentActiveAirline = Session::get("activeairline");
-        $current_auth_user_id = auth()->user()->id;
 
         $flights = Flight::query()
-            ->where("pilot_id", $current_auth_user_id)
             ->where("airline_id", $currentActiveAirline->id)
             ->where("status_id", "=", "1")
             ->orderBy("created_at", "DESC")
@@ -204,17 +200,25 @@ class FlightController extends Controller
                 ->with("error", "You tried to review a flight of another airline.");
         }
 
-        // Status auf 'Accepted' setzen (Angenommen, Status ID 2 steht für "Accepted")
-        // Falls deine IDs in der DB anders definiert sind, passe die '2' entsprechend an.
+        // Status auf 'Accepted' setzen (Status ID 2)
         $flight->status_id = 2; 
         $flight->save();
+
+        // Notify the pilot
+        Notification::create([
+            'title' => 'PIREP Accepted',
+            'message' => "Your flight {$flight->full_flight_number} from {$flight->departure_icao} to {$flight->arrival_icao} has been accepted.",
+            'url' => route('viewflight', $flight->id),
+            'target_id' => $flight->pilot_id,
+            'acknowledged' => false,
+        ]);
 
         return redirect()->route('flightreviewindex')->with('success', 'Flight successfully approved.');
     }
 
-    public function rejectFlight(Flight $flight)
+    public function rejectFlight(Request $request, Flight $flight)
     {
-        $currentActiveAirline = Session::get("activeairline");
+        $currentActiveAirline = session()->get("activeairline");
 
         // Is the flight part of the active airline?
         if ($currentActiveAirline->id !== $flight->airline_id) {
@@ -223,10 +227,29 @@ class FlightController extends Controller
                 ->with("error", "You tried to review a flight of another airline.");
         }
 
-        // Status auf 'Rejected' / 'Denied' setzen (Angenommen, Status ID 3 steht für "Rejected")
-        // Falls deine IDs in der DB anders definiert sind, passe die '3' entsprechend an.
+        // Status auf 'Rejected' setzen (Status ID 3)
         $flight->status_id = 3;
+        
+        // Optional: Rejection Remarks speichern
+        if ($request->has('rejection_remarks')) {
+            $flight->rejection_remarks = $request->input('rejection_remarks');
+        }
+        
         $flight->save();
+
+        // Notify the pilot
+        $message = "Your flight {$flight->full_flight_number} from {$flight->departure_icao} to {$flight->arrival_icao} has been rejected.";
+        if ($flight->rejection_remarks) {
+            $message .= " Reason: " . $flight->rejection_remarks;
+        }
+
+        Notification::create([
+            'title' => 'PIREP Rejected',
+            'message' => $message,
+            'url' => route('viewflight', $flight->id),
+            'target_id' => $flight->pilot_id,
+            'acknowledged' => false,
+        ]);
 
         return redirect()->route('flightreviewindex')->with('success', 'Flight has been rejected.');
     }

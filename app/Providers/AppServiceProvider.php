@@ -27,10 +27,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Event::listen(
-            FlightFiled::class,
-        );
-
         // Fortify Views registrieren
         Fortify::loginView(function () {
             return view('auth.login'); 

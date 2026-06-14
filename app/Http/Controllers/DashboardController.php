@@ -17,7 +17,7 @@ class DashboardController extends Controller
     }
 
     public function index(){
-        $currentActiveAirline = Session()->get('activeairline');
+        $currentActiveAirline = session()->get('activeairline');
 
         // Alternative approach:
         // $airlineFlights = $currentActiveAirline->flights;
@@ -25,6 +25,7 @@ class DashboardController extends Controller
         $airlineFlights = Flight::query()
         ->orderBy('created_at', 'DESC')
         ->where('airline_id', '=', $currentActiveAirline->id )
+        ->where('status_id', '=', 2)
         ->limit(5)
         ->get();
 

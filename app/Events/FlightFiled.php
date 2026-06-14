@@ -11,19 +11,20 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 use App\Models\User;
+use App\Models\Flight;
 
 class FlightFiled
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    protected User $user;
+    public Flight $flight;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($user)
+    public function __construct(Flight $flight)
     {
-        $this->user = $user;
+        $this->flight = $flight;
     }
 
     /**

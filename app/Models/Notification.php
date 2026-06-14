@@ -12,6 +12,7 @@ class Notification extends Model
     protected $fillable = [
         'title',
         'message',
+        'url',
         'target_id',
         'acknowledged'
     ];

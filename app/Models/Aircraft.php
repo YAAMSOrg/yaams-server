@@ -16,7 +16,10 @@ class Aircraft extends Model
         'model',
         'remarks',
         'current_loc',
-        'used_by'
+        'used_by',
+        'active',
+        'in_service_since',
+        'first_flight'
     ];
 
     protected $appends = [
