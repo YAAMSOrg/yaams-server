@@ -52,8 +52,8 @@
 <body class="d-flex flex-column min-vh-100">
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
-                <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="YAAMS Logo" height="32">
+                <a class="navbar-brand d-flex align-items-center gap-2" href="{{ auth()->check() ? route('dashboard') : route('home') }}">
+                    <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="YAAMS Logo" height="32">
                 <span class="fs-5 fw-bold tracking-tight">YAAMS</span>
             </a>
 
@@ -64,7 +64,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('home') }}"><i class="bi bi-house-door"></i> Home</a>
+                        <a class="nav-link" href="{{ auth()->check() ? route('dashboard') : route('home') }}"><i class="bi bi-house-door"></i> Home</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFlights" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -138,9 +138,7 @@
                                 <span>{{ Auth::user()->name }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdownUser">
-                                <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2 me-2 text-secondary"></i> Dashboard</a></li>
                                 @role('Manager')
-                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('usernotifications') }}">
                                             <span><i class="bi bi-bell me-2 text-secondary"></i> Notifications</span>
@@ -149,7 +147,6 @@
                                     </li>
                                     <li><a class="dropdown-item" href="#"><i class="bi bi-people me-2 text-secondary"></i> Manage Pilots</a></li>
                                 @endrole
-                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
