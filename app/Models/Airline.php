@@ -50,8 +50,14 @@ class Airline extends Model
         return $this->hasMany(Flight::class, 'airline_id');
     }
 
-    public function aircraft() {
+    public function aircraft(): HasMany
+    {
         return $this->hasMany(Aircraft::class, 'used_by');
+    }
+
+    public function activeAircraft(): HasMany
+    {
+        return $this->hasMany(Aircraft::class, 'used_by')->where('active', true);
     }
 
 }

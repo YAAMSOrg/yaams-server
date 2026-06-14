@@ -10,6 +10,7 @@ use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
 use App\Actions\Fortify\SetActiveAirline;
 use App\Events\FlightFiled;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
                 PrepareAuthenticatedSession::class,
                 SetActiveAirline::class, // <- Hier klinken wir uns ein, sobald die Session bereit ist!
             ]);
+        });
+
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Super-Admin') ? true : null;
         });
     }
 }

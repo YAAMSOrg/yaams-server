@@ -63,9 +63,6 @@ Route::get("/airline/fleetmanager/view/{aircraft}", [
     AircraftController::class,
     "view",
 ])->name("viewaircraft");
-Route::match(["GET", "POST"], "/airline/fleetmanager/edit/{aircraft}", [
-    AircraftController::class,
-    "edit",
-])
+Route::match(["GET", "POST"], "/airline/fleetmanager/edit/{aircraft}", [AircraftController::class, "edit"])
     ->name("editaircraft")
-    ->middleware(["role:Manager"]);
+    ->middleware(["can:edit aircraft"]);

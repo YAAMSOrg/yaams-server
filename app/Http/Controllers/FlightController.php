@@ -117,16 +117,14 @@ class FlightController extends Controller
                 ]);
             }
 
-            // Check if the aircraft is indeed part of the active airline
-            if (
-                Aircraft::query()
+            // Check if the aircraft is indeed part of the active airline AND is active
+            if (Aircraft::query()
                     ->where("id", "=", $request->post("aircraft_id"))
                     ->where("used_by", "=", $currentActiveAirline->id)
-                    ->count() == 0
-            ) {
+                    ->where("active", true)
+                    ->count() == 0) {
                 throw ValidationException::withMessages([
-                    "aircraft_id" =>
-                        "This aircraft is not owned by your current airline.",
+                    "aircraft_id" => "This aircraft is not available or not owned by your current airline.",
                 ]);
             }
 
@@ -150,7 +148,7 @@ class FlightController extends Controller
         $prefill_select_online_network = OnlineNetwork::query()->get();
 
         // Get all aircraft of the active airline for the select. This returns the models and we can access the properties of them in the view.
-        $prefill_select_aircraft = $currentActiveAirline->aircraft;
+        $prefill_select_aircraft = $currentActiveAirline->activeAircraft;
 
         return view("flights.add", [
             "prefill_online_network" => $prefill_select_online_network,
