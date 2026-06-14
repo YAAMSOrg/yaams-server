@@ -2,6 +2,8 @@
 
 YAAMS is a modern, high-performance Virtual Airline Management System built with a strict "API-first" philosophy. Designed as a flexible alternative to legacy systems, YAAMS provides a robust foundation for virtual aviation organizations to manage their operations, fleets, and pilot communities through modern web technologies and a powerful RESTful interface.
 
+![video demo](https://github.com/YAAMSOrg/yaams-server/blob/main/Docs/res/showcase.gif)
+
 ## Core Pillars
 
 ### API-First Architecture
