@@ -42,8 +42,8 @@ class AirlineAPIController extends Controller
                 'message' => 'New airline ' . $request->name . ' stored succesfully.'
             ]);
 
-        } else { // If user does not have permission, throw a 401
-            return response()->json(['error' => 'Missing "add airlines" permission. Unauthenticated.'], 401);
+        } else { // If user does not have permission, throw a 403
+            return response()->json(['error' => 'Forbidden: Missing "add airlines" permission.'], 403);
         }
     }
 

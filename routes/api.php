@@ -35,4 +35,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1', 'm
     Route::get('/airline/{airline}/aircraft/', [AircraftAPIController::class, 'listAircraftForAirline'])->name('aircraftlistforairline');
     Route::post('/airline/{airline}/aircraft/', [AircraftAPIController::class, 'addAircraftForAirline'])->name('aircraftaddforairline');
 
+    // Flight API
+    Route::get('/flights', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'index'])->name('api.flights.index');
+    Route::post('/flights', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'store'])->name('api.flights.store');
+    Route::get('/airline/{airline}/flights/review', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'reviewList'])->name('api.flights.review');
+    Route::post('/flights/{flight}/accept', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'accept'])->name('api.flights.accept');
+    Route::post('/flights/{flight}/reject', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'reject'])->name('api.flights.reject');
+
 });

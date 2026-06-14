@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\AircraftCollection;
+use App\Http\Resources\V1\AircraftResource;
 use App\Models\Aircraft;
 use App\Models\Airline;
 use App\Models\Airport;
@@ -23,7 +24,7 @@ class AircraftAPIController extends Controller
 
         // Check if the user is member of the airline.
         if(!$get_asking_user->isMemberOf($airline)){
-            return response()->json(['error' => 'You are not a member of this airline.'], 401);
+            return response()->json(['error' => 'You are not a member of this airline.'], 403);
         }
 
         //Return every aircraft which is used by the airline.
@@ -33,33 +34,33 @@ class AircraftAPIController extends Controller
     public function addAircraftForAirline(Airline $airline, Request $request){
         $get_asking_user = request()->user('sanctum');
 
-        if($get_asking_user->can('add aircraft')) { // Check user permission
-            // Check if the user is member of the airline.
-            if(!$get_asking_user->isMemberOf($airline)){
-                return response()->json(['error' => 'You are not a member of this airline.'], 401);
-            }
+        if(!$get_asking_user->can('add aircraft')) {
+            return response()->json(['error' => 'Forbidden: You do not have permission to add aircraft.'], 403);
+        }
 
-            $validated = $request->validate([
-                'registration' => 'required|max:6',
-                'manufacturer' => 'required',
-                'model' => 'required',
-                'current_loc' => 'required|max:4',
-                'remarks' => 'nullable|alphanum',
-            ]);
+        // Check if the user is member of the airline.
+        if(!$get_asking_user->isMemberOf($airline)){
+            return response()->json(['error' => 'You are not a member of this airline.'], 403);
+        }
 
-            if (!Airport::find($request->post('current_loc'))) {
-                throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
-            }
+        $validated = $request->validate([
+            'registration' => 'required|max:6',
+            'manufacturer' => 'required',
+            'model' => 'required',
+            'current_loc' => 'required|max:4',
+            'remarks' => 'nullable|alphanum',
+        ]);
 
-            // Check if user given aircraft exists for the same airline and status = active. If not, throw exception.
-            if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $airline->id)->count() >= 1) {
-                throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
-            } else {
-                Aircraft::create($validated + ['used_by' => $airline->id]);
-                return response()->json(['message' => 'New aircraft ' . $request->registration . ' stored succesfully.']);
-            }
+        if (!Airport::find($request->post('current_loc'))) {
+            throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
+        }
+
+        // Check if user given aircraft exists for the same airline and status = active. If not, throw exception.
+        if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $airline->id)->count() >= 1) {
+            throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
         } else {
-            return response()->json(['error' => 'You are not a member of this airline.'], 401);
+            $aircraft = Aircraft::create($validated + ['used_by' => $airline->id]);
+            return new AircraftResource($aircraft);
         }
     }
 }

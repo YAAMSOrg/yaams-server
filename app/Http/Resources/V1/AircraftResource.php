@@ -26,6 +26,8 @@ class AircraftResource extends JsonResource
             //'usedBy' => $this->used_by,
 
             'active' => $this->active,
+            'inServiceSince' => $this->in_service_since,
+            'firstFlight' => $this->first_flight,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at
         ];
