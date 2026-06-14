@@ -27,10 +27,22 @@ Route::match(["GET", "POST"], "/user/flights/add", [
     FlightController::class,
     "addFlight",
 ])->name("flightadd");
+
 Route::get("/user/flights/review", [
     FlightController::class,
     "listReviewFlights",
 ])->name("flightreviewindex");
+
+Route::post("/user/flights/review/{id}/accept", [
+    FlightController::class,
+    "acceptFlight",
+])->name("flightreviewaccept");
+
+Route::post("/user/flights/review/{id}/reject", [
+    FlightController::class,
+    "rejectFlight",
+])->name("flightreviewreject");
+
 Route::get("/user/flights/list", [
     FlightController::class,
     "displayFlightsForUser",

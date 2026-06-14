@@ -190,11 +190,39 @@ class FlightController extends Controller
 
     public function acceptFlight(Flight $flight)
     {
-        // Todo
+        $currentActiveAirline = Session::get("activeairline");
+
+        // Is the flight part of the active airline?
+        if ($currentActiveAirline->id !== $flight->airline_id) {
+            return redirect()
+                ->route("dashboard")
+                ->with("error", "You tried to review a flight of another airline.");
+        }
+
+        // Status auf 'Accepted' setzen (Angenommen, Status ID 2 steht für "Accepted")
+        // Falls deine IDs in der DB anders definiert sind, passe die '2' entsprechend an.
+        $flight->status_id = 2; 
+        $flight->save();
+
+        return redirect()->route('flightreviewindex')->with('success', 'Flight successfully approved.');
     }
 
-    public function denyFlight(Flight $flight)
+    public function rejectFlight(Flight $flight)
     {
-        // Todo
+        $currentActiveAirline = Session::get("activeairline");
+
+        // Is the flight part of the active airline?
+        if ($currentActiveAirline->id !== $flight->airline_id) {
+            return redirect()
+                ->route("dashboard")
+                ->with("error", "You tried to review a flight of another airline.");
+        }
+
+        // Status auf 'Rejected' / 'Denied' setzen (Angenommen, Status ID 3 steht für "Rejected")
+        // Falls deine IDs in der DB anders definiert sind, passe die '3' entsprechend an.
+        $flight->status_id = 3;
+        $flight->save();
+
+        return redirect()->route('flightreviewindex')->with('success', 'Flight has been rejected.');
     }
 }
