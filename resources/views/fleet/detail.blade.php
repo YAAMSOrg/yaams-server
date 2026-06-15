@@ -95,6 +95,10 @@
                                 <td class="fw-medium pe-4">{{ \Carbon\Carbon::parse($aircraft->created_at)->format('Y-m-d') }}</td>
                             </tr>
                             <tr>
+                                <td class="text-muted ps-4 py-3">Total Distance Flown</td>
+                                <td class="fw-medium pe-4">{{ number_format($aircraft->total_distance_flown) }} NM</td>
+                            </tr>
+                            <tr>
                                 <td class="text-muted ps-4 py-3">Remarks / Description</td>
                                 <td class="pe-4 italic text-muted">
                                     {{ $aircraft->remarks ? $aircraft->remarks : 'No remarks specified for this aircraft.' }}
@@ -102,6 +106,58 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
+                    <i class="bi bi-clock-history text-muted me-2"></i> Recent Flights
+                </div>
+                <div class="card-body p-0">
+                    @if($lastFlights->isEmpty())
+                        <div class="text-muted p-4 text-center">
+                            <i class="bi bi-info-circle me-1"></i> No flights logged for this aircraft yet.
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover mb-0 align-middle">
+                                <thead class="table-light border-bottom text-muted small text-uppercase">
+                                    <tr>
+                                        <th scope="col" class="ps-4">Flight</th>
+                                        <th scope="col">Pilot</th>
+                                        <th scope="col">Route</th>
+                                        <th scope="col">Duration</th>
+                                        <th scope="col" class="pe-4 text-end">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($lastFlights as $flight)
+                                        <tr>
+                                            <td class="ps-4 font-monospace fw-semibold">
+                                                <a href="{{ route('viewflight', $flight->id) }}" class="text-decoration-none">
+                                                    {{ $flight->full_flight_number }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {{ $flight->pilot->name }}
+                                            </td>
+                                            <td class="font-monospace">
+                                                <abbr title="{{ $flight->departure_airport->name }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->departure_icao }}</abbr>
+                                                <i class="bi bi-arrow-right text-muted mx-1"></i>
+                                                <abbr title="{{ $flight->arrival_airport->name }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->arrival_icao }}</abbr>
+                                            </td>
+                                            <td class="text-muted">
+                                                {{ $flight->flight_duration }}
+                                            </td>
+                                            <td class="pe-4 text-end text-secondary small">
+                                                {{ $flight->flight_date }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
             </div>
 

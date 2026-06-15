@@ -135,7 +135,20 @@ class AircraftController extends Controller
         $curLat = $aircraft->location->latitude_deg;
         $curLon = $aircraft->location->longitude_deg;
 
-        return view('fleet.detail', ['aircraft' => $aircraft, 'lon' => $curLon, 'lat' => $curLat ]);
+        // Fetch last 5 accepted flights for this aircraft
+        $lastFlights = $aircraft->flights()
+            ->where('status_id', 2)
+            ->with(['departure_airport', 'arrival_airport', 'pilot'])
+            ->orderBy('created_at', 'DESC')
+            ->limit(5)
+            ->get();
+
+        return view('fleet.detail', [
+            'aircraft' => $aircraft,
+            'lon' => $curLon,
+            'lat' => $curLat,
+            'lastFlights' => $lastFlights
+        ]);
     }
 }
 

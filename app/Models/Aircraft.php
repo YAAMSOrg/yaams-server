@@ -25,7 +25,8 @@ class Aircraft extends Model
     protected $appends = [
         'full_type',
         'total_flights_count',
-        'total_flights_hours'
+        'total_flights_hours',
+        'total_distance_flown'
     ];
 
     public function getFullTypeAttribute()
@@ -45,6 +46,11 @@ class Aircraft extends Model
     public function airline()
     {
         return $this->belongsTo(Airline::class, 'used_by');
+    }
+
+    public function flights()
+    {
+        return $this->hasMany(Flight::class, 'aircraft_id');
     }
 
     // This is a dynamic attribute, which simply adds the occurances of a flight entry with the specific $aicraft->id and all accepted flights.
@@ -69,6 +75,17 @@ class Aircraft extends Model
         $minutes = $totalFlightMinutes % 60;
 
         return $hours;
+    }
+
+    public function getTotalDistanceFlownAttribute() {
+        $flights = Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->get();
+
+        $totalDistance = 0;
+        foreach ($flights as $flight) {
+            $totalDistance += $flight->raw_distance ?? 0;
+        }
+
+        return $totalDistance;
     }
 
     /* Why do we need this?
