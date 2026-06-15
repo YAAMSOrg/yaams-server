@@ -67,13 +67,13 @@ class AircraftController extends Controller
     }
 
     public function edit(Request $request, Aircraft $aircraft) {
-        // Get the current active airline
-        $currentActiveAirline = $request->session()->get('activeairline');
-
-        // Check if users airline owns the aircraft
-        if(!$aircraft->ownedBy($currentActiveAirline)) {
+        // Authorize using AircraftPolicy
+        if ($request->user()->cannot('update', $aircraft)) {
             return redirect()->route('dashboard')->with('error', 'You did something nasty!');
         }
+
+        // Get the current active airline
+        $currentActiveAirline = $request->session()->get('activeairline');
 
         // Check if the request is a POST
         if($request->getMethod() == "POST"){
@@ -123,13 +123,13 @@ class AircraftController extends Controller
     }
 
     public function view(Aircraft $aircraft) {
-        // Get the current active airline
-        $currentActiveAirline = Session()->get('activeairline');
-
-        // Check if the aircraft is indeed part of the active airline
-        if (!$aircraft->ownedBy($currentActiveAirline)) {
-            return redirect()->route('dashboard')->with('error', 'The aircraft you tried to edit is not owned by the current active airline.');
+        // Authorize using AircraftPolicy
+        if (request()->user()->cannot('view', $aircraft)) {
+            return redirect()->route('dashboard')->with('error', 'The aircraft you tried to view is not owned by the current active airline.');
         }
+
+        // Get the current active airline
+        $currentActiveAirline = session()->get('activeairline');
 
         // Get lat and lon for position view
         $curLat = $aircraft->location->latitude_deg;
