@@ -119,8 +119,11 @@
                             <tbody>
                                 @foreach($flights as $flight)
                                 <tr>
+
                                     <td class="ps-4 fw-semibold text-dark">
-                                        {{ $flight->full_flight_number }}
+                                        <a href="{{ route('viewflight', $flight->id) }}" class="text-decoration-none">
+                                                        {{ $flight->full_flight_number }}
+                                        </a>
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark border font-monospace">{{ $flight->full_icao_callsign }}</span>

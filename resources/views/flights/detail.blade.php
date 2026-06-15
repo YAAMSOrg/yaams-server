@@ -187,25 +187,21 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
                         <i class="bi bi-airplane-fill text-primary"></i>
-                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">Aircraft Assignment</h2>
+                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">Aircraft Information</h2>
                     </div>
                     <div class="card-body pt-0">
                         <div class="p-3 bg-light rounded border border-dashed mb-3">
                             <span class="text-muted small d-block mb-1">Registration & Type</span>
-                            <h3 class="h5 font-monospace fw-bold text-dark mb-1">{{ $flight->aircraft->registration }}</h3>
+                            <h3 class="h5 font-monospace fw-bold text-dark mb-1"><a class="text-decoration-none" href="{{ route('viewaircraft', $flight->aircraft->id) }}">{{ $flight->aircraft->registration }}</a></h3>
                             <p class="text-secondary small mb-0">{{ $flight->aircraft->full_type }}</p>
                         </div>
 
                         <div class="table-responsive">
                             <table class="table table-sm table-borderless align-middle mb-0 small">
                                 <tbody>
-                                    <tr class="border-bottom">
+                                    <tr>
                                         <td class="py-2 text-muted">In service since</td>
                                         <td class="py-2 fw-semibold text-dark text-end">{{ $flight->aircraft->in_service_since ?? 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-muted">First flight</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->aircraft->first_flight ?? 'N/A' }}</td>
                                     </tr>
                                 </tbody>
                             </table>

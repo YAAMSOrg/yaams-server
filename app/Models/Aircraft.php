@@ -17,16 +17,15 @@ class Aircraft extends Model
         'remarks',
         'current_loc',
         'used_by',
-        'active',
-        'in_service_since',
-        'first_flight'
+        'active'
     ];
 
     protected $appends = [
         'full_type',
         'total_flights_count',
         'total_flights_hours',
-        'total_distance_flown'
+        'total_distance_flown',
+        'in_service_since',
     ];
 
     public function getFullTypeAttribute()
@@ -88,17 +87,14 @@ class Aircraft extends Model
         return $totalDistance;
     }
 
-    /* Why do we need this?
-    public function activeAndOwnedBy(Airline $airline)
-    {
-        return $this->used_by === $airline->id && $this->active == 1;
-    }
-    */
-
     // Returns a bool if an aircraft is owned by $airline
     public function ownedBy(Airline $airline): bool
     {
         return $this->used_by === $airline->id;
+    }
+
+    public function getInServiceSinceAttribute() {
+        return $this->created_at->format('Y-m-d');
     }
 
 }
