@@ -112,7 +112,8 @@
                                     <th class="ps-4">Flight</th>
                                     <th>Callsign</th>
                                     <th>Route</th>
-                                    <th class="pe-4">Aircraft</th>
+                                    <th>Aircraft</th>
+                                    <th class="pe-4">Pilot</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -131,11 +132,14 @@
                                             <abbr title="{{ $flight->arrival_airport->name }}" class="text-decoration-none fw-bold text-dark font-monospace">{{ $flight->arrival_icao }}</abbr>
                                         </div>
                                     </td>
-                                    <td class="pe-4">
+                                    <td>
                                         <div class="small">
                                             <span class="fw-medium text-dark">{{ $flight->aircraft->registration }}</span>
                                             <span class="text-muted d-block" style="font-size: 0.8rem;">{{ $flight->aircraft->full_type }}</span>
                                         </div>
+                                    </td>
+                                    <td class="pe-4 fw-semibold text-dark">
+                                        {{ $flight->pilot->name }}
                                     </td>
                                 </tr>
                                 @endforeach
