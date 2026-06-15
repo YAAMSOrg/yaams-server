@@ -6,8 +6,8 @@
     <div class="col-xl-10 col-lg-12">
 
         <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
-            <a href="{{ route('flightlist') }}" class="btn btn-outline-secondary btn-sm px-3 d-inline-flex align-items-center gap-1.5 shadow-sm">
-                <i class="bi bi-arrow-left"></i> Back to List
+            <a href="{{ url()->previous()  }}" class="btn btn-outline-secondary btn-sm px-3 d-inline-flex align-items-center gap-1.5 shadow-sm">
+                <i class="bi bi-arrow-left"></i> Back
             </a>
 
             @if($flight->status_id == 1 && auth()->user()->can('review flight'))
