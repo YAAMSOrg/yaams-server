@@ -138,13 +138,13 @@
                                 <span>{{ Auth::user()->name }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdownUser">
+                                <li>
+                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('usernotifications') }}">
+                                        <span><i class="bi bi-bell me-2 text-secondary"></i> Notifications</span>
+                                        <span class="badge bg-danger rounded-pill">{{ auth()->user()->countNewNotifications() }}</span>
+                                    </a>
+                                </li>
                                 @role('Manager')
-                                    <li>
-                                        <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('usernotifications') }}">
-                                            <span><i class="bi bi-bell me-2 text-secondary"></i> Notifications</span>
-                                            <span class="badge bg-danger rounded-pill">{{ auth()->user()->countNewNotifications() }}</span>
-                                        </a>
-                                    </li>
                                     <li><a class="dropdown-item" href="#"><i class="bi bi-people me-2 text-secondary"></i> Manage Pilots</a></li>
                                 @endrole
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>
