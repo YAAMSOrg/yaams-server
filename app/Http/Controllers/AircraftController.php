@@ -47,21 +47,76 @@ class AircraftController extends Controller
             }
         }
 
-        // This is pagination voodo.
-        $limit = max(env('FLEET_PAGE_LIMIT'), 1);
-        $maxEntries = Aircraft::count();
-        $maxPages = (int)ceil($maxEntries/$limit);
+        // Base query with airline and search filters
+        $fleetQuery = Aircraft::query()
+            ->where('used_by', '=', $currentActiveAirline->id);
+
+        if ($search = $request->get('search')) {
+            $fleetQuery->where(function($q) use ($search) {
+                $q->where('registration', 'LIKE', "%{$search}%")
+                  ->orWhere('manufacturer', 'LIKE', "%{$search}%")
+                  ->orWhere('model', 'LIKE', "%{$search}%")
+                  ->orWhere('current_loc', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $maxEntries = $fleetQuery->count();
+
+        // Database driver-independent duration seconds SQL
+        $driver = \DB::connection()->getDriverName();
+        if ($driver === 'sqlite') {
+            $durationSecondsSql = "(strftime('%s', flights.blockon) - strftime('%s', flights.blockoff))";
+        } else {
+            $durationSecondsSql = "TIMESTAMPDIFF(SECOND, flights.blockoff, flights.blockon)";
+        }
+
+        $fleetQuery->select('aircraft.*')
+            ->selectRaw("COALESCE((
+                SELECT SUM($durationSecondsSql)
+                FROM flights
+                WHERE flights.aircraft_id = aircraft.id AND flights.status_id = 2
+            ), 0) as logged_seconds");
+
+        $sortBy = $request->get('sort_by');
+        $sortOrder = strtolower($request->get('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        switch ($sortBy) {
+            case 'registration':
+                $fleetQuery->orderBy('registration', $sortOrder);
+                break;
+            case 'type':
+                $fleetQuery->orderBy('manufacturer', $sortOrder)
+                           ->orderBy('model', $sortOrder);
+                break;
+            case 'current_loc':
+                $fleetQuery->orderBy('current_loc', $sortOrder);
+                break;
+            case 'logged_hours':
+                $fleetQuery->orderBy('logged_seconds', $sortOrder);
+                break;
+            case 'active':
+                $fleetQuery->orderBy('active', $sortOrder);
+                break;
+            default:
+                $fleetQuery->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $fleetQuery->orderBy('id', 'desc');
+
+        $limit = max((int)env('FLEET_PAGE_LIMIT', 15), 1);
+        $maxPages = (int)ceil($maxEntries / $limit);
+        if ($maxPages < 1) {
+            $maxPages = 1;
+        }
         $page = (int)$request->get('page', 1);
         $page = min(max(1, $page), $maxPages);
-        $offset = ($page -1) * $limit;
+        $offset = ($page - 1) * $limit;
 
-        // This is pagination voodo.
-        $fleet = Aircraft::query()
-        ->orderBy('created_at', 'DESC')
-        ->where('used_by', '=', $currentActiveAirline->id )
-        ->offset($offset)
-        ->limit($limit)
-        ->get();
+        $fleet = $fleetQuery
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
 
         return view('fleet.index', ['fleet' => $fleet, 'maxPages' => $maxPages, 'currentPage' => $page]);
     }

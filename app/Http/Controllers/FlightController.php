@@ -30,38 +30,111 @@ class FlightController extends Controller
     public function displayFlightsForUser(Request $request)
     {
         $current_auth_user_id = auth()->id();
-        $currentActiveAirline = session()->get('activeairline'); // Kleingeschrieben "session()" nutzen oder Session::get()
+        $currentActiveAirline = session()->get('activeairline');
 
-        // 1. Limit sicherstellen (Fallback auf 10, falls env() null oder nicht numerisch ist)
+        // 1. Base query
+        $flightsQuery = Flight::query()
+            ->where('pilot_id', $current_auth_user_id)
+            ->where('airline_id', $currentActiveAirline->id);
+
+        // 2. Apply search
+        if ($search = $request->get('search')) {
+            $flightsQuery->where(function($q) use ($search, $currentActiveAirline) {
+                if (is_numeric($search)) {
+                    $q->where('flights.id', '=', $search);
+                }
+                
+                $prefix = $currentActiveAirline->prefix;
+                $icao = $currentActiveAirline->icao_callsign;
+                $searchNumber = $search;
+                if (str_starts_with(strtoupper($search), strtoupper($prefix))) {
+                    $searchNumber = substr($search, strlen($prefix));
+                } elseif (str_starts_with(strtoupper($search), strtoupper($icao))) {
+                    $searchNumber = substr($search, strlen($icao));
+                }
+                $searchNumber = trim($searchNumber);
+                
+                if (is_numeric($searchNumber)) {
+                    $q->orWhere('flights.flightnumber', '=', $searchNumber);
+                }
+                
+                $q->orWhere('flights.callsign', 'LIKE', "%{$search}%")
+                  ->orWhere('flights.departure_icao', 'LIKE', "%{$search}%")
+                  ->orWhere('flights.arrival_icao', 'LIKE', "%{$search}%")
+                  ->orWhereHas('aircraft', function($aq) use ($search) {
+                      $aq->where('registration', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        // 3. Count matching entries
+        $maxEntries = $flightsQuery->count();
+
+        // 4. Select fields and Joins
+        $flightsQuery->select('flights.*');
+
+        $driver = \DB::connection()->getDriverName();
+        if ($driver === 'sqlite') {
+            $durationSecondsSql = "(strftime('%s', flights.blockon) - strftime('%s', flights.blockoff))";
+        } else {
+            $durationSecondsSql = "TIMESTAMPDIFF(SECOND, flights.blockoff, flights.blockon)";
+        }
+
+        // 5. Apply sorting
+        $sortBy = $request->get('sort_by');
+        $sortOrder = strtolower($request->get('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        switch ($sortBy) {
+            case 'id':
+                $flightsQuery->orderBy('flights.id', $sortOrder);
+                break;
+            case 'flightnumber':
+                $flightsQuery->orderBy('flights.flightnumber', $sortOrder);
+                break;
+            case 'callsign':
+                $flightsQuery->orderBy('flights.callsign', $sortOrder);
+                break;
+            case 'route':
+                $flightsQuery->orderBy('flights.departure_icao', $sortOrder)
+                             ->orderBy('flights.arrival_icao', $sortOrder);
+                break;
+            case 'duration':
+                $flightsQuery->orderByRaw("$durationSecondsSql $sortOrder");
+                break;
+            case 'aircraft':
+                $flightsQuery->leftJoin('aircraft', 'flights.aircraft_id', '=', 'aircraft.id')
+                             ->orderBy('aircraft.registration', $sortOrder);
+                break;
+            case 'date':
+                $flightsQuery->orderBy('flights.blockon', $sortOrder);
+                break;
+            case 'status':
+                $flightsQuery->orderBy('flights.status_id', $sortOrder);
+                break;
+            default:
+                $flightsQuery->orderBy('flights.created_at', 'desc');
+                break;
+        }
+
+        $flightsQuery->orderBy('flights.id', 'desc');
+
+        // 6. Pagination settings
         $limit = (int) env('FLIGHT_PAGE_LIMIT', 10);
         if ($limit < 1) {
             $limit = 1;
         }
 
-        // 2. Einträge zählen
-        $maxEntries = Flight::query()
-            ->where('pilot_id', $current_auth_user_id)
-            ->where('airline_id', $currentActiveAirline->id)
-            ->count();
-
-        // 3. Seiten berechnen – Sicherstellen, dass maxPages mindestens 1 ist!
         $maxPages = (int) ceil($maxEntries / $limit);
         if ($maxPages < 1) {
             $maxPages = 1;
         }
 
-        // 4. Aktuelle Seite validieren
         $page = (int) $request->get('page', 1);
         $page = min(max(1, $page), $maxPages);
-
-        // 5. Offset berechnen
         $offset = ($page - 1) * $limit;
 
-        // 6. Daten holen
-        $flights = Flight::query()
-            ->where('pilot_id', $current_auth_user_id)
-            ->where('airline_id', $currentActiveAirline->id)
-            ->orderBy('created_at', 'DESC')
+        // 7. Get results
+        $flights = $flightsQuery
             ->offset($offset)
             ->limit($limit)
             ->get();

@@ -2,6 +2,41 @@
 @section('title', 'YAAMS: Fleet Overview')
 
 @section('content')
+@php
+    if (!function_exists('sortUrl')) {
+        function sortUrl($column) {
+            $currentSort = request('sort_by');
+            $currentOrder = request('sort_order', 'asc');
+            
+            $newOrder = 'asc';
+            if ($currentSort === $column) {
+                $newOrder = $currentOrder === 'asc' ? 'desc' : 'asc';
+            }
+            
+            return route(request()->route()->getName(), array_merge(request()->query(), [
+                'sort_by' => $column,
+                'sort_order' => $newOrder,
+                'page' => 1
+            ]), false);
+        }
+    }
+    
+    if (!function_exists('sortIcon')) {
+        function sortIcon($column) {
+            $currentSort = request('sort_by');
+            $currentOrder = request('sort_order', 'asc');
+            
+            if ($currentSort !== $column) {
+                return '<i class="bi bi-arrow-down-up ms-1 text-muted opacity-50 small"></i>';
+            }
+            
+            return $currentOrder === 'asc' 
+                ? '<i class="bi bi-arrow-up ms-1 text-primary small"></i>' 
+                : '<i class="bi bi-arrow-down ms-1 text-primary small"></i>';
+        }
+    }
+@endphp
+
 <div class="row justify-content-center">
     <div class="col-xl-11 col-lg-12">
 
@@ -31,6 +66,32 @@
         </div>
         @endif
 
+        <!-- Search Bar -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-3">
+                <form action="{{ route('fleetmanager') }}" method="GET" class="m-0">
+                    @if(request()->has('sort_by'))
+                        <input type="hidden" name="sort_by" value="{{ request('sort_by') }}">
+                    @endif
+                    @if(request()->has('sort_order'))
+                        <input type="hidden" name="sort_order" value="{{ request('sort_order') }}">
+                    @endif
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-start-0 ps-0 fs-6" placeholder="Search aircraft by registration, manufacturer, variant, or current hub..." value="{{ request('search') }}">
+                        @if(request('search'))
+                            <a href="{{ route('fleetmanager', request()->except(['search', 'page'])) }}" class="btn btn-outline-secondary border-start-0 border-end-0 d-flex align-items-center bg-white text-muted">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </a>
+                        @endif
+                        <button class="btn btn-primary px-4 fw-semibold" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         @if($fleet->count() > 0)
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-0">
@@ -38,11 +99,31 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="bg-light border-bottom text-secondary small text-uppercase tracking-wider">
                                 <tr>
-                                    <th scope="col" class="py-3 ps-4">Tail Number</th>
-                                    <th scope="col" class="py-3">Type</th>
-                                    <th scope="col" class="py-3 text-center">Current Location</th>
-                                    <th scope="col" class="py-3 text-end">Logged Hours</th>
-                                    <th scope="col" class="py-3 text-center">Status</th>
+                                    <th scope="col" class="py-3 ps-4">
+                                        <a href="{!! sortUrl('registration') !!}" class="text-decoration-none text-secondary d-inline-flex align-items-center">
+                                            Tail Number {!! sortIcon('registration') !!}
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="py-3">
+                                        <a href="{!! sortUrl('type') !!}" class="text-decoration-none text-secondary d-inline-flex align-items-center">
+                                            Type {!! sortIcon('type') !!}
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="py-3 text-center">
+                                        <a href="{!! sortUrl('current_loc') !!}" class="text-decoration-none text-secondary d-inline-flex align-items-center justify-content-center w-100">
+                                            Current Location {!! sortIcon('current_loc') !!}
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="py-3 text-end">
+                                        <a href="{!! sortUrl('logged_hours') !!}" class="text-decoration-none text-secondary d-inline-flex align-items-center justify-content-end w-100">
+                                            Logged Hours {!! sortIcon('logged_hours') !!}
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="py-3 text-center">
+                                        <a href="{!! sortUrl('active') !!}" class="text-decoration-none text-secondary d-inline-flex align-items-center justify-content-center w-100">
+                                            Status {!! sortIcon('active') !!}
+                                        </a>
+                                    </th>
                                     @can('edit aircraft')
                                     <th scope="col" class="py-3 text-end pe-4">Actions</th>
                                     @endcan
@@ -76,7 +157,7 @@
                                         <td class="py-3 text-end font-monospace fw-semibold text-dark">
                                             {{ $aircraft->total_flights_hours }} hrs
                                         </td>
-
+ 
                                         <td class="py-3 text-center">
                                             @if($aircraft->active == 1)
                                                 <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">Active</span>
@@ -104,19 +185,19 @@
                     <nav aria-label="Fleet navigation">
                         <ul class="pagination pagination-sm justify-content-center mb-0 gap-1">
                             <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
-                                <a class="page-link rounded" href="{{ route('fleetmanager', ['page' => $currentPage - 1], false) }}" aria-label="Previous">
+                                <a class="page-link rounded" href="{{ route('fleetmanager', array_merge(request()->query(), ['page' => $currentPage - 1]), false) }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
             
                             @for($page = 1; $page <= $maxPages; $page++)
                                 <li class="page-item {{ $page === $currentPage ? 'active' : '' }}">
-                                    <a class="page-link rounded" href="{{ route('fleetmanager', ['page' => $page], false) }}">{{ $page }}</a>
+                                    <a class="page-link rounded" href="{{ route('fleetmanager', array_merge(request()->query(), ['page' => $page]), false) }}">{{ $page }}</a>
                                 </li>
                             @endfor
                           
                             <li class="page-item {{ $currentPage >= $maxPages ? 'disabled' : '' }}">
-                                <a class="page-link rounded" href="{{ route('fleetmanager', ['page' => $currentPage + 1], false) }}" aria-label="Next">
+                                <a class="page-link rounded" href="{{ route('fleetmanager', array_merge(request()->query(), ['page' => $currentPage + 1]), false) }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -129,15 +210,23 @@
             <div class="card border-0 shadow-sm my-5">
                 <div class="card-body p-5 text-center">
                     <div class="text-muted mb-3">
-                        <i class="bi bi-airplane fs-1 text-secondary opacity-50"></i>
+                        <i class="bi bi-search fs-1 text-secondary opacity-50"></i>
                     </div>
-                    <h5 class="fw-bold text-dark mb-1">No Aircraft Found</h5>
-                    <p class="text-secondary small max-w-md mx-auto mb-3">Your airline fleet is currently empty. Get started by registering your first airframe.</p>
-                    @can('add aircraft')
-                        <button type="button" class="btn btn-sm btn-success px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addAircraftModal">
-                            Add First Aircraft
-                        </button>
-                    @endcan
+                    @if(request('search'))
+                        <h5 class="fw-bold text-dark mb-1">No Matching Aircraft</h5>
+                        <p class="text-secondary small max-w-md mx-auto mb-3">We couldn't find any aircraft matching "{{ request('search') }}". Try adjusting your search query or clear the search.</p>
+                        <a href="{{ route('fleetmanager', request()->except(['search', 'page'])) }}" class="btn btn-sm btn-outline-secondary px-3 shadow-sm">
+                            Clear Search
+                        </a>
+                    @else
+                        <h5 class="fw-bold text-dark mb-1">No Aircraft Found</h5>
+                        <p class="text-secondary small max-w-md mx-auto mb-3">Your airline fleet is currently empty. Get started by registering your first airframe.</p>
+                        @can('add aircraft')
+                            <button type="button" class="btn btn-sm btn-success px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addAircraftModal">
+                                Add First Aircraft
+                            </button>
+                        @endcan
+                    @endif
                 </div>
             </div>
         @endif
