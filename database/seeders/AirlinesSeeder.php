@@ -15,32 +15,84 @@ class AirlinesSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('airlines')->insert([
-            'name' => "First VA",
-            'prefix' => "FV",
-            'icao_callsign' => 'FVA',
-            'atc_callsign' => 'FIRST',
-            'unit_is_lbs' => false,
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString()
-        ]);
-        DB::table('airlines')->insert([
-            'name' => "Second VA",
-            'prefix' => "SV",
-            'icao_callsign' => 'SVA',
-            'atc_callsign' => 'SECOND',
-            'unit_is_lbs' => true,
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString()
-        ]);
-        DB::table('airlines')->insert([
-            'name' => "Third VA",
-            'prefix' => "TV",
-            'icao_callsign' => 'TVA',
-            'atc_callsign' => 'THIRD',
-            'unit_is_lbs' => true,
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString()
-        ]);
+        $airlines = [
+            [
+                'name' => "First VA",
+                'prefix' => "FV",
+                'icao_callsign' => 'FVA',
+                'atc_callsign' => 'FIRST',
+                'unit_is_lbs' => false,
+            ],
+            [
+                'name' => "Second VA",
+                'prefix' => "SV",
+                'icao_callsign' => 'SVA',
+                'atc_callsign' => 'SECOND',
+                'unit_is_lbs' => true,
+            ],
+            [
+                'name' => "Third VA",
+                'prefix' => "TV",
+                'icao_callsign' => 'TVA',
+                'atc_callsign' => 'THIRD',
+                'unit_is_lbs' => true,
+            ],
+            [
+                'name' => "Global Cargo",
+                'prefix' => "GC",
+                'icao_callsign' => 'GCG',
+                'atc_callsign' => 'GLOBAL CARGO',
+                'unit_is_lbs' => false,
+            ],
+            [
+                'name' => "Ocean Link",
+                'prefix' => "OL",
+                'icao_callsign' => 'OLN',
+                'atc_callsign' => 'OCEAN LINK',
+                'unit_is_lbs' => false,
+            ],
+            [
+                'name' => "Euro Express",
+                'prefix' => "EE",
+                'icao_callsign' => 'EEX',
+                'atc_callsign' => 'EURO EXPRESS',
+                'unit_is_lbs' => false,
+            ],
+            [
+                'name' => "Alpine Connect",
+                'prefix' => "AC",
+                'icao_callsign' => 'ALP',
+                'atc_callsign' => 'ALPINE',
+                'unit_is_lbs' => false,
+            ],
+            [
+                'name' => "Pacific Airways",
+                'prefix' => "PA",
+                'icao_callsign' => 'PAC',
+                'atc_callsign' => 'PACIFIC',
+                'unit_is_lbs' => true,
+            ],
+            [
+                'name' => "Apex Charter",
+                'prefix' => "AX",
+                'icao_callsign' => 'APX',
+                'atc_callsign' => 'APEX',
+                'unit_is_lbs' => true,
+            ],
+            [
+                'name' => "Northern Air",
+                'prefix' => "NA",
+                'icao_callsign' => 'NTR',
+                'atc_callsign' => 'NORTHERN',
+                'unit_is_lbs' => false,
+            ],
+        ];
+
+        foreach ($airlines as $airline) {
+            DB::table('airlines')->insert($airline + [
+                'created_at' => Carbon::now()->toDateTimeString(),
+                'updated_at' => Carbon::now()->toDateTimeString(),
+            ]);
+        }
     }
 }

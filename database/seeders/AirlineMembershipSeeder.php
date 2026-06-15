@@ -52,5 +52,20 @@ class AirlineMembershipSeeder extends Seeder
             'created_at' => Carbon::now()->toDateTimeString(),
             'updated_at' => Carbon::now()->toDateTimeString(),
         ]);
+
+        // Randomly assign existing users (Homer: 1, Max: 2, Admin: 3) to new airlines (4 to 10)
+        for ($airlineId = 4; $airlineId <= 10; $airlineId++) {
+            foreach ([1, 2, 3] as $userId) {
+                // ~60% probability of membership
+                if (rand(0, 100) < 60) {
+                    DB::table('airline_memberships')->insert([
+                        'airline_id' => $airlineId,
+                        'user_id' => $userId,
+                        'created_at' => Carbon::now()->toDateTimeString(),
+                        'updated_at' => Carbon::now()->toDateTimeString(),
+                    ]);
+                }
+            }
+        }
     }
 }
