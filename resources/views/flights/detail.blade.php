@@ -148,7 +148,7 @@
                                     </tr>
                                     <tr class="border-bottom">
                                         <td class="py-2.5 text-muted"><i class="bi bi-fuel-pump me-2"></i>Fuel Burned</td>
-                                        <td class="py-2.5 font-monospace fw-semibold text-dark">{{ number_format($flight->burned_fuel) }} kg</td>
+                                        <td class="py-2.5 font-monospace fw-semibold text-dark">{{ number_format($flight->burned_fuel) }} {{ session('activeairline')->unit_is_lbs ? 'lbs' : 'kg' }}</td>
                                     </tr>
                                     <tr class="border-bottom">
                                         <td class="py-2.5 text-muted"><i class="bi bi-box-arrow-right me-2"></i>Block Off</td>
