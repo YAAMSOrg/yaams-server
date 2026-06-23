@@ -52,11 +52,11 @@ class AircraftAPIController extends Controller
             'winglets' => 'boolean',
             'selcal' => 'nullable|string|max:5|regex:/^[A-Z]{2}-?[A-Z]{2}$/i',
             'hex_code' => 'nullable|string|size:6|regex:/^[a-fA-F0-9]{6}$/i',
-            'msn' => 'nullable|string|max:50',
-            'mtow' => 'nullable|integer|min:0',
-            'mzfw' => 'nullable|integer|min:0',
-            'mlw' => 'nullable|integer|min:0',
-            'remarks' => 'nullable|string',
+            'msn' => 'nullable|digits_between:1,6',
+            'mtow' => 'nullable|integer|min:0|max:1000000',
+            'mzfw' => 'nullable|integer|min:0|max:1000000',
+            'mlw' => 'nullable|integer|min:0|max:1000000',
+            'remarks' => 'nullable|string|max:1000',
             'current_loc' => 'required|max:4',
         ]);
 

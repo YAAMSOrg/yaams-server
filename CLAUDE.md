@@ -10,6 +10,8 @@ YAAMS (Yet Another Airline Management System) is a Laravel 12.x application prov
 
 ## Commands
 
+All php artisan commands have to run using the Docker container in which PHP runs. For example: `docker exec yaams-dev-app php artisan`
+
 ### Database Setup / Reset
 ```bash
 docker exec yaams-dev-app php artisan migrate --seed

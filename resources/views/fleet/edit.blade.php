@@ -80,7 +80,7 @@
 
                             <div class="col-md-6">
                                 <label for="msn" class="form-label fw-semibold">MSN <span class="text-muted">(Optional)</span></label>
-                                <input type="text" class="form-control" id="msn" name="msn" value="{{ old('msn', $aircraft->msn) }}" maxlength="50" placeholder="e.g. 29314">
+                                <input type="text" class="form-control font-monospace" id="msn" name="msn" value="{{ old('msn', $aircraft->msn) }}" maxlength="6" pattern="[0-9]{1,6}" inputmode="numeric" placeholder="e.g. 29314">
                                 <div class="form-text fs-7">Manufacturer Serial Number</div>
                             </div>
 
@@ -109,7 +109,7 @@
                             <div class="col-md-4">
                                 <label for="mtow" class="form-label fw-semibold">MTOW <span class="text-muted">(Optional)</span></label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="mtow" name="mtow" value="{{ old('mtow', $aircraft->mtow) }}" min="0" placeholder="e.g. 79010">
+                                    <input type="number" class="form-control" id="mtow" name="mtow" value="{{ old('mtow', $aircraft->mtow) }}" min="0" max="1000000" placeholder="e.g. 79010">
                                     <span class="input-group-text bg-light text-muted">kg</span>
                                 </div>
                                 <div class="form-text fs-7">Maximum Takeoff Weight</div>
@@ -118,7 +118,7 @@
                             <div class="col-md-4">
                                 <label for="mzfw" class="form-label fw-semibold">MZFW <span class="text-muted">(Optional)</span></label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="mzfw" name="mzfw" value="{{ old('mzfw', $aircraft->mzfw) }}" min="0" placeholder="e.g. 62730">
+                                    <input type="number" class="form-control" id="mzfw" name="mzfw" value="{{ old('mzfw', $aircraft->mzfw) }}" min="0" max="1000000" placeholder="e.g. 62730">
                                     <span class="input-group-text bg-light text-muted">kg</span>
                                 </div>
                                 <div class="form-text fs-7">Maximum Zero Fuel Weight</div>
@@ -127,7 +127,7 @@
                             <div class="col-md-4">
                                 <label for="mlw" class="form-label fw-semibold">MLW <span class="text-muted">(Optional)</span></label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="mlw" name="mlw" value="{{ old('mlw', $aircraft->mlw) }}" min="0" placeholder="e.g. 66349">
+                                    <input type="number" class="form-control" id="mlw" name="mlw" value="{{ old('mlw', $aircraft->mlw) }}" min="0" max="1000000" placeholder="e.g. 66349">
                                     <span class="input-group-text bg-light text-muted">kg</span>
                                 </div>
                                 <div class="form-text fs-7">Maximum Landing Weight</div>
@@ -219,7 +219,7 @@
                     <div class="card-body p-4">
                         <div class="mb-0">
                             <label for="remarks" class="form-label fw-semibold">Notes / Description</label>
-                            <textarea class="form-control" id="remarks" name="remarks" rows="4" placeholder="Optional notes, paint schemes, special features, etc...">{{ old('remarks', $aircraft->remarks) }}</textarea>
+                            <textarea class="form-control" id="remarks" name="remarks" rows="4" maxlength="1000" placeholder="Optional notes, paint schemes, special features, etc...">{{ old('remarks', $aircraft->remarks) }}</textarea>
                         </div>
                     </div>
                 </div>
