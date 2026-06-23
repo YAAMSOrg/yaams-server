@@ -93,9 +93,10 @@ class SetupController extends Controller
 
             // Admin user
             $user = User::create([
-                'name'     => $request->admin_name,
-                'email'    => $request->admin_email,
-                'password' => Hash::make($request->admin_password),
+                'name'              => $request->admin_name,
+                'email'             => $request->admin_email,
+                'password'          => Hash::make($request->admin_password),
+                'email_verified_at' => $now,
             ]);
 
             $user->assignRole($superAdminRole);
