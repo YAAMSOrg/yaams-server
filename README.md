@@ -1,12 +1,12 @@
 # YAAMS - Yet Another Airline Management System
 
-YAAMS is a modern, high-performance Virtual Airline Management System built with a strict "API-first" philosophy. Designed as a flexible alternative to legacy systems, YAAMS provides a robust foundation for virtual aviation organizations to manage their operations, fleets, and pilot communities through modern web technologies and a powerful RESTful interface.
+YAAMS is a modern, high-performance Virtual Airline Management System with a robust API designed as a flexible alternative to legacy systems, YAAMS provides a robust foundation for virtual aviation organizations to manage their operations, fleets, and pilot communities through modern web technologies and a powerful RESTful interface.
 
 ![video demo](https://github.com/YAAMSOrg/yaams-server/blob/main/Docs/res/showcase.gif)
 
 ## Core Pillars
 
-### API-First Architecture
+### Powerful API Architecture
 Every feature available in the web interface is backed by a fully documented RESTful API (v1). This allows developers to build custom ACARS clients, mobile apps, or specialized flight tracking tools that integrate seamlessly with the YAAMS ecosystem.
 
 ### Comprehensive PIREP Workflow
@@ -19,7 +19,7 @@ YAAMS features a sophisticated Flight Reporting (PIREP) system:
 ### Professional Fleet Management
 Manage your airline's assets with precision:
 * Detailed aircraft tracking including service dates and airframe history.
-* Status-aware fleet listings (Active/Inactive).
+* Status-aware fleet listings (Active/Inactive/Decommissioned).
 * Automated airframe metrics based on validated flight hours.
 
 ### Pilot Experience

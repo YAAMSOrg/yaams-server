@@ -5,17 +5,17 @@ This document tracks ideas for increasing the realism and detail of the YAAMS (Y
 ## 1. Aircraft (Fleet & Technical)
 Increasing the level of detail for airframes.
 
-- **MSN (Manufacturer Serial Number):** Unique serial number from the manufacturer.
-- **Engine Type:** Specific engine variants (e.g., CFM56-5B4 vs. IAE V2527-A5).
+- **MSN (Manufacturer Serial Number):** Unique serial number from the manufacturer. ✓
+- **Engine Type:** Specific engine variants (e.g., CFM56-5B4 vs. IAE V2527-A5). ✓
 - **Maintenance Status:**
     - Tracking of `Total Cycles` (landings) and `Airframe Hours`.
     - Maintenance intervals (A, B, C, D-Checks) with downtime.
 - **Technical Codes:**
-    - **SELCAL:** 4-character radio code (e.g., AB-CD).
-    - **HEX Code:** Mode-S transponder address.
+    - **SELCAL:** 4-character radio code (e.g., AB-CD). ✓
+    - **HEX Code:** Mode-S transponder address. ✓
 - **Configuration (LOPA):** Seating configuration (First/Business/Premium Eco/Economy).
-- **Weights (Performance):** MTOW (Max Takeoff), MZFW (Max Zero Fuel), MLW (Max Landing Weight).
-- **Visual Options:** Presence of winglets, SATCOM humps, etc.
+- **Weights (Performance):** MTOW (Max Takeoff), MZFW (Max Zero Fuel), MLW (Max Landing Weight). ✓
+- **Visual Options:** Presence of winglets, SATCOM humps, etc. ✓
 - **Registry & Transfer History (Multi-VA Trading / Leasing):**
     - **Ownership & Leasing:** Allow airlines to sell or lease (wet/dry lease) aircraft to other Virtual Airlines on the same YAAMS instance.
     - **Aircraft Registration Log:** A chronological history log of ownership changes and leases (e.g., *"Delivered to Airline A on 2026-01-01"*, *"Leased to Airline B on 2026-06-15"*, *"Sold to Airline C on 2027-01-10"*), mimicking real-world spotter sites like Planespotters or Airfleets.
