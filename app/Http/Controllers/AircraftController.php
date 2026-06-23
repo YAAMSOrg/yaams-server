@@ -146,7 +146,15 @@ class AircraftController extends Controller
             return redirect()->route('fleetmanager')->with('success', 'Aircraft registered successfully.');
         }
 
-        return view('fleet.create');
+        $manufacturers = Aircraft::distinct()->orderBy('manufacturer')->pluck('manufacturer');
+        $models = Aircraft::distinct()->orderBy('model')->pluck('model');
+        $engines = Aircraft::distinct()->whereNotNull('engine_type')->where('engine_type', '<>', '')->orderBy('engine_type')->pluck('engine_type');
+
+        return view('fleet.create', [
+            'manufacturers' => $manufacturers,
+            'models' => $models,
+            'engines' => $engines
+        ]);
     }
 
     public function edit(Request $request, Aircraft $aircraft) {

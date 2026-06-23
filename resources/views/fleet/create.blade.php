@@ -61,12 +61,22 @@
 
                             <div class="col-md-6">
                                 <label for="manufacturer" class="form-label fw-semibold">Manufacturer <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="manufacturer" name="manufacturer" value="{{ old('manufacturer') }}" maxlength="100" placeholder="e.g. Boeing" required>
+                                <input type="text" class="form-control" id="manufacturer" name="manufacturer" value="{{ old('manufacturer') }}" list="manufacturers_list" maxlength="100" placeholder="e.g. Boeing" required>
+                                <datalist id="manufacturers_list">
+                                    @foreach($manufacturers as $manufacturer)
+                                        <option value="{{ $manufacturer }}">
+                                    @endforeach
+                                </datalist>
                             </div>
 
                             <div class="col-md-6">
                                 <label for="model" class="form-label fw-semibold">Model Variant <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="model" name="model" value="{{ old('model') }}" maxlength="100" placeholder="e.g. 737-800" required>
+                                <input type="text" class="form-control" id="model" name="model" value="{{ old('model') }}" list="models_list" maxlength="100" placeholder="e.g. 737-800" required>
+                                <datalist id="models_list">
+                                    @foreach($models as $model)
+                                        <option value="{{ $model }}">
+                                    @endforeach
+                                </datalist>
                             </div>
                         </div>
                     </div>
@@ -81,7 +91,12 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="engine_type" class="form-label fw-semibold">Engine Variant <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="engine_type" name="engine_type" value="{{ old('engine_type') }}" maxlength="100" placeholder="e.g. CFM56-7B26" required>
+                                <input type="text" class="form-control" id="engine_type" name="engine_type" value="{{ old('engine_type') }}" list="engines_list" maxlength="100" placeholder="e.g. CFM56-7B26" required>
+                                <datalist id="engines_list">
+                                    @foreach($engines as $engine)
+                                        <option value="{{ $engine }}">
+                                    @endforeach
+                                </datalist>
                                 <div class="form-text fs-7">Specific engine variant (Required)</div>
                             </div>
 
