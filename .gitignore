@@ -19,3 +19,4 @@ yarn-error.log
 /.idea/yaams-server.imla
 .bash_history
 .composer/
+.claude/
