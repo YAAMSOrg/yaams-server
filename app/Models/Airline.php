@@ -17,7 +17,21 @@ class Airline extends Model
         'prefix',
         'icao_callsign',
         'atc_callsign',
-        'unit_is_lbs'
+        'unit_is_lbs',
+        'hub',
+        'country',
+        'description',
+        'website',
+        'founded_at',
+        'active',
+        'require_pirep_review',
+    ];
+
+    protected $casts = [
+        'founded_at'           => 'date',
+        'unit_is_lbs'          => 'boolean',
+        'active'               => 'boolean',
+        'require_pirep_review' => 'boolean',
     ];
 
     /***

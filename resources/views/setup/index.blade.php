@@ -135,6 +135,88 @@
                 </div>
             </div>
 
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <label for="airline_hub" class="form-label">Main hub <span class="text-muted fw-normal">(ICAO)</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-geo-alt text-secondary"></i></span>
+                        <input type="text"
+                               id="airline_hub"
+                               name="airline_hub"
+                               class="form-control text-uppercase @error('airline_hub') is-invalid @enderror"
+                               placeholder="EDDF"
+                               maxlength="4"
+                               oninput="this.value = this.value.toUpperCase()"
+                               value="{{ old('airline_hub') }}"
+                               required>
+                    </div>
+                    @error('airline_hub')
+                        <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-sm-6">
+                    <label for="airline_country" class="form-label">Country <span class="text-muted fw-normal">(ISO 3166-1)</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-flag text-secondary"></i></span>
+                        <input type="text"
+                               id="airline_country"
+                               name="airline_country"
+                               class="form-control text-uppercase @error('airline_country') is-invalid @enderror"
+                               placeholder="DE"
+                               maxlength="2"
+                               oninput="this.value = this.value.toUpperCase()"
+                               value="{{ old('airline_country') }}"
+                               required>
+                    </div>
+                    @error('airline_country')
+                        <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="airline_founded" class="form-label">Founded <span class="text-muted fw-normal">(optional)</span></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar text-secondary"></i></span>
+                    <input type="date"
+                           id="airline_founded"
+                           name="airline_founded"
+                           class="form-control @error('airline_founded') is-invalid @enderror"
+                           value="{{ old('airline_founded', now()->toDateString()) }}">
+                </div>
+                @error('airline_founded')
+                    <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="airline_website" class="form-label">Website <span class="text-muted fw-normal">(optional)</span></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-link-45deg text-secondary"></i></span>
+                    <input type="url"
+                           id="airline_website"
+                           name="airline_website"
+                           class="form-control @error('airline_website') is-invalid @enderror"
+                           placeholder="https://my-va.example.com"
+                           value="{{ old('airline_website') }}">
+                </div>
+                @error('airline_website')
+                    <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="airline_desc" class="form-label">Description <span class="text-muted fw-normal">(optional)</span></label>
+                <textarea id="airline_desc"
+                          name="airline_desc"
+                          class="form-control @error('airline_desc') is-invalid @enderror"
+                          rows="3"
+                          placeholder="A short description of your virtual airline…">{{ old('airline_desc') }}</textarea>
+                @error('airline_desc')
+                    <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="mb-3">
                 <label class="form-label d-block">Weight unit</label>
                 <div class="btn-group w-100" role="group">

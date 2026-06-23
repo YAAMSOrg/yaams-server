@@ -34,6 +34,11 @@ class SetupController extends Controller
             'airline_prefix'   => 'required|string|max:2|min:2|alpha',
             'airline_icao'     => 'required|string|max:3|min:2|alpha',
             'airline_callsign' => 'required|alpha|min:2|max:10',
+            'airline_hub'      => 'required|string|max:4|exists:airports,icao_code',
+            'airline_country'  => 'required|string|size:2|alpha',
+            'airline_desc'     => 'nullable|string|max:1000',
+            'airline_website'  => 'nullable|url|max:255',
+            'airline_founded'  => 'nullable|date',
             'unit_is_lbs'      => 'nullable|boolean',
             'admin_name'       => 'required|string|max:255',
             'admin_email'      => 'required|email|max:255',
@@ -84,11 +89,18 @@ class SetupController extends Controller
             $callsign = strtoupper($request->airline_callsign);
 
             $airline = Airline::create([
-                'name'          => $request->airline_name,
-                'prefix'        => strtoupper($request->airline_prefix),
-                'icao_callsign' => $icao,
-                'atc_callsign'  => $callsign,
-                'unit_is_lbs'   => $request->boolean('unit_is_lbs'),
+                'name'                 => $request->airline_name,
+                'prefix'               => strtoupper($request->airline_prefix),
+                'icao_callsign'        => $icao,
+                'atc_callsign'         => $callsign,
+                'unit_is_lbs'          => $request->boolean('unit_is_lbs'),
+                'hub'                  => strtoupper($request->airline_hub),
+                'country'              => strtoupper($request->airline_country),
+                'description'          => $request->airline_desc,
+                'website'              => $request->airline_website,
+                'founded_at'           => $request->airline_founded ?? now()->toDateString(),
+                'active'               => true,
+                'require_pirep_review' => true,
             ]);
 
             // Admin user
