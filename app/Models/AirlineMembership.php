@@ -11,7 +11,8 @@ class AirlineMembership extends Model
 
     protected $fillable = [
         'airline_id',
-        'user_id'
+        'user_id',
+        'role',
     ];
 
     public function airline()

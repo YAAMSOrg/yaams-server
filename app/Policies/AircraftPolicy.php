@@ -30,6 +30,6 @@ class AircraftPolicy
     public function update(User $user, Aircraft $aircraft): bool
     {
         $activeAirline = session('activeairline');
-        return $user->can('edit aircraft') && $activeAirline && $aircraft->ownedBy($activeAirline);
+        return $activeAirline && $aircraft->ownedBy($activeAirline) && $user->isManagerOf($activeAirline);
     }
 }

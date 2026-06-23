@@ -7,6 +7,11 @@ use App\Http\Controllers\FlightController;
 use App\Http\Controllers\AircraftController;
 use App\Http\Controllers\AirlineMembershipController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\SetupController;
+
+// Setup wizard — only accessible before any user exists
+Route::get('/setup', [SetupController::class, 'show'])->name('setup.index');
+Route::post('/setup', [SetupController::class, 'store'])->name('setup.store');
 
 // Global Welcome / Guest landing page
 Route::get("/", function () {

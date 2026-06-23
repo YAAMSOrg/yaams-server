@@ -24,7 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'homebase',
+        'email_verified_at',
     ];
 
     /**
@@ -79,12 +79,31 @@ class User extends Authenticatable
 
     public function airlines(): BelongsToMany
     {
-        return $this->belongsToMany(Airline::class, 'airline_memberships', 'user_id', 'airline_id');
+        return $this->belongsToMany(Airline::class, 'airline_memberships', 'user_id', 'airline_id')
+                    ->withPivot('role');
     }
 
-    public function isMemberOf(Airline $airline) : bool
+    public function isMemberOf(Airline $airline): bool
     {
         return $this->airlines()->where('airline_id', $airline->id)->exists();
+    }
+
+    public function hasAirlineRole(Airline $airline, string|array $roles): bool
+    {
+        return $this->airlines()
+            ->where('airline_id', $airline->id)
+            ->wherePivotIn('role', (array) $roles)
+            ->exists();
+    }
+
+    public function isManagerOf(Airline $airline): bool
+    {
+        return $this->hasAirlineRole($airline, 'Manager');
+    }
+
+    public function canReviewFlightsFor(Airline $airline): bool
+    {
+        return $this->hasAirlineRole($airline, ['Dispatcher', 'Manager']);
     }
 
     public function notifications()

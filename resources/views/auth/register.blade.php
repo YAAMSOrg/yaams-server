@@ -45,19 +45,6 @@
             </div>
 
             <div class="mb-3">
-                <label for="homebase" class="form-label">Home base (ICAO code)</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-geo-alt text-secondary"></i></span>
-                    <input type="text" id="homebase" class="form-control @error('homebase') is-invalid @enderror" name="homebase" placeholder="e.g. EDDK" required value="{{ old('homebase') }}">
-                </div>
-                @error('homebase')
-                    <div class="invalid-feedback d-block mt-1">
-                        {{ $message }}
-                    </div>
-                @enderror
-            </div>
-
-            <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock text-secondary"></i></span>

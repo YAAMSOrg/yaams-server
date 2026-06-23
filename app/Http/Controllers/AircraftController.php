@@ -96,8 +96,8 @@ class AircraftController extends Controller
     public function create(Request $request) {
         $currentActiveAirline = $request->session()->get('activeairline');
 
-        if (!auth()->user()->can('add aircraft')) {
-            return redirect()->route('dashboard')->with('error', 'You do not have permission to add aircraft.');
+        if (!auth()->user()->isManagerOf($currentActiveAirline)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have permission to add aircraft to this airline.');
         }
 
         if ($request->getMethod() == "POST") {

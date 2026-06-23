@@ -25,7 +25,8 @@ class Airline extends Model
      */
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'airline_memberships', 'airline_id', 'user_id');
+        return $this->belongsToMany(User::class, 'airline_memberships', 'airline_id', 'user_id')
+                    ->withPivot('role');
     }
 
     /***
