@@ -10,14 +10,29 @@ class Aircraft extends Model
 {
    use HasFactory;
 
-   protected $fillable = [
+    protected $fillable = [
         'registration',
         'manufacturer',
         'model',
+        'engine_type',
+        'satcom',
+        'winglets',
+        'selcal',
+        'hex_code',
+        'msn',
+        'mtow',
+        'mzfw',
+        'mlw',
         'remarks',
         'current_loc',
         'used_by',
         'active'
+    ];
+
+    protected $casts = [
+        'satcom' => 'boolean',
+        'winglets' => 'boolean',
+        'active' => 'boolean',
     ];
 
     protected $appends = [

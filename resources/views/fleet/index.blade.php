@@ -47,9 +47,9 @@
             </div>
             @can('add aircraft')
                 <div>
-                    <button type="button" class="btn btn-success px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#addAircraftModal">
+                    <a href="{{ route('createaircraft') }}" class="btn btn-success px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
                         <i class="bi bi-plus-circle"></i> Add Aircraft
-                    </button>
+                    </a>
                 </div>
             @endcan
         </div>
@@ -222,9 +222,9 @@
                         <h5 class="fw-bold text-dark mb-1">No Aircraft Found</h5>
                         <p class="text-secondary small max-w-md mx-auto mb-3">Your airline fleet is currently empty. Get started by registering your first airframe.</p>
                         @can('add aircraft')
-                            <button type="button" class="btn btn-sm btn-success px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addAircraftModal">
+                            <a href="{{ route('createaircraft') }}" class="btn btn-sm btn-success px-3 shadow-sm">
                                 Add First Aircraft
-                            </button>
+                            </a>
                         @endcan
                     @endif
                 </div>
@@ -234,60 +234,7 @@
     </div>
 </div>
 
-@can('add aircraft')
-<div class="modal fade" id="addAircraftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addAircraftModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-light border-bottom-0 py-3 px-4">
-                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="addAircraftModalLabel">
-                    <i class="bi bi-airplane-fill text-success"></i> Add New Aircraft
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ route('fleetmanager') }}" method="post">
-                @csrf
-                <div class="modal-body p-4">
-                    <input type="hidden" id="in_service_since" name="in_service_since" value="{{ date('Y-m-d') }}">
-                    <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->id }}">
 
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <label for="registration" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Registration</label>
-                            <input type="text" id="registration" name="registration" style="text-transform:uppercase" class="form-control font-monospace" required placeholder="D-EXAM" minlength="4" maxlength="6">
-                            <div class="form-text fs-7">Tail number (e.g. N172VA)</div>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <label for="current_loc" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">First Location</label>
-                            <input type="text" class="form-control font-monospace text-uppercase" id="current_loc" name="current_loc" minlength="4" maxlength="4" pattern="[A-Za-z]+" required placeholder="EDDL">
-                            <div class="form-text fs-7">4-Letter ICAO hub</div>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="manufacturer" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Manufacturer</label>
-                            <input type="text" class="form-control" id="manufacturer" name="manufacturer" maxlength="100" required placeholder="Boeing">
-                        </div>
-
-                        <div class="col-12">
-                            <label for="model" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Model Variant</label>
-                            <input type="text" class="form-control" id="model" name="model" maxlength="100" required placeholder="737-800WL">
-                        </div>
-
-                        <div class="col-12">
-                            <label for="remarks" class="form-label text-secondary small fw-bold text-uppercase tracking-wider">Remarks / Description</label>
-                            <textarea class="form-control" style="font-size: 14px;" rows="3" id="remarks" name="remarks" placeholder="Optional notes, winglet configuration, special livery, etc."></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-top-0 py-3 px-4">
-                    <button type="button" class="btn btn-outline-secondary px-3 py-1.5 fs-6" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success px-4 py-1.5 fs-6 shadow-sm">Save Airframe</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endcan
 
 <style>
     /* Zusätzlicher nützlicher Hilfsstyle für kleinere Controls */

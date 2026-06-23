@@ -69,6 +69,11 @@ Route::middleware(['auth'])->group(function () {
         AircraftController::class,
         "index",
     ])->name("fleetmanager");
+    Route::match(["GET", "POST"], "/airline/fleetmanager/create", [
+        AircraftController::class,
+        "create",
+    ])->name("createaircraft")
+      ->middleware(["can:add aircraft"]);
     Route::get("/airline/fleetmanager/view/{aircraft}", [
         AircraftController::class,
         "view",

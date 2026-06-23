@@ -85,27 +85,116 @@
 
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
-                    <i class="bi bi-card-text text-muted me-2"></i> Technical Specifications & Details
+                    <i class="bi bi-card-text text-muted me-2"></i> Technical Specifications & Configuration
                 </div>
                 <div class="card-body p-0">
-                    <table class="table table-striped table-hover mb-0 align-middle">
-                        <tbody>
-                            <tr>
-                                <td class="text-muted ps-4 py-3" style="width: 35%;">In Service Since</td>
-                                <td class="fw-medium pe-4">{{ \Carbon\Carbon::parse($aircraft->created_at)->format('Y-m-d') }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted ps-4 py-3">Total Distance Flown</td>
-                                <td class="fw-medium pe-4">{{ number_format($aircraft->total_distance_flown) }} NM</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted ps-4 py-3">Remarks / Description</td>
-                                <td class="pe-4 italic text-muted">
-                                    {{ $aircraft->remarks ? $aircraft->remarks : 'No remarks specified for this aircraft.' }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="row g-0">
+                        <div class="col-md-6 border-end">
+                            <table class="table table-striped table-hover mb-0 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2" class="bg-light ps-4 py-2 text-secondary fw-bold fs-7 text-uppercase">General & Tech Codes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-muted ps-4 py-2.5" style="width: 45%;">Manufacturer MSN</td>
+                                        <td class="fw-semibold pe-4">{{ $aircraft->msn ?? 'Not Specified' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted ps-4 py-2.5">SELCAL Code</td>
+                                        <td class="fw-semibold font-monospace text-primary pe-4">{{ $aircraft->selcal ?? 'Not Assigned' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted ps-4 py-2.5">ICAO 24-bit Hex</td>
+                                        <td class="fw-semibold font-monospace text-dark pe-4">{{ $aircraft->hex_code ?? 'Not Assigned' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted ps-4 py-2.5">In Service Since</td>
+                                        <td class="fw-medium pe-4">{{ \Carbon\Carbon::parse($aircraft->created_at)->format('Y-m-d') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted ps-4 py-2.5">Distance Flown</td>
+                                        <td class="fw-medium pe-4">{{ number_format($aircraft->total_distance_flown) }} NM</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-striped table-hover mb-0 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2" class="bg-light ps-4 py-2 text-secondary fw-bold fs-7 text-uppercase">Propulsion & Equipment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-muted ps-4 py-2.5" style="width: 45%;">Engine Variant</td>
+                                        <td class="fw-bold text-success pe-4">{{ $aircraft->engine_type ?? 'Unknown' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted ps-4 py-2.5">SATCOM</td>
+                                        <td class="pe-4">
+                                            @if($aircraft->satcom)
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
+                                                    <i class="bi bi-wifi me-1"></i> Equipped
+                                                </span>
+                                            @else
+                                                <span class="badge bg-light text-muted border px-2.5 py-1">None</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted ps-4 py-2.5">Wingtip Devices</td>
+                                        <td class="pe-4">
+                                            @if($aircraft->winglets)
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
+                                                    <i class="bi bi-airplane-engines me-1"></i> Winglets
+                                                </span>
+                                            @else
+                                                <span class="badge bg-light text-muted border px-2.5 py-1">None</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Weight Profile Section -->
+                    <div class="border-top">
+                        <table class="table table-striped table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th colspan="6" class="bg-light ps-4 py-2 text-secondary fw-bold fs-7 text-uppercase">Performance Weights</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-muted ps-4 py-2.5" style="width: 20%;">MTOW</td>
+                                    <td class="fw-semibold text-dark py-2.5" style="width: 13%;">
+                                        {{ $aircraft->mtow ? number_format($aircraft->mtow) . ' kg' : 'N/A' }}
+                                    </td>
+                                    <td class="text-muted py-2.5" style="width: 20%;">MZFW</td>
+                                    <td class="fw-semibold text-dark py-2.5" style="width: 13%;">
+                                        {{ $aircraft->mzfw ? number_format($aircraft->mzfw) . ' kg' : 'N/A' }}
+                                    </td>
+                                    <td class="text-muted py-2.5" style="width: 20%;">MLW</td>
+                                    <td class="fw-semibold text-dark pe-4 py-2.5" style="width: 14%;">
+                                        {{ $aircraft->mlw ? number_format($aircraft->mlw) . ' kg' : 'N/A' }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Remarks Section -->
+                    <div class="border-top p-4 bg-light bg-opacity-30">
+                        <h6 class="fw-bold text-secondary fs-7 text-uppercase mb-2">Remarks / Configuration Details</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem; line-height: 1.5;">
+                            {{ $aircraft->remarks ? $aircraft->remarks : 'No additional remarks or custom configurations specified for this airframe.' }}
+                        </p>
+                    </div>
                 </div>
             </div>
 

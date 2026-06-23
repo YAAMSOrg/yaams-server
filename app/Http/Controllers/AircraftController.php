@@ -18,34 +18,6 @@ class AircraftController extends Controller
     public function index(Request $request) {
         $currentActiveAirline = $request->session()->get('activeairline');
 
-        if($request->getMethod() == "POST"){
-
-            // If user tries to send POST request, although he has no permission, redirect him instantly.
-            if(!auth()->user()->can('add aircraft')){
-                return redirect()->route('dashboard')->with('error', 'You did something nasty!');
-            }
-
-            // Validate form input
-            $validated = $request->validate([
-                'registration' => 'required|max:9|regex:/^[A-Z0-9]{1,2}-?[A-Z0-9]{3,5}$/i',
-                'manufacturer' => 'required|alphanum',
-                'model' => 'required',
-                'current_loc' => 'required|max:4',
-                'remarks' => 'alphanum|nullable',
-            ]);
-
-            // Check if user given airport exists, if not throw an exception.
-            if (!Airport::find($request->post('current_loc'))) {
-                throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
-            }
-
-            // Check if user given aircraft exists for the same airline and status = active. If not, throw exception.
-            if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $currentActiveAirline->id)->count() >= 1) {
-                throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
-            } else {
-                Aircraft::create($validated + ['used_by' => $currentActiveAirline->id]);
-            }
-        }
 
         // Base query with airline and search filters
         $fleetQuery = Aircraft::query()
@@ -121,6 +93,62 @@ class AircraftController extends Controller
         return view('fleet.index', ['fleet' => $fleet, 'maxPages' => $maxPages, 'currentPage' => $page]);
     }
 
+    public function create(Request $request) {
+        $currentActiveAirline = $request->session()->get('activeairline');
+
+        if (!auth()->user()->can('add aircraft')) {
+            return redirect()->route('dashboard')->with('error', 'You do not have permission to add aircraft.');
+        }
+
+        if ($request->getMethod() == "POST") {
+            $validated = $request->validate([
+                'registration' => 'required|max:9|regex:/^[A-Z0-9]{1,2}-?[A-Z0-9]{3,5}$/i|uppercase',
+                'manufacturer' => 'required|string|max:100',
+                'model' => 'required|string|max:100',
+                'engine_type' => 'required|string|max:100',
+                'satcom' => 'boolean',
+                'winglets' => 'boolean',
+                'selcal' => 'nullable|string|max:5|regex:/^[A-Z]{2}-?[A-Z]{2}$/i',
+                'hex_code' => 'nullable|string|size:6|regex:/^[A-F0-9]{6}$/i',
+                'msn' => 'nullable|string|max:50',
+                'mtow' => 'nullable|integer|min:0',
+                'mzfw' => 'nullable|integer|min:0',
+                'mlw' => 'nullable|integer|min:0',
+                'remarks' => 'nullable|string',
+                'current_loc' => 'required|max:4',
+            ]);
+
+            $validated['satcom'] = $request->boolean('satcom');
+            $validated['winglets'] = $request->boolean('winglets');
+            
+            if (isset($validated['selcal'])) {
+                $validated['selcal'] = strtoupper($validated['selcal']);
+            }
+            if (isset($validated['hex_code'])) {
+                $validated['hex_code'] = strtoupper($validated['hex_code']);
+            }
+
+            if (!Airport::find($request->post('current_loc'))) {
+                throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
+            }
+
+            $existingAircraft = Aircraft::where('active', 1)
+                ->where('registration', $validated['registration'])
+                ->where('used_by', $currentActiveAirline->id)
+                ->exists();
+
+            if ($existingAircraft) {
+                throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exists in this airline. Please set the aircraft inactive or choose another tail number.']);
+            }
+
+            Aircraft::create($validated + ['used_by' => $currentActiveAirline->id]);
+
+            return redirect()->route('fleetmanager')->with('success', 'Aircraft registered successfully.');
+        }
+
+        return view('fleet.create');
+    }
+
     public function edit(Request $request, Aircraft $aircraft) {
         // Authorize using AircraftPolicy
         if ($request->user()->cannot('update', $aircraft)) {
@@ -134,14 +162,27 @@ class AircraftController extends Controller
         if($request->getMethod() == "POST"){
             // Validate input
             $validated = $request->validate([
-                'registration' => 'required|uppercase|max:6',
-                'manufacturer' => 'required',
-                'model' => 'required',
-                'remarks' => 'nullable',
+                'registration' => 'required|max:9|regex:/^[A-Z0-9]{1,2}-?[A-Z0-9]{3,5}$/i|uppercase',
+                'manufacturer' => 'required|string|max:100',
+                'model' => 'required|string|max:100',
+                'engine_type' => 'required|string|max:100',
+                'satcom' => 'boolean',
+                'winglets' => 'boolean',
+                'selcal' => 'nullable|string|max:5|regex:/^[A-Z]{2}-?[A-Z]{2}$/i',
+                'hex_code' => 'nullable|string|size:6|regex:/^[A-F0-9]{6}$/i',
+                'msn' => 'nullable|string|max:50',
+                'mtow' => 'nullable|integer|min:0',
+                'mzfw' => 'nullable|integer|min:0',
+                'mlw' => 'nullable|integer|min:0',
+                'remarks' => 'nullable|string',
             ]);
 
-            // Konvertiert "on" zu true, und das Fehlen des Feldes automatisch zu false
+            // Convert to boolean and format strings
             $finalStatus = $request->boolean('active');
+            $satcom = $request->boolean('satcom');
+            $winglets = $request->boolean('winglets');
+            $selcal = $request->filled('selcal') ? strtoupper($request->post('selcal')) : null;
+            $hex_code = $request->filled('hex_code') ? strtoupper($request->post('hex_code')) : null;
 
             // Actually change the values
             $targetAircraft = Aircraft::find($aircraft->id);
@@ -149,10 +190,19 @@ class AircraftController extends Controller
             $targetAircraft->used_by = $currentActiveAirline->id;
             $targetAircraft->manufacturer = $request->post('manufacturer');
             $targetAircraft->model = $request->post('model');
-            $targetAircraft->active = $finalStatus; // Setzt jetzt zuverlässig true oder false
+            $targetAircraft->engine_type = $request->post('engine_type');
+            $targetAircraft->satcom = $satcom;
+            $targetAircraft->winglets = $winglets;
+            $targetAircraft->selcal = $selcal;
+            $targetAircraft->hex_code = $hex_code;
+            $targetAircraft->msn = $request->post('msn');
+            $targetAircraft->mtow = $request->post('mtow');
+            $targetAircraft->mzfw = $request->post('mzfw');
+            $targetAircraft->mlw = $request->post('mlw');
+            $targetAircraft->active = $finalStatus;
             $targetAircraft->remarks = $request->post('remarks');
 
-            // If we notice, that the registration has changed, we need to make a check if there is an aircraft with the same tail number already active
+            // If we notice that the registration has changed or active status, we need to check if there is another active aircraft with same tail number
             if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')) {
 
                 $existingAircraft = Aircraft::where('registration', $request->post('registration'))
@@ -170,7 +220,7 @@ class AircraftController extends Controller
             $targetAircraft->save();
 
             // And boom: Back to fleetmanager :)
-            return redirect()->route('fleetmanager');
+            return redirect()->route('fleetmanager')->with('success', 'Aircraft updated successfully.');
         }
 
         // If we just get a GET request, display the manager.

@@ -44,12 +44,34 @@ class AircraftAPIController extends Controller
         }
 
         $validated = $request->validate([
-            'registration' => 'required|max:6',
-            'manufacturer' => 'required',
-            'model' => 'required',
+            'registration' => 'required|max:9|regex:/^[A-Z0-9]{1,2}-?[A-Z0-9]{3,5}$/i',
+            'manufacturer' => 'required|string|max:100',
+            'model' => 'required|string|max:100',
+            'engine_type' => 'nullable|string|max:100',
+            'satcom' => 'boolean',
+            'winglets' => 'boolean',
+            'selcal' => 'nullable|string|max:5|regex:/^[A-Z]{2}-?[A-Z]{2}$/i',
+            'hex_code' => 'nullable|string|size:6|regex:/^[a-fA-F0-9]{6}$/i',
+            'msn' => 'nullable|string|max:50',
+            'mtow' => 'nullable|integer|min:0',
+            'mzfw' => 'nullable|integer|min:0',
+            'mlw' => 'nullable|integer|min:0',
+            'remarks' => 'nullable|string',
             'current_loc' => 'required|max:4',
-            'remarks' => 'nullable|alphanum',
         ]);
+
+        if (empty($validated['engine_type'])) {
+            $validated['engine_type'] = 'Unknown';
+        }
+        if (isset($validated['registration'])) {
+            $validated['registration'] = strtoupper($validated['registration']);
+        }
+        if (isset($validated['selcal'])) {
+            $validated['selcal'] = strtoupper($validated['selcal']);
+        }
+        if (isset($validated['hex_code'])) {
+            $validated['hex_code'] = strtoupper($validated['hex_code']);
+        }
 
         if (!Airport::find($request->post('current_loc'))) {
             throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
