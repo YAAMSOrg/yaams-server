@@ -45,13 +45,13 @@
                 <h1 class="display-5 fw-bold text-dark tracking-tight mb-1">Fleet Overview</h1>
                 <p class="text-muted lead mb-0 fs-6">Monitor all operational aircraft and their current hubs based on recent flight logs.</p>
             </div>
-            @can('add aircraft')
+            @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
                 <div>
                     <a href="{{ route('createaircraft') }}" class="btn btn-success px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
                         <i class="bi bi-plus-circle"></i> Add Aircraft
                     </a>
                 </div>
-            @endcan
+            @endif
         </div>
 
         @if($errors->any())
@@ -124,9 +124,9 @@
                                             Status {!! sortIcon('active') !!}
                                         </a>
                                     </th>
-                                    @can('edit aircraft')
+                                    @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
                                     <th scope="col" class="py-3 text-end pe-4">Actions</th>
-                                    @endcan
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody class="fs-6">
@@ -166,13 +166,13 @@
                                             @endif
                                         </td>
                                         
-                                        @can('edit aircraft')
+                                        @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
                                             <td class="py-3 text-end pe-4">
                                                 <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary px-2.5 py-1 shadow-xs fs-7">
                                                     <i class="bi bi-pencil-square"></i> Edit
                                                 </a>
                                             </td>
-                                        @endcan
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>                    
@@ -221,11 +221,11 @@
                     @else
                         <h5 class="fw-bold text-dark mb-1">No Aircraft Found</h5>
                         <p class="text-secondary small max-w-md mx-auto mb-3">Your airline fleet is currently empty. Get started by registering your first airframe.</p>
-                        @can('add aircraft')
+                        @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
                             <a href="{{ route('createaircraft') }}" class="btn btn-sm btn-success px-3 shadow-sm">
                                 Add First Aircraft
                             </a>
-                        @endcan
+                        @endif
                     @endif
                 </div>
             </div>

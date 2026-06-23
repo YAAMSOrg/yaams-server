@@ -261,6 +261,10 @@ class FlightController extends Controller
     {
         $currentActiveAirline = Session::get("activeairline");
 
+        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
+        }
+
         $flights = Flight::query()
             ->where("airline_id", $currentActiveAirline->id)
             ->where("status_id", "=", "1")
@@ -273,6 +277,10 @@ class FlightController extends Controller
     public function acceptFlight(Flight $flight)
     {
         $currentActiveAirline = Session::get("activeairline");
+
+        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
+        }
 
         // Is the flight part of the active airline?
         if ($currentActiveAirline->id !== $flight->airline_id) {
@@ -300,6 +308,10 @@ class FlightController extends Controller
     public function rejectFlight(Request $request, Flight $flight)
     {
         $currentActiveAirline = session()->get("activeairline");
+
+        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
+        }
 
         // Is the flight part of the active airline?
         if ($currentActiveAirline->id !== $flight->airline_id) {

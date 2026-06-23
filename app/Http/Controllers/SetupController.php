@@ -100,7 +100,7 @@ class SetupController extends Controller
             ]);
 
             $user->assignRole($superAdminRole);
-            $airline->users()->attach($user);
+            $airline->users()->attach($user, ['role' => 'Manager']);
 
             auth()->login($user);
             session(['activeairline' => $airline]);

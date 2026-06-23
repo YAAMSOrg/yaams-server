@@ -4,7 +4,6 @@ namespace App\Listeners;
 
 use App\Events\FlightFiled;
 use App\Models\Notification;
-use App\Models\User;
 
 class FlightFiledNotification
 {
@@ -24,9 +23,9 @@ class FlightFiledNotification
         $airline = $flight->airline;
         $pilot = $flight->pilot;
 
-        // Find all users in this airline who have the 'review flight' permission
+        // Find all Dispatchers and Managers in this airline
         $reviewers = $airline->users()
-            ->whereIn('users.id', User::permission('review flight')->pluck('id'))
+            ->wherePivotIn('role', ['Dispatcher', 'Manager'])
             ->get();
 
         foreach ($reviewers as $reviewer) {

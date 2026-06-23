@@ -15,43 +15,19 @@ class AirlineMembershipSeeder extends Seeder
      */
     public function run(): void
     {
-        // Max Mustermann is member of the two demo airlines
-        DB::table('airline_memberships')->insert([
-            'airline_id' => "2",
-            'user_id' => "2",
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString(),
-        ]);
-        DB::table('airline_memberships')->insert([
-            'airline_id' => "1",
-            'user_id' => "2",
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString(),
-        ]);
-        DB::table('airline_memberships')->insert([
-            'airline_id' => "3",
-            'user_id' => "1",
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString(),
-        ]);
-        DB::table('airline_memberships')->insert([
-            'airline_id' => "1",
-            'user_id' => "3",
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString(),
-        ]);
-        DB::table('airline_memberships')->insert([
-            'airline_id' => "2",
-            'user_id' => "3",
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString(),
-        ]);
-        DB::table('airline_memberships')->insert([
-            'airline_id' => "3",
-            'user_id' => "3",
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString(),
-        ]);
+        $now = Carbon::now()->toDateTimeString();
+
+        // Max Mustermann: Dispatcher on airline 1, Manager on airline 2
+        DB::table('airline_memberships')->insert(['airline_id' => 1, 'user_id' => 2, 'role' => 'Dispatcher', 'created_at' => $now, 'updated_at' => $now]);
+        DB::table('airline_memberships')->insert(['airline_id' => 2, 'user_id' => 2, 'role' => 'Manager',    'created_at' => $now, 'updated_at' => $now]);
+
+        // Homer Simpson: Pilot on airline 3
+        DB::table('airline_memberships')->insert(['airline_id' => 3, 'user_id' => 1, 'role' => 'Pilot',     'created_at' => $now, 'updated_at' => $now]);
+
+        // Admin: Manager on all three demo airlines (Super-Admin bypasses anyway)
+        DB::table('airline_memberships')->insert(['airline_id' => 1, 'user_id' => 3, 'role' => 'Manager',   'created_at' => $now, 'updated_at' => $now]);
+        DB::table('airline_memberships')->insert(['airline_id' => 2, 'user_id' => 3, 'role' => 'Manager',   'created_at' => $now, 'updated_at' => $now]);
+        DB::table('airline_memberships')->insert(['airline_id' => 3, 'user_id' => 3, 'role' => 'Manager',   'created_at' => $now, 'updated_at' => $now]);
 
         // Randomly assign existing users (Homer: 1, Max: 2, Admin: 3) to new airlines (4 to 10)
         for ($airlineId = 4; $airlineId <= 10; $airlineId++) {
@@ -61,8 +37,9 @@ class AirlineMembershipSeeder extends Seeder
                     DB::table('airline_memberships')->insert([
                         'airline_id' => $airlineId,
                         'user_id' => $userId,
-                        'created_at' => Carbon::now()->toDateTimeString(),
-                        'updated_at' => Carbon::now()->toDateTimeString(),
+                        'role' => 'Pilot',
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ]);
                 }
             }

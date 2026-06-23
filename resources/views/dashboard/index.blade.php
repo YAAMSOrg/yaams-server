@@ -71,7 +71,7 @@
                 <i class="bi bi-shield-slash-fill fs-4 text-danger"></i>
                 <div>
                     <h6 class="alert-heading fw-bold mb-1">An error occurred</h6>
-                    <p class="small mb-0 text-secondary">Something went sideways! Please try again or contact an admin.</p>
+                    <p class="small mb-0 text-secondary">{{ session('error') }}</p>
                 </div>
             </div>
         @endif

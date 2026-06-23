@@ -73,10 +73,10 @@
                         <ul class="dropdown-menu shadow-sm border-0" aria-labelledby="navbarDropdownFlights">
                             <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
                             <li><a class="dropdown-item" href="{{ route('flightadd') }}">File a PIREP</a></li>
-                            @can('review flight')
+                            @if(session('activeairline') && auth()->user()->canReviewFlightsFor(session('activeairline')))
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ route('flightreviewindex') }}">Review flights</a></li>
-                            @endcan
+                            @endif
                         </ul>
                     </li>
                     <li class="nav-item">
