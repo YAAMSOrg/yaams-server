@@ -66,7 +66,7 @@
                            id="airline_name"
                            name="airline_name"
                            class="form-control @error('airline_name') is-invalid @enderror"
-                           placeholder="e.g. FlySimWorld Airlines"
+                           placeholder="e.g. My virtual airline"
                            value="{{ old('airline_name') }}"
                            required>
                 </div>
@@ -84,7 +84,7 @@
                                id="airline_prefix"
                                name="airline_prefix"
                                class="form-control text-uppercase @error('airline_prefix') is-invalid @enderror"
-                               placeholder="FW"
+                               placeholder="VA"
                                maxlength="2"
                                value="{{ old('airline_prefix') }}"
                                required>
@@ -101,7 +101,7 @@
                                id="airline_icao"
                                name="airline_icao"
                                class="form-control text-uppercase @error('airline_icao') is-invalid @enderror"
-                               placeholder="FSW"
+                               placeholder="MVA"
                                maxlength="3"
                                value="{{ old('airline_icao') }}"
                                required>
@@ -118,7 +118,7 @@
                                id="airline_callsign"
                                name="airline_callsign"
                                class="form-control text-uppercase @error('airline_callsign') is-invalid @enderror"
-                               placeholder="FLYSIM"
+                               placeholder="VIRTUAL"
                                maxlength="10"
                                style="text-transform: uppercase"
                                oninput="this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '')"
