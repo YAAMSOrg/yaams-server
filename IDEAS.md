@@ -16,6 +16,11 @@ Increasing the level of detail for airframes.
 - **Configuration (LOPA):** Seating configuration (First/Business/Premium Eco/Economy).
 - **Weights (Performance):** MTOW (Max Takeoff), MZFW (Max Zero Fuel), MLW (Max Landing Weight).
 - **Visual Options:** Presence of winglets, SATCOM humps, etc.
+- **Registry & Transfer History (Multi-VA Trading / Leasing):**
+    - **Ownership & Leasing:** Allow airlines to sell or lease (wet/dry lease) aircraft to other Virtual Airlines on the same YAAMS instance.
+    - **Aircraft Registration Log:** A chronological history log of ownership changes and leases (e.g., *"Delivered to Airline A on 2026-01-01"*, *"Leased to Airline B on 2026-06-15"*, *"Sold to Airline C on 2027-01-10"*), mimicking real-world spotter sites like Planespotters or Airfleets.
+    - **Instance-Wide Aircraft Registry:** A public directory of all airframes on the YAAMS instance, allowing spotters and pilots to look up any aircraft by registration/MSN and see its complete history.
+    - **Flight Log Integrity on Transfer:** When an aircraft is transferred to another airline, its historical flight logs remain associated with the airline that originally operated them, while the physical airframe moves to the new airline carrying over its accumulated hours, MSN, engine type, and maintenance history.
 
 ## 2. Flight / PIREP (Pilot Reports)
 Detailed analysis of flight execution.
