@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -24,14 +23,12 @@ class RegisterController extends Controller
         $this->validate($request, [
             'name' => 'required|max:255|string',
             'email' => 'required|email|max:255',
-            'homebase' => 'max:4',
             'password' => 'required|confirmed'
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'homebase' => Str::upper($request->homebase),
             'password' => Hash::make($request->password)
         ]);
 

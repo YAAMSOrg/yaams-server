@@ -220,6 +220,14 @@ class FlightController extends Controller
             return redirect()->route("flightlist");
         }
 
+        // Guard: no aircraft means the form is unusable
+        if ($currentActiveAirline->activeAircraft->isEmpty()) {
+            return redirect()->route('flightlist')->with(
+                'error',
+                'You need to add an aircraft first before adding a flight!'
+            );
+        }
+
         // Get all available online networks to display in the select
         $prefill_select_online_network = OnlineNetwork::query()->get();
 

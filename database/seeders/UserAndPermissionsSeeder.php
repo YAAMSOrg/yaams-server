@@ -44,7 +44,6 @@ class UserAndPermissionsSeeder extends Seeder
             'name' => 'Homer Simpson',
             'email' => 'homer@test.com',
             'password' => Hash::make('start'),
-            'homebase' => 'EDDF'
         ]);
         $user->assignRole($role1);
         $generatedToken = $user->createToken("homertoken")->plainTextToken;
@@ -54,7 +53,6 @@ class UserAndPermissionsSeeder extends Seeder
             'name' => 'Max Mustermann',
             'email' => 'test@test.com',
             'password' => Hash::make('start'),
-            'homebase' => 'EDDF'
         ]);
         $user->assignRole($role2);
         $generatedToken = $user->createToken("maxtoken")->plainTextToken;
@@ -64,7 +62,6 @@ class UserAndPermissionsSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@test.com',
             'password' => Hash::make('start'),
-            'homebase' => 'EDDM'
         ]);
         $user->assignRole($role3);
         $generatedToken = $user->createToken("admintoken")->plainTextToken;
