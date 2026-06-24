@@ -1,32 +1,17 @@
 # YAAMS - Yet Another Airline Management System
 
-YAAMS is a modern, high-performance Virtual Airline Management System with a robust API designed as a flexible alternative to legacy systems, YAAMS provides a robust foundation for virtual aviation organizations to manage their operations, fleets, and pilot communities through modern web technologies and a powerful RESTful interface.
+An decentralised open-source virtual airline management platform. Track PIREPs, manage fleets, and build thriving virtual airline communities — all in one place.
 
 ![video demo](https://github.com/YAAMSOrg/yaams-server/blob/main/Docs/res/showcase.gif)
 
-## Core Pillars
+## Features
 
-### Powerful API Architecture
-Every feature available in the web interface is backed by a fully documented RESTful API (v1). This allows developers to build custom ACARS clients, mobile apps, or specialized flight tracking tools that integrate seamlessly with the YAAMS ecosystem.
-
-### Comprehensive PIREP Workflow
-YAAMS features a sophisticated Flight Reporting (PIREP) system:
-* Automated notification system for airline managers when new flights are filed.
-* Detailed validation interface for reviewers to accept or reject flights.
-* Support for rejection remarks to provide clear feedback to pilots.
-* Real-time notification updates for pilots regarding their flight status.
-
-### Professional Fleet Management
-Manage your airline's assets with precision:
-* Detailed aircraft tracking including service dates and airframe history.
-* Status-aware fleet listings (Active/Inactive/Decommissioned).
-* Automated airframe metrics based on validated flight hours.
-
-### Pilot Experience
-A clean, responsive dashboard designed for clarity:
-* Personalized statistics including verified flight hours and count.
-* Real-time notification center for operation updates.
-* Integrated airline switching for pilots flying for multiple organizations.
+* PIREP filing, review, and acceptance workflow
+* Fleet management with airframe tracking and metrics
+* Pilot dashboard with verified flight hours and statistics
+* Multi-airline support with easy switching
+* In-app notification system
+* REST API (v1) for custom ACARS clients and integrations
 
 ## Technical Foundation
 
