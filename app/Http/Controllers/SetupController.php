@@ -28,6 +28,9 @@ class SetupController extends Controller
             return redirect()->route('dashboard');
         }
 
+        // Import airports before validation so the exists:airports,icao_code check can run
+        DB::unprepared(file_get_contents(base_path('resources/db/airports.sql')));
+
         $request->validate([
             'app_name'         => 'required|string|max:255',
             'airline_name'     => 'required|string|max:255',
@@ -44,9 +47,6 @@ class SetupController extends Controller
             'admin_email'      => 'required|email|max:255',
             'admin_password'   => 'required|confirmed|min:8',
         ]);
-
-        // Import airports outside the main transaction — large bulk insert
-        DB::unprepared(file_get_contents(base_path('resources/db/airports.sql')));
 
         DB::transaction(function () use ($request) {
             // Roles & permissions
