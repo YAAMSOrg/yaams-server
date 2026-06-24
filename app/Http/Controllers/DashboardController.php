@@ -19,6 +19,10 @@ class DashboardController extends Controller
     public function index(){
         $currentActiveAirline = session()->get('activeairline');
 
+        if (!$currentActiveAirline) {
+            return redirect()->route('portal');
+        }
+
         // Alternative approach:
         // $airlineFlights = $currentActiveAirline->flights;
 

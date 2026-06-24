@@ -144,9 +144,10 @@
                                         <span class="badge bg-danger rounded-pill">{{ auth()->user()->countNewNotifications() }}</span>
                                     </a>
                                 </li>
-                                @role('Manager')
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-people me-2 text-secondary"></i> Manage Pilots</a></li>
-                                @endrole
+                                @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
+                                    <li><a class="dropdown-item" href="{{ route('invitecodes.index') }}"><i class="bi bi-ticket-perforated me-2 text-secondary"></i> Invite Codes</a></li>
+                                @endif
+                                <li><a class="dropdown-item" href="{{ route('portal') }}"><i class="bi bi-buildings me-2 text-secondary"></i> Airline Portal</a></li>
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
