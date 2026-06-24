@@ -8,15 +8,14 @@ use App\Http\Controllers\AircraftController;
 use App\Http\Controllers\AirlineMembershipController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\SetupController;
+use App\Http\Controllers\HomeController;
 
 // Setup wizard — only accessible before any user exists
 Route::get('/setup', [SetupController::class, 'show'])->name('setup.index');
 Route::post('/setup', [SetupController::class, 'store'])->name('setup.store');
 
 // Global Welcome / Guest landing page
-Route::get("/", function () {
-    return view("home.index");
-})->name("home");
+Route::get("/", [HomeController::class, "index"])->name("home");
 
 // User Dashboard & Action Routes, Flight Management, Notifications, and Fleet Management
 Route::middleware(['auth'])->group(function () {
