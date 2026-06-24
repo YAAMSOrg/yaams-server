@@ -1,6 +1,6 @@
 # YAAMS - Yet Another Airline Management System
 
-An decentralised open-source virtual airline management platform. Track PIREPs, manage fleets, and build thriving virtual airline communities — all in one place.
+An decentralised open-source virtual airline management platform. Track PIREPs, manage fleets, and build thriving virtual airline communities - all in one place.
 
 ![video demo](https://github.com/YAAMSOrg/yaams-server/blob/main/Docs/res/showcase.gif)
 
