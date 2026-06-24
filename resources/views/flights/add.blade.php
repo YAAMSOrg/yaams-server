@@ -122,11 +122,11 @@
                     <div class="row g-4">
                         <div class="col-md-4">
                             <label for="blockoff" class="form-label">Block Off (UTC)</label>
-                            <input type="datetime-local" class="form-control" required name="blockoff" id="blockoff" value="{{ old('blockoff') }}">
+                            <input type="datetime-local" class="form-control" required name="blockoff" id="blockoff" value="{{ old('blockoff') }}" data-prefill-utc>
                         </div>
                         <div class="col-md-4">
                             <label for="blockon" class="form-label">Block On (UTC)</label>
-                            <input type="datetime-local" class="form-control" required name="blockon" id="blockon" value="{{ old('blockon') }}">
+                            <input type="datetime-local" class="form-control" required name="blockon" id="blockon" value="{{ old('blockon') }}" data-prefill-utc>
                         </div>
                         <div class="col-md-4">
                             @php $isLbs = session('activeairline')->unit_is_lbs; @endphp
@@ -154,4 +154,40 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Pre-fill Block Off / Block On with today's UTC date + current UTC time
+    document.querySelectorAll('[data-prefill-utc]').forEach(function (el) {
+        if (!el.value) {
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            el.value = `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())}T${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}`;
+        }
+    });
+
+    // Uppercase submitted values for ICAO fields (CSS text-transform only affects display)
+    ['departure', 'arrival'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => { el.value = el.value.toUpperCase(); });
+    });
+
+    // Auto-fill callsign from flight number until the user manually edits the callsign
+    const flightNumber = document.getElementById('flightnumber');
+    const callsign = document.getElementById('callsign');
+    if (flightNumber && callsign) {
+        let callsignManuallyEdited = !!callsign.value;
+        flightNumber.addEventListener('input', function () {
+            flightNumber.value = flightNumber.value.toUpperCase();
+            if (!callsignManuallyEdited) {
+                callsign.value = flightNumber.value;
+            }
+        });
+        callsign.addEventListener('input', function () {
+            callsign.value = callsign.value.toUpperCase();
+            callsignManuallyEdited = callsign.value !== flightNumber.value;
+        });
+    }
+});
+</script>
 @endsection
