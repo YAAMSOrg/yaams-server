@@ -35,14 +35,14 @@ Route::middleware(['auth'])->group(function () {
         "changeActiveAirline",
     ])->name("changeactiveairline");
 
+    // Dashboard — no airline middleware; controller handles the redirect to /portal itself
+    Route::get("/user/dashboard", [DashboardController::class, "index"])->name("dashboard");
+
     // -------------------------------------------------------------------------
     // Routes that require an active airline session
     // -------------------------------------------------------------------------
 
     Route::middleware(['airline'])->group(function () {
-
-        // Dashboard
-        Route::get("/user/dashboard", [DashboardController::class, "index"])->name("dashboard");
 
         // Invite code management (manager check enforced in controller)
         Route::get('/airline/invitecodes', [InviteCodeController::class, 'index'])->name('invitecodes.index');
