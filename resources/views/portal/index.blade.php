@@ -63,6 +63,22 @@
             </div>
         @endunless
 
+        {{-- Found a new airline --}}
+        @if(auth()->user()->hasRole('Super-Admin') || \App\Models\Setting::get('allow_user_airline_creation') === '1')
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-building-fill-add text-secondary"></i>
+                    Found a New Airline
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">Create your own airline and become its first Manager.</p>
+                    <a href="{{ route('airline.found') }}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-building-fill-add me-1"></i> Found an Airline
+                    </a>
+                </div>
+            </div>
+        @endif
+
         {{-- Invite code form --}}
         <div class="card">
             <div class="card-header d-flex align-items-center gap-2">

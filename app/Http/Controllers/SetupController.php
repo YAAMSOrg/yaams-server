@@ -42,8 +42,9 @@ class SetupController extends Controller
             'airline_desc'     => 'nullable|string|max:1000',
             'airline_website'  => 'nullable|url|max:255',
             'airline_founded'  => 'nullable|date',
-            'unit_is_lbs'      => 'nullable|boolean',
-            'admin_name'       => 'required|string|max:255',
+            'unit_is_lbs'                  => 'nullable|boolean',
+            'allow_user_airline_creation'  => 'required|boolean',
+            'admin_name'                   => 'required|string|max:255',
             'admin_email'      => 'required|email|max:255',
             'admin_password'   => 'required|confirmed|min:8',
         ]);
@@ -77,12 +78,11 @@ class SetupController extends Controller
                 ['networkname' => 'PilotEdge',  'created_at' => $now, 'updated_at' => $now],
             ]);
 
-            // Instance name
-            DB::table('settings')->upsert(
-                ['key' => 'app_name', 'value' => $request->app_name, 'created_at' => $now, 'updated_at' => $now],
-                ['key'],
-                ['value', 'updated_at']
-            );
+            // Instance settings
+            DB::table('settings')->upsert([
+                ['key' => 'app_name',                    'value' => $request->app_name,                                          'created_at' => $now, 'updated_at' => $now],
+                ['key' => 'allow_user_airline_creation', 'value' => $request->boolean('allow_user_airline_creation') ? '1' : '0', 'created_at' => $now, 'updated_at' => $now],
+            ], ['key'], ['value', 'updated_at']);
 
             // Airline
             $icao     = strtoupper($request->airline_icao);

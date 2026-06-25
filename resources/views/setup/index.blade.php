@@ -234,7 +234,33 @@
                 </div>
             </div>
 
-            {{-- Section 3: Admin account --}}
+            {{-- Section 3: Policies --}}
+            <div class="step-divider">
+                <span class="section-icon bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-shield-check"></i>
+                </span>
+                Instance Policies
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label d-block">Who can found new airlines?</label>
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="allow_user_airline_creation" id="airline_creation_admin" value="0"
+                           {{ old('allow_user_airline_creation', '0') === '0' ? 'checked' : '' }}>
+                    <label class="btn btn-outline-secondary" for="airline_creation_admin">
+                        <i class="bi bi-person-lock me-1"></i> Admins only
+                    </label>
+
+                    <input type="radio" class="btn-check" name="allow_user_airline_creation" id="airline_creation_all" value="1"
+                           {{ old('allow_user_airline_creation') === '1' ? 'checked' : '' }}>
+                    <label class="btn btn-outline-secondary" for="airline_creation_all">
+                        <i class="bi bi-people me-1"></i> Any registered user
+                    </label>
+                </div>
+                <div class="form-text">Admins can always create airlines regardless of this setting.</div>
+            </div>
+
+            {{-- Section 4: Admin account --}}
             <div class="step-divider">
                 <span class="section-icon bg-warning bg-opacity-10 text-warning">
                     <i class="bi bi-person-badge-fill"></i>

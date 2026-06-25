@@ -11,6 +11,7 @@ use App\Http\Controllers\SetupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\InviteCodeController;
+use App\Http\Controllers\AirlineController;
 
 // Setup wizard — only accessible before any user exists
 Route::get('/setup', [SetupController::class, 'show'])->name('setup.index');
@@ -28,6 +29,10 @@ Route::middleware(['auth'])->group(function () {
     // Airline Portal — join via invite code, always accessible
     Route::get('/portal', [PortalController::class, 'index'])->name('portal');
     Route::post('/portal/redeem', [PortalController::class, 'redeem'])->name('portal.redeem');
+
+    // Found a new airline (access controlled in controller based on setting / Super-Admin role)
+    Route::get('/airline/found', [AirlineController::class, 'found'])->name('airline.found');
+    Route::post('/airline/found', [AirlineController::class, 'foundStore'])->name('airline.found.store');
 
     // Airline switcher — no active airline required (that's the point)
     Route::match(["GET", "POST"], "/user/switchactiveairline", [
