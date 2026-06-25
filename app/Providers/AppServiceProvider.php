@@ -7,6 +7,8 @@ use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Actions\AttemptToAuthenticate;
 use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
+use Laravel\Fortify\Contracts\CreatesNewUsers;
+use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\SetActiveAirline;
 use App\Events\FlightFiled;
 use Illuminate\Support\Facades\Event;
@@ -14,12 +16,9 @@ use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->app->bind(CreatesNewUsers::class, CreateNewUser::class);
     }
 
     /**
