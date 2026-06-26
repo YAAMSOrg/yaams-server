@@ -22,14 +22,14 @@ services:
       - PMA_USER=root
       - UPLOAD_LIMIT=300M
 
-    smtp4dev:
-        image: docker.io/rnwood/smtp4dev:latest
-        container_name: yaams-mailserver
-        networks:
-            - "yaams"
-        ports:
-            - "2525:25"
-            - "8081:80"
+  smtp4dev:
+      image: docker.io/rnwood/smtp4dev:latest
+      container_name: yaams-mailserver
+      networks:
+          - "yaams"
+      ports:
+          - "2525:25"
+          - "8081:80"
 
 networks:
   yaams:
