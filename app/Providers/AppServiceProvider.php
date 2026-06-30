@@ -11,8 +11,12 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\SetActiveAirline;
 use App\Events\FlightFiled;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +30,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Fortify rate limiters — referenced by config('fortify.limiters'),
+        // which makes Fortify attach throttle:login / throttle:two-factor
+        // middleware to its routes. Without these definitions the throttle
+        // middleware throws MissingRateLimiterException on login.
+        RateLimiter::for('login', function (Request $request) {
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
+
+            return Limit::perMinute(5)->by($throttleKey);
+        });
+
+        RateLimiter::for('two-factor', function (Request $request) {
+            return Limit::perMinute(5)->by($request->session()->get('login.id'));
+        });
+
         // Fortify Views registrieren
         Fortify::loginView(function () {
             return view('auth.login'); 
