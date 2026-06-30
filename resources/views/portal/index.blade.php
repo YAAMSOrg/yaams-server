@@ -3,6 +3,7 @@
 @section('title', 'Airline Portal — YAAMS')
 
 @section('content')
+@php($emailVerified = auth()->user()->hasVerifiedEmail())
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
 
@@ -19,6 +20,37 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
+
+        {{-- Verification link resent confirmation --}}
+        @if(session('status') === 'verification-link-sent')
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-envelope-check me-2"></i>A new verification link has been sent to your email address.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        {{-- Email not verified — portal actions are blocked until confirmed --}}
+        @unless($emailVerified)
+            <div class="alert alert-warning mb-4" role="alert">
+                <h5 class="alert-heading d-flex align-items-center gap-2">
+                    <i class="bi bi-envelope-exclamation"></i> Please verify your email address
+                </h5>
+                <p class="mb-2">
+                    We've sent a verification link to <strong>{{ auth()->user()->email }}</strong>.
+                    You need to confirm your email before you can join or found an airline.
+                </p>
+                <p class="mb-3 small text-muted">
+                    Didn't get the email? Check your spam folder, or resend it below. If it still
+                    doesn't arrive, please contact the administrator of this instance.
+                </p>
+                <form action="{{ route('verification.send') }}" method="POST" class="mb-0">
+                    @csrf
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-arrow-repeat me-1"></i> Resend verification email
+                    </button>
+                </form>
+            </div>
+        @endunless
 
         {{-- Header --}}
         <div class="text-center mb-5">
@@ -52,7 +84,7 @@
                                 <form action="{{ route('changeactiveairline') }}" method="POST" class="d-inline">
                                     @csrf
                                     <input type="hidden" name="airline_id" value="{{ $airline->id }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary" @disabled(!$emailVerified)>
                                         <i class="bi bi-box-arrow-in-right"></i> Switch
                                     </button>
                                 </form>
@@ -64,7 +96,7 @@
         @endunless
 
         {{-- Found a new airline --}}
-        @if(auth()->user()->hasRole('Super-Admin') || \App\Models\Setting::get('allow_user_airline_creation') === '1')
+        @if($emailVerified && (auth()->user()->hasRole('Super-Admin') || \App\Models\Setting::get('allow_user_airline_creation') === '1'))
             <div class="card mb-4">
                 <div class="card-header d-flex align-items-center gap-2">
                     <i class="bi bi-building-fill-add text-secondary"></i>
@@ -79,7 +111,8 @@
             </div>
         @endif
 
-        {{-- Invite code form --}}
+        {{-- Invite code form (hidden until email is verified) --}}
+        @if($emailVerified)
         <div class="card">
             <div class="card-header d-flex align-items-center gap-2">
                 <i class="bi bi-ticket-perforated text-secondary"></i>
@@ -112,6 +145,7 @@
                 </form>
             </div>
         </div>
+        @endif
 
     </div>
 </div>
