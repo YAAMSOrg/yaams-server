@@ -28,17 +28,23 @@ Route::middleware(['auth'])->group(function () {
 
     // Airline Portal — join via invite code, always accessible
     Route::get('/portal', [PortalController::class, 'index'])->name('portal');
-    Route::post('/portal/redeem', [PortalController::class, 'redeem'])->name('portal.redeem');
+    Route::post('/portal/redeem', [PortalController::class, 'redeem'])
+        ->middleware('verified')
+        ->name('portal.redeem');
 
     // Found a new airline (access controlled in controller based on setting / Super-Admin role)
-    Route::get('/airline/found', [AirlineController::class, 'found'])->name('airline.found');
-    Route::post('/airline/found', [AirlineController::class, 'foundStore'])->name('airline.found.store');
+    Route::get('/airline/found', [AirlineController::class, 'found'])
+        ->middleware('verified')
+        ->name('airline.found');
+    Route::post('/airline/found', [AirlineController::class, 'foundStore'])
+        ->middleware('verified')
+        ->name('airline.found.store');
 
     // Airline switcher — no active airline required (that's the point)
     Route::match(["GET", "POST"], "/user/switchactiveairline", [
         AirlineMembershipController::class,
         "changeActiveAirline",
-    ])->name("changeactiveairline");
+    ])->middleware('verified')->name("changeactiveairline");
 
     // Dashboard — no airline middleware; controller handles the redirect to /portal itself
     Route::get("/user/dashboard", [DashboardController::class, "index"])->name("dashboard");
@@ -47,7 +53,7 @@ Route::middleware(['auth'])->group(function () {
     // Routes that require an active airline session
     // -------------------------------------------------------------------------
 
-    Route::middleware(['airline'])->group(function () {
+    Route::middleware(['verified', 'airline'])->group(function () {
 
         // Invite code management (manager check enforced in controller)
         Route::get('/airline/invitecodes', [InviteCodeController::class, 'index'])->name('invitecodes.index');

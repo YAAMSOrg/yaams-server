@@ -35,6 +35,12 @@ class AppServiceProvider extends ServiceProvider
             return view('auth.register');
         });
 
+        // No standalone "verify email" page — the portal shows the unverified
+        // notice (with a resend link), so send anyone hitting the notice route there.
+        Fortify::verifyEmailView(function () {
+            return redirect()->route('portal');
+        });
+
         // Die Login-Pipeline von Fortify anpassen:
         Fortify::authenticateThrough(function () {
             return array_filter([
