@@ -20,3 +20,4 @@ yarn-error.log
 .bash_history
 .composer/
 .claude/
+.DS_Store
