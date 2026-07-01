@@ -134,6 +134,12 @@ class FlightAPIController extends Controller
             return response()->json(['error' => 'Unauthorized to review this flight.'], 403);
         }
 
+        if ($flight->pilot_id === $user->id
+            && !$user->isManagerOf($flight->airline)
+            && !$user->hasRole('Super-Admin')) {
+            return response()->json(['error' => 'Dispatchers cannot accept their own PIREP.'], 403);
+        }
+
         $flight->status_id = 2;
         $flight->save();
 
@@ -158,6 +164,12 @@ class FlightAPIController extends Controller
 
         if (!$user->can('review flight') || !$user->isMemberOf($flight->airline)) {
             return response()->json(['error' => 'Unauthorized to review this flight.'], 403);
+        }
+
+        if ($flight->pilot_id === $user->id
+            && !$user->isManagerOf($flight->airline)
+            && !$user->hasRole('Super-Admin')) {
+            return response()->json(['error' => 'Dispatchers cannot reject their own PIREP.'], 403);
         }
 
         $flight->status_id = 3;

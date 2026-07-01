@@ -289,6 +289,13 @@ class FlightController extends Controller
                 ->with("error", "You tried to review a flight of another airline.");
         }
 
+        // Dispatchers cannot review their own PIREPs
+        if ($flight->pilot_id === auth()->id()
+            && !auth()->user()->isManagerOf($currentActiveAirline)
+            && !auth()->user()->hasRole('Super-Admin')) {
+            return redirect()->route('flightreviewindex')->with('error', 'You cannot accept your own PIREP.');
+        }
+
         // Status auf 'Accepted' setzen (Status ID 2)
         $flight->status_id = 2; 
         $flight->save();
@@ -318,6 +325,13 @@ class FlightController extends Controller
             return redirect()
                 ->route("dashboard")
                 ->with("error", "You tried to review a flight of another airline.");
+        }
+
+        // Dispatchers cannot review their own PIREPs
+        if ($flight->pilot_id === auth()->id()
+            && !auth()->user()->isManagerOf($currentActiveAirline)
+            && !auth()->user()->hasRole('Super-Admin')) {
+            return redirect()->route('flightreviewindex')->with('error', 'You cannot reject your own PIREP.');
         }
 
         // Status auf 'Rejected' setzen (Status ID 3)
