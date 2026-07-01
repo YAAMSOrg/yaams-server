@@ -180,14 +180,23 @@
                         <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">Pilot Information</h2>
                     </div>
                     <div class="card-body pt-0">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-light p-3 rounded-circle text-primary">
-                                <i class="bi bi-person-fill fs-4"></i>
-                            </div>
-                            <div>
-                                <h3 class="h6 fw-bold text-dark mb-0">{{ $flight->pilot->name }}</h3>
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small mt-1">Base: {{ $flight->pilot->homebase }}</span>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless align-middle mb-0 small">
+                                <tbody>
+                                    <tr>
+                                        <td class="py-2 text-muted">Name</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot->name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 text-muted">Total flights</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot->logged_flights($flight->airline) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 text-muted">Member since</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot->created_at->format('M j, Y') }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
