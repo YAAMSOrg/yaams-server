@@ -20,9 +20,11 @@
     </p>
     @guest
     <div class="d-flex gap-2 flex-wrap">
+        @if(\App\Models\Setting::get('allow_registration', '1') === '1')
         <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-4">
             <i class="bi bi-person-plus me-2"></i>Create an Account
         </a>
+        @endif
         <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-lg px-4">
             <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
         </a>
@@ -189,9 +191,11 @@
             <p class="mb-0 text-white-50 small">Create a free account and start filing PIREPs today.</p>
         </div>
         <div class="d-flex gap-2 flex-shrink-0">
+            @if(\App\Models\Setting::get('allow_registration', '1') === '1')
             <a href="{{ route('register') }}" class="btn btn-primary px-4">
                 <i class="bi bi-person-plus me-2"></i>Sign Up Free
             </a>
+            @endif
             <a href="{{ route('login') }}" class="btn btn-outline-light px-4">Sign In</a>
         </div>
     </div>

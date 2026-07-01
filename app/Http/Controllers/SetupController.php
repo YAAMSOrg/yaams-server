@@ -44,6 +44,8 @@ class SetupController extends Controller
             'airline_founded'  => 'nullable|date',
             'unit_is_lbs'                  => 'nullable|boolean',
             'allow_user_airline_creation'  => 'required|boolean',
+            'allow_registration'           => 'required|boolean',
+            'support_email'                => 'nullable|email|max:255',
             'admin_name'                   => 'required|string|max:255',
             'admin_email'      => 'required|email|max:255',
             'admin_password'   => 'required|confirmed|min:8',
@@ -82,6 +84,8 @@ class SetupController extends Controller
             DB::table('settings')->upsert([
                 ['key' => 'app_name',                    'value' => $request->app_name,                                          'created_at' => $now, 'updated_at' => $now],
                 ['key' => 'allow_user_airline_creation', 'value' => $request->boolean('allow_user_airline_creation') ? '1' : '0', 'created_at' => $now, 'updated_at' => $now],
+                ['key' => 'allow_registration',          'value' => $request->boolean('allow_registration') ? '1' : '0',          'created_at' => $now, 'updated_at' => $now],
+                ['key' => 'support_email',               'value' => $request->support_email,                                     'created_at' => $now, 'updated_at' => $now],
             ], ['key'], ['value', 'updated_at']);
 
             // Airline

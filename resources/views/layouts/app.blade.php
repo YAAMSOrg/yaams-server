@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>@yield('title', 'YAAMS')</title>
+    <title>@yield('title', $instanceName)</title>
 
     <link rel="icon" href="{{ asset('favicon.ico') }}">
 
@@ -53,8 +53,8 @@
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
                 <a class="navbar-brand d-flex align-items-center gap-2" href="{{ auth()->check() ? route('dashboard') : route('home') }}">
-                    <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="YAAMS Logo" height="32">
-                <span class="fs-5 fw-bold tracking-tight">YAAMS</span>
+                    <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="{{ $instanceName }} Logo" height="32">
+                <span class="fs-5 fw-bold tracking-tight">{{ $instanceName }}</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -148,10 +148,10 @@
                                     <li><a class="dropdown-item" href="{{ route('invitecodes.index') }}"><i class="bi bi-ticket-perforated me-2 text-secondary"></i> Invite Codes</a></li>
                                 @endif
                                 <li><a class="dropdown-item" href="{{ route('portal') }}"><i class="bi bi-buildings me-2 text-secondary"></i> Airline Portal</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>
                                 @role('Super-Admin')
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bi bi-shield-lock me-2 text-secondary"></i> Administration</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.settings.edit') }}"><i class="bi bi-gear me-2 text-secondary"></i> Instance Settings</a></li>
                                 @endrole
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
@@ -174,8 +174,14 @@
 
     <footer class="bg-white border-top mt-auto py-4">
         <div class="container d-flex justify-content-between align-items-center text-muted">
-            <small>&copy; {{ date('Y') }} YAAMS Virtual Airline Management</small>
-            <small>v0.0.1 | <a href="https://www.github.com/flymia/YAAMS/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-github"></i> GitHub</a></small>
+            <small>&copy; {{ date('Y') }} {{ $instanceName }} Virtual Airline Management</small>
+            <small>
+                @php($supportEmail = \App\Models\Setting::get('support_email'))
+                @if($supportEmail)
+                    <a href="mailto:{{ $supportEmail }}" class="text-decoration-none text-secondary"><i class="bi bi-envelope"></i> Contact</a> |
+                @endif
+                v0.0.1 | <a href="https://www.github.com/flymia/YAAMS/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-github"></i> GitHub</a>
+            </small>
         </div>
     </footer>
 
