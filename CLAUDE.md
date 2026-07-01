@@ -68,7 +68,19 @@ Filtering for "accepted" flights always uses `status_id = 2`.
 
 ### PIREP Workflow (Event-Driven)
 
-When a PIREP is filed (both web and API paths), `event(new FlightFiled($flight))` is dispatched. The `FlightFiledNotification` listener (`app/Listeners/FlightFiledNotification.php`) finds all airline members with `review flight` permission and creates in-app `Notification` records for them. Accept/reject actions create notifications for the pilot.
+When a PIREP is filed (both web and API paths), `event(new FlightFiled($flight))` is dispatched. The `FlightFiledNotification` listener (`app/Listeners/FlightFiledNotification.php`) resolves the airline's reviewers (per-airline `Dispatcher`/`Manager`, excluding the filing pilot) and hands them to Laravel's notification system via `Notification::send($reviewers, new PirepFiled($flight))`.
+
+### Notifications (Multi-Channel)
+
+Notifications use Laravel's native notification system so delivery channels are pluggable without touching the trigger/listener logic. A notification class (e.g. `app/Notifications/PirepFiled.php`) declares its channels in `via()` — currently `['inapp', 'mail']` — and renders each with a matching method (`toInApp()`, `toMail()`).
+
+- **`inapp`** is a custom channel (`app/Channels/InAppChannel.php`, registered in `AppServiceProvider::boot()` via `Notification::extend('inapp', ...)`). It persists to the existing `notifications` table through `App\Models\Notification`, so the in-app bell/list UI is unchanged. A notification opts in by returning `'inapp'` from `via()` and implementing `toInApp($notifiable): array` (`title`, `message`, optional `url`).
+- **`mail`** is Laravel's built-in channel; `toMail()` returns a `MailMessage`.
+- Notification classes implement `ShouldQueue`, so mail dispatches inline under `QUEUE_CONNECTION=sync` and becomes async automatically once a real queue is configured.
+
+**To add a channel** (e.g. webhook): add a channel class + `Notification::extend('webhook', ...)`, add `'webhook'` to `via()`, and add a `toWebhook()` renderer. No event/listener changes. `via()` receives `$notifiable`, so per-user channel preferences can be added there.
+
+Accept/reject actions still create pilot notifications via direct `App\Models\Notification::create()` in `FlightController` / `FlightAPIController` — these have not yet been migrated to notification classes.
 
 ### API Resources
 

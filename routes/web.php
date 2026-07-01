@@ -12,6 +12,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\InviteCodeController;
 use App\Http\Controllers\AirlineController;
+use App\Http\Controllers\Admin\AdminController;
 
 // Setup wizard — only accessible before any user exists
 Route::get('/setup', [SetupController::class, 'show'])->name('setup.index');
@@ -45,6 +46,13 @@ Route::middleware(['auth'])->group(function () {
         AirlineMembershipController::class,
         "changeActiveAirline",
     ])->middleware('verified')->name("changeactiveairline");
+
+    // -------------------------------------------------------------------------
+    // Instance Administration — Super-Admins only
+    // -------------------------------------------------------------------------
+    Route::prefix('admin')->name('admin.')->middleware('role:Super-Admin')->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+    });
 
     // Dashboard — no airline middleware; controller handles the redirect to /portal itself
     Route::get("/user/dashboard", [DashboardController::class, "index"])->name("dashboard");
