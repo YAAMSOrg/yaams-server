@@ -106,13 +106,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasAirlineRole($airline, ['Dispatcher', 'Manager']);
     }
 
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class, 'target_id');
-    }
-
     public function countNewNotifications() {
-        return $this->notifications()->where('acknowledged', false)->count();
+        return $this->unreadNotifications()->count();
     }
 
 }

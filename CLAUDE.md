@@ -72,15 +72,15 @@ When a PIREP is filed (both web and API paths), `event(new FlightFiled($flight))
 
 ### Notifications (Multi-Channel)
 
-Notifications use Laravel's native notification system so delivery channels are pluggable without touching the trigger/listener logic. A notification class (e.g. `app/Notifications/PirepFiled.php`) declares its channels in `via()` — currently `['inapp', 'mail']` — and renders each with a matching method (`toInApp()`, `toMail()`).
+Notifications use Laravel's native notification system so delivery channels are pluggable without touching the trigger/listener logic. A notification class (e.g. `app/Notifications/PirepFiled.php`) declares its channels in `via()` — currently `['database', 'mail']` — and renders each with a matching method (`toArray()`, `toMail()`).
 
-- **`inapp`** is a custom channel (`app/Channels/InAppChannel.php`, registered in `AppServiceProvider::boot()` via `Notification::extend('inapp', ...)`). It persists to the existing `notifications` table through `App\Models\Notification`, so the in-app bell/list UI is unchanged. A notification opts in by returning `'inapp'` from `via()` and implementing `toInApp($notifiable): array` (`title`, `message`, optional `url`).
+- **`database`** is Laravel's built-in channel. It persists to the standard `notifications` table (uuid PK, polymorphic `notifiable`, JSON `data`, `read_at`) via `Illuminate\Notifications\DatabaseNotification`. A notification opts in by returning `'database'` from `via()` and implementing `toArray($notifiable): array` (`title`, `message`, optional `url`) — the payload is stored in `data`. The bell/list UI reads unread rows through the `Notifiable` trait's `unreadNotifications` relation; `User::countNewNotifications()` wraps `unreadNotifications()->count()`. Dismissing a notification calls `$notification->markAsRead()`.
 - **`mail`** is Laravel's built-in channel; `toMail()` returns a `MailMessage`.
 - Notification classes implement `ShouldQueue`, so mail dispatches inline under `QUEUE_CONNECTION=sync` and becomes async automatically once a real queue is configured.
 
 **To add a channel** (e.g. webhook): add a channel class + `Notification::extend('webhook', ...)`, add `'webhook'` to `via()`, and add a `toWebhook()` renderer. No event/listener changes. `via()` receives `$notifiable`, so per-user channel preferences can be added there.
 
-Accept/reject actions still create pilot notifications via direct `App\Models\Notification::create()` in `FlightController` / `FlightAPIController` — these have not yet been migrated to notification classes.
+Accept/reject actions notify the pilot the same way — `Notification::send($flight->pilot, new PirepAccepted($flight))` (and `PirepRejected`) in `FlightController` / `FlightAPIController`.
 
 ### API Resources
 
