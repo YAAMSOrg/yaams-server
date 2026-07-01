@@ -30,6 +30,13 @@
     </div>
     @endif
 
+    @if (session('error'))
+    <div class="alert alert-danger shadow-sm border-0 mb-4 d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        <div>{{ session('error') }}</div>
+    </div>
+    @endif
+
     @if ($flights->isEmpty())
         <div class="card border-0 shadow-sm text-center py-5">
             <div class="card-body">
