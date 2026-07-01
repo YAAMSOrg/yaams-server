@@ -59,9 +59,11 @@
                 Forgot password?
             </a>
 
-            <div class="text-center mt-4 pt-3 border-top">
-                <p class="mb-0 text-muted small">New pilot? <a href="{{ route('register') }}" class="text-primary fw-semibold text-decoration-none">Register here</a></p>
-            </div>
+            @if(\App\Models\Setting::get('allow_registration', '1') === '1')
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="mb-0 text-muted small">New pilot? <a href="{{ route('register') }}" class="text-primary fw-semibold text-decoration-none">Register here</a></p>
+                </div>
+            @endif
         </form>
     </div>
 </div>

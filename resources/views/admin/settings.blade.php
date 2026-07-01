@@ -1,0 +1,119 @@
+@extends('layouts.app')
+@section('title', 'YAAMS: Instance Settings')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1"><i class="bi bi-gear me-2"></i> Instance Settings</h1>
+        <p class="text-muted mb-0">Configure instance-wide options for this YAAMS install.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {{-- Sidebar: admin sections --}}
+    @include('admin._sidebar', ['active' => 'instance'])
+
+    {{-- Main: settings form --}}
+    <div class="col-12 col-lg-9">
+        @if (session('status'))
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i> {{ session('status') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0 ps-3">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form action="{{ route('admin.settings.update') }}" method="post">
+                    @csrf
+                    @method('PUT')
+
+                    {{-- General --}}
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-globe2 me-2 text-primary"></i> General</h6>
+
+                    <div class="mb-4">
+                        <label for="app_name" class="form-label">Instance name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-tag text-secondary"></i></span>
+                            <input type="text"
+                                   id="app_name"
+                                   name="app_name"
+                                   class="form-control @error('app_name') is-invalid @enderror"
+                                   value="{{ old('app_name', $settings['app_name']) }}"
+                                   required>
+                        </div>
+                        <div class="form-text">Shown in the page title and header across the app.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="support_email" class="form-label">Support email <span class="text-muted fw-normal">(optional)</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope text-secondary"></i></span>
+                            <input type="email"
+                                   id="support_email"
+                                   name="support_email"
+                                   class="form-control @error('support_email') is-invalid @enderror"
+                                   placeholder="support@example.com"
+                                   value="{{ old('support_email', $settings['support_email']) }}">
+                        </div>
+                        <div class="form-text">Displayed in the site footer as a contact link when set.</div>
+                    </div>
+
+                    {{-- Policies --}}
+                    <hr class="my-4">
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-shield-check me-2 text-info"></i> Policies</h6>
+
+                    <div class="mb-4">
+                        <label class="form-label d-block">Public registration</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="allow_registration" id="registration_open" value="1"
+                                   {{ old('allow_registration', $settings['allow_registration']) === '1' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="registration_open">
+                                <i class="bi bi-door-open me-1"></i> Open
+                            </label>
+
+                            <input type="radio" class="btn-check" name="allow_registration" id="registration_closed" value="0"
+                                   {{ old('allow_registration', $settings['allow_registration']) === '0' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="registration_closed">
+                                <i class="bi bi-door-closed me-1"></i> Closed
+                            </label>
+                        </div>
+                        <div class="form-text">When closed, new users cannot self-register.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label d-block">Who can found new airlines?</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="allow_user_airline_creation" id="airline_creation_admin" value="0"
+                                   {{ old('allow_user_airline_creation', $settings['allow_user_airline_creation']) === '0' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="airline_creation_admin">
+                                <i class="bi bi-person-lock me-1"></i> Admins only
+                            </label>
+
+                            <input type="radio" class="btn-check" name="allow_user_airline_creation" id="airline_creation_all" value="1"
+                                   {{ old('allow_user_airline_creation', $settings['allow_user_airline_creation']) === '1' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="airline_creation_all">
+                                <i class="bi bi-people me-1"></i> Any registered user
+                            </label>
+                        </div>
+                        <div class="form-text">Admins can always create airlines regardless of this setting.</div>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-check2-circle me-2"></i> Save settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

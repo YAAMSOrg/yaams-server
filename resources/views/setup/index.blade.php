@@ -260,6 +260,40 @@
                 <div class="form-text">Admins can always create airlines regardless of this setting.</div>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label d-block">Public registration</label>
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="allow_registration" id="registration_open" value="1"
+                           {{ old('allow_registration', '1') === '1' ? 'checked' : '' }}>
+                    <label class="btn btn-outline-secondary" for="registration_open">
+                        <i class="bi bi-door-open me-1"></i> Open
+                    </label>
+
+                    <input type="radio" class="btn-check" name="allow_registration" id="registration_closed" value="0"
+                           {{ old('allow_registration') === '0' ? 'checked' : '' }}>
+                    <label class="btn btn-outline-secondary" for="registration_closed">
+                        <i class="bi bi-door-closed me-1"></i> Closed
+                    </label>
+                </div>
+                <div class="form-text">When closed, new users cannot self-register.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="support_email" class="form-label">Support email <span class="text-muted fw-normal">(optional)</span></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope text-secondary"></i></span>
+                    <input type="email"
+                           id="support_email"
+                           name="support_email"
+                           class="form-control @error('support_email') is-invalid @enderror"
+                           placeholder="support@example.com"
+                           value="{{ old('support_email') }}">
+                </div>
+                @error('support_email')
+                    <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+
             {{-- Section 4: Admin account --}}
             <div class="step-divider">
                 <span class="section-icon bg-warning bg-opacity-10 text-warning">
