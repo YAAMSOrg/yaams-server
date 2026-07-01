@@ -10,6 +10,9 @@ use App\Models\Airline;
 use App\Models\Aircraft;
 use App\Models\Airport;
 use App\Events\FlightFiled;
+use App\Notifications\PirepAccepted;
+use App\Notifications\PirepRejected;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Gate;
@@ -143,14 +146,8 @@ class FlightAPIController extends Controller
         $flight->status_id = 2;
         $flight->save();
 
-        // Notification logic (mirrored from web controller)
-        \App\Models\Notification::create([
-            'title' => 'PIREP Accepted',
-            'message' => "Your flight {$flight->full_flight_number} from {$flight->departure_icao} to {$flight->arrival_icao} has been accepted.",
-            'url' => route('viewflight', $flight->id),
-            'target_id' => $flight->pilot_id,
-            'acknowledged' => false,
-        ]);
+        // Notify the pilot (in-app + email). Channels live in PirepAccepted::via().
+        Notification::send($flight->pilot, new PirepAccepted($flight));
 
         return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status']));
     }
@@ -180,19 +177,8 @@ class FlightAPIController extends Controller
         
         $flight->save();
 
-        // Notification logic
-        $message = "Your flight {$flight->full_flight_number} from {$flight->departure_icao} to {$flight->arrival_icao} has been rejected.";
-        if ($flight->rejection_remarks) {
-            $message .= " Reason: " . $flight->rejection_remarks;
-        }
-
-        \App\Models\Notification::create([
-            'title' => 'PIREP Rejected',
-            'message' => $message,
-            'url' => route('viewflight', $flight->id),
-            'target_id' => $flight->pilot_id,
-            'acknowledged' => false,
-        ]);
+        // Notify the pilot (in-app + email). Channels live in PirepRejected::via().
+        Notification::send($flight->pilot, new PirepRejected($flight));
 
         return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status']));
     }
