@@ -8,7 +8,13 @@ use Laravel\Fortify\Actions\AttemptToAuthenticate;
 use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Laravel\Fortify\Contracts\ResetsUserPasswords;
+use Laravel\Fortify\Contracts\UpdatesUserPasswords;
+use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
 use App\Actions\Fortify\CreateNewUser;
+use App\Actions\Fortify\ResetUserPassword;
+use App\Actions\Fortify\UpdateUserPassword;
+use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Actions\Fortify\SetActiveAirline;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -21,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(CreatesNewUsers::class, CreateNewUser::class);
+        $this->app->bind(ResetsUserPasswords::class, ResetUserPassword::class);
+        $this->app->bind(UpdatesUserPasswords::class, UpdateUserPassword::class);
+        $this->app->bind(UpdatesUserProfileInformation::class, UpdateUserProfileInformation::class);
     }
 
     /**
@@ -55,6 +64,16 @@ class AppServiceProvider extends ServiceProvider
         // notice (with a resend link), so send anyone hitting the notice route there.
         Fortify::verifyEmailView(function () {
             return redirect()->route('portal');
+        });
+
+        // Password reset flow: request a reset link, then set a new password
+        // from the emailed token link.
+        Fortify::requestPasswordResetLinkView(function () {
+            return view('auth.forgot-password');
+        });
+
+        Fortify::resetPasswordView(function (Request $request) {
+            return view('auth.reset-password', ['request' => $request]);
         });
 
         // Die Login-Pipeline von Fortify anpassen:
