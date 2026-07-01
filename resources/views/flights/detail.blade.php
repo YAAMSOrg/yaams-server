@@ -10,7 +10,15 @@
                 <i class="bi bi-arrow-left"></i> Back
             </a>
 
-            @if($flight->status_id == 1 && auth()->user()->can('review flight'))
+            @php
+                $activeAirline = session('activeairline');
+                $canReview = $activeAirline
+                    && auth()->user()->canReviewFlightsFor($activeAirline)
+                    && ($flight->pilot_id !== auth()->id()
+                        || auth()->user()->isManagerOf($activeAirline)
+                        || auth()->user()->hasRole('Super-Admin'));
+            @endphp
+            @if($flight->status_id == 1 && $canReview)
                 <div class="d-flex gap-2">
                     <form action="{{ route('flightreviewaccept', $flight->id) }}" method="POST">
                         @csrf
