@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Aircraft;
 use App\Models\Airline;
-use App\Models\Setting;
+use App\Models\Flight;
 use App\Models\User;
 
 class AdminController extends Controller
@@ -18,12 +19,14 @@ class AdminController extends Controller
     public function index()
     {
         $stats = [
-            'users'           => User::count(),
-            'unverified'      => User::whereNull('email_verified_at')->count(),
-            'airlines'        => Airline::count(),
-            'settings'        => Setting::count(),
+            'users'    => User::count(),
+            'airlines' => Airline::count(),
+            'flights'  => Flight::count(),
+            'aircraft' => Aircraft::count(),
         ];
 
-        return view('admin.index', compact('stats'));
+        $recentUsers = User::latest()->take(5)->get();
+
+        return view('admin.index', compact('stats', 'recentUsers'));
     }
 }
