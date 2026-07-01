@@ -101,7 +101,8 @@
                         @php
                             $activeAirline = session('activeairline');
                             // Fallback to empty collection if relation is not loaded or user has no airlines
-                            $userAirlines = auth()->user()->airlines ?? collect(); 
+                            $userAirlines = auth()->user()->airlines ?? collect();
+                            $newNotifications = auth()->user()->countNewNotifications();
                         @endphp
 
                         @if($userAirlines->count() > 0)
@@ -132,6 +133,17 @@
                                 </ul>
                             </li>
                         @endif
+                        <li class="nav-item me-lg-2">
+                            <a class="nav-link position-relative d-flex align-items-center" href="{{ route('usernotifications') }}" title="Notifications" aria-label="Notifications">
+                                <i class="bi {{ $newNotifications > 0 ? 'bi-bell-fill' : 'bi-bell' }} fs-5"></i>
+                                @if($newNotifications > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                                        {{ $newNotifications > 9 ? '9+' : $newNotifications }}
+                                        <span class="visually-hidden">unread notifications</span>
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle fs-5"></i> 
@@ -139,19 +151,22 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdownUser">
                                 <li>
-                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('usernotifications') }}">
-                                        <span><i class="bi bi-bell me-2 text-secondary"></i> Notifications</span>
-                                        <span class="badge bg-danger rounded-pill">{{ auth()->user()->countNewNotifications() }}</span>
+                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('usernotifications') }}">
+                                        <i class="bi bi-bell me-2 text-secondary"></i>
+                                        <span>Notifications</span>
+                                        @if($newNotifications > 0)
+                                            <span class="badge bg-danger rounded-pill ms-auto">{{ $newNotifications }}</span>
+                                        @endif
                                     </a>
                                 </li>
                                 @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
                                     <li><a class="dropdown-item" href="{{ route('invitecodes.index') }}"><i class="bi bi-ticket-perforated me-2 text-secondary"></i> Invite Codes</a></li>
                                 @endif
                                 <li><a class="dropdown-item" href="{{ route('portal') }}"><i class="bi bi-buildings me-2 text-secondary"></i> Airline Portal</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>
                                 @role('Super-Admin')
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bi bi-shield-lock me-2 text-secondary"></i> Administration</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('admin.settings.edit') }}"><i class="bi bi-gear me-2 text-secondary"></i> Instance Settings</a></li>
                                 @endrole
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
