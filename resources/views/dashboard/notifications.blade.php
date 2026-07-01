@@ -50,11 +50,11 @@
                                         <i class="bi bi-info-circle-fill fs-5"></i>
                                     </div>
                                     <div>
-                                        <h5 class="fw-bold text-dark mb-1">{{ $notification->title }}</h5>
-                                        <p class="text-secondary mb-2">{{ $notification->message }}</p>
-                                        
-                                        @if($notification->url)
-                                            <a href="{{ $notification->url }}" class="btn btn-sm btn-outline-primary px-3 mb-2 rounded-pill">
+                                        <h5 class="fw-bold text-dark mb-1">{{ $notification->data['title'] }}</h5>
+                                        <p class="text-secondary mb-2">{{ $notification->data['message'] }}</p>
+
+                                        @if(!empty($notification->data['url']))
+                                            <a href="{{ $notification->data['url'] }}" class="btn btn-sm btn-outline-primary px-3 mb-2 rounded-pill">
                                                 <i class="bi bi-eye me-1"></i> View Details
                                             </a>
                                         @endif

@@ -12,8 +12,8 @@ use Illuminate\Notifications\Notification;
  * Sent to an airline's reviewers (Dispatchers/Managers) when a pilot files a
  * new PIREP.
  *
- * The set of channels lives in `via()` — add `'inapp'`, `'mail'` (and later a
- * webhook channel) there to control how each notifiable is reached. Every
+ * The set of channels lives in `via()` — add `'database'`, `'mail'` (and later
+ * a webhook channel) there to control how each notifiable is reached. Every
  * channel has a matching `to*()` renderer below.
  */
 class PirepFiled extends Notification implements ShouldQueue
@@ -31,15 +31,15 @@ class PirepFiled extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['inapp', 'mail'];
+        return ['database', 'mail'];
     }
 
     /**
-     * In-app notification payload (App\Channels\InAppChannel).
+     * In-app notification payload persisted by the built-in `database` channel.
      *
      * @return array<string, string>
      */
-    public function toInApp(object $notifiable): array
+    public function toArray(object $notifiable): array
     {
         $flight = $this->flight;
 

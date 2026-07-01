@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Notification;
+use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationsController extends Controller
 {
@@ -13,21 +12,22 @@ class NotificationsController extends Controller
     }
 
     public function viewNotifications() {
-        $notifications = Notification::where('target_id', '=', auth()->user()->id)->where('acknowledged', '=', '0')->get();
+        $notifications = auth()->user()->unreadNotifications;
 
         return view('dashboard.notifications', ['notifications' => $notifications]);
     }
 
-    public function acknowledge(Notification $notification)
+    public function acknowledge(DatabaseNotification $notification)
     {
         // Ensure the notification belongs to the authenticated user
-        if ($notification->target_id !== auth()->id()) {
+        if ($notification->notifiable_id !== auth()->id()
+            || $notification->notifiable_type !== auth()->user()->getMorphClass()) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
-        $notification->update(['acknowledged' => true]);
+        $notification->markAsRead();
 
         return redirect()->back()->with('success', 'Notification dismissed.');
     }
-    
+
 }
