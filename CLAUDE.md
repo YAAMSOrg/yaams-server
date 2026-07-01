@@ -109,3 +109,7 @@ Key `.env` values beyond standard Laravel:
 - `FLIGHT_PAGE_LIMIT` — number of flights per page in the pilot flight list (default: 10)
 
 Docker setup lives in `Docker/` with `Dockerfile` and `docker-compose.yml`. A Nix flake (`flake.nix`) is also provided for NixOS environments.
+
+## Commit Messages
+
+When asked to write a commit message, keep it short but precise: a concise summary line followed by an unordered list of the key changes. Avoid long paragraphs of prose.
