@@ -10,11 +10,13 @@ use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\SetActiveAirline;
+use App\Channels\InAppChannel;
 use App\Events\FlightFiled;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
@@ -71,6 +73,12 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Super-Admin') ? true : null;
+        });
+
+        // Register the custom "inapp" notification channel so notifications can
+        // list it in their via() alongside built-in channels like "mail".
+        Notification::extend('inapp', function ($app) {
+            return new InAppChannel();
         });
     }
 }

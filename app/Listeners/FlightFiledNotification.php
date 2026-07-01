@@ -3,7 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\FlightFiled;
-use App\Models\Notification;
+use App\Notifications\PirepFiled;
+use Illuminate\Support\Facades\Notification;
 
 class FlightFiledNotification
 {
@@ -23,24 +24,15 @@ class FlightFiledNotification
         $airline = $flight->airline;
         $pilot = $flight->pilot;
 
-        // Find all Dispatchers and Managers in this airline
+        // Find all Dispatchers and Managers in this airline, except the pilot
+        // who filed the flight themselves (even if they are a reviewer).
         $reviewers = $airline->users()
             ->wherePivotIn('role', ['Dispatcher', 'Manager'])
+            ->where('users.id', '!=', $pilot->id)
             ->get();
 
-        foreach ($reviewers as $reviewer) {
-            // Don't notify the pilot who filed the flight themselves, even if they are a reviewer
-            if ($reviewer->id === $pilot->id) {
-                continue;
-            }
-
-            Notification::create([
-                'title' => 'New PIREP to review',
-                'message' => "Pilot {$pilot->name} filed a new flight ({$flight->full_flight_number}) from {$flight->departure_icao} to {$flight->arrival_icao}.",
-                'url' => route('viewflight', $flight->id),
-                'target_id' => $reviewer->id,
-                'acknowledged' => false,
-            ]);
-        }
+        // Which channels each reviewer is reached on lives in the notification's
+        // via() method — currently in-app + email.
+        Notification::send($reviewers, new PirepFiled($flight));
     }
 }
