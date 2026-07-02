@@ -83,6 +83,9 @@
                         <a class="nav-link" href="{{ route('fleetmanager') }}"><i class="bi bi-airplane-fill"></i> Fleet</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('crewactivity') ? 'active' : '' }}" href="{{ route('crewactivity') }}"><i class="bi bi-people-fill"></i> Crew Activity</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#"><i class="bi bi-globe-americas"></i> Live Map</a>
                     </li>
                 </ul>

@@ -259,6 +259,86 @@ class FlightController extends Controller
         }
     }
 
+    public function displayCrewActivity(Request $request)
+    {
+        $currentActiveAirline = $request->session()->get('activeairline');
+
+        // Base scope: this airline's accepted flights (status_id = 2)
+        $baseFeedQuery = Flight::query()
+            ->where('airline_id', $currentActiveAirline->id)
+            ->where('status_id', 2);
+
+        // Manual pagination (matching the fleet listing pattern)
+        $maxEntries = (clone $baseFeedQuery)->count();
+        $limit = max((int) env('CREW_FEED_PAGE_LIMIT', 15), 1);
+        $maxPages = (int) ceil($maxEntries / $limit);
+        if ($maxPages < 1) {
+            $maxPages = 1;
+        }
+        $page = (int) $request->get('page', 1);
+        $page = min(max(1, $page), $maxPages);
+        $offset = ($page - 1) * $limit;
+
+        $feed = (clone $baseFeedQuery)
+            ->with(['pilot', 'aircraft', 'departure_airport', 'arrival_airport'])
+            ->orderBy('created_at', 'desc')
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
+
+        // Leaderboard: top pilots this month by accepted-flight count
+        $leaderboard = Flight::query()
+            ->where('airline_id', $currentActiveAirline->id)
+            ->where('status_id', 2)
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->selectRaw('pilot_id, COUNT(*) as flights_count')
+            ->groupBy('pilot_id')
+            ->orderByDesc('flights_count')
+            ->limit(5)
+            ->with('pilot')
+            ->get();
+
+        // Community stats
+        $flightsThisWeek = Flight::query()
+            ->where('airline_id', $currentActiveAirline->id)
+            ->where('status_id', 2)
+            ->where('created_at', '>=', now()->startOfWeek())
+            ->count();
+
+        $activePilots = Flight::query()
+            ->where('airline_id', $currentActiveAirline->id)
+            ->where('status_id', 2)
+            ->where('created_at', '>=', now()->subDays(30))
+            ->distinct()
+            ->count('pilot_id');
+
+        // Crew roster with per-pilot stats (sorted by flights flown)
+        $roster = $currentActiveAirline->users()->get()
+            ->map(function ($member) use ($currentActiveAirline) {
+                return [
+                    'user' => $member,
+                    'role' => $member->pivot->role ?? 'Pilot',
+                    'flights' => $member->logged_flights($currentActiveAirline),
+                    'hours' => $member->logged_hours($currentActiveAirline),
+                ];
+            })
+            ->sortByDesc('flights')
+            ->values();
+
+        return view('flights.activity', [
+            'activeAirline' => $currentActiveAirline,
+            'feed' => $feed,
+            'leaderboard' => $leaderboard,
+            'flightsThisWeek' => $flightsThisWeek,
+            'activePilots' => $activePilots,
+            'crewSize' => $roster->count(),
+            'airlineHours' => $roster->sum('hours'),
+            'roster' => $roster,
+            'maxPages' => $maxPages,
+            'currentPage' => $page,
+        ]);
+    }
+
     public function listReviewFlights()
     {
         $currentActiveAirline = Session::get("activeairline");

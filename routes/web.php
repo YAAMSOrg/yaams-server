@@ -81,6 +81,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get("/user/flights/list", [FlightController::class, "displayFlightsForUser"])->name("flightlist");
         Route::get("/user/flights/view/{flight}", [FlightController::class, "view"])->name("viewflight");
 
+        // Crew Activity (airline-wide social flight feed)
+        Route::get("/airline/activity", [FlightController::class, "displayCrewActivity"])->name("crewactivity");
+
         // Notifications
         Route::get("/user/notifications", [NotificationsController::class, "viewNotifications"])->name("usernotifications");
         Route::post("/user/notifications/{notification}/acknowledge", [NotificationsController::class, "acknowledge"])->name("notificationsacknowledge");
