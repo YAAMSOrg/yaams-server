@@ -140,7 +140,8 @@
                             <a class="nav-link position-relative d-flex align-items-center" href="{{ route('usernotifications') }}" title="Notifications" aria-label="Notifications">
                                 <i class="bi {{ $newNotifications > 0 ? 'bi-bell-fill' : 'bi-bell' }} fs-5"></i>
                                 @if($newNotifications > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                                    <span class="position-absolute start-100 translate-middle badge rounded-pill bg-danger border border-light"
+                                          style="top: 35%; font-size: 0.6rem; padding: 0.25em 0.45em; line-height: 1;">
                                         {{ $newNotifications > 9 ? '9+' : $newNotifications }}
                                         <span class="visually-hidden">unread notifications</span>
                                     </span>
@@ -149,7 +150,7 @@
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-circle fs-5"></i> 
+                                <x-pilot-avatar :name="Auth::user()->name" :size="32" />
                                 <span>{{ Auth::user()->name }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdownUser">
