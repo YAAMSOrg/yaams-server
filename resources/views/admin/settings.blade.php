@@ -91,6 +91,24 @@
                     </div>
 
                     <div class="mb-4">
+                        <label class="form-label d-block">Public statistics</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="show_public_stats" id="public_stats_shown" value="1"
+                                   {{ old('show_public_stats', $settings['show_public_stats']) === '1' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="public_stats_shown">
+                                <i class="bi bi-eye me-1"></i> Shown
+                            </label>
+
+                            <input type="radio" class="btn-check" name="show_public_stats" id="public_stats_hidden" value="0"
+                                   {{ old('show_public_stats', $settings['show_public_stats']) === '0' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="public_stats_hidden">
+                                <i class="bi bi-eye-slash me-1"></i> Hidden
+                            </label>
+                        </div>
+                        <div class="form-text">When hidden, the totals (airlines, pilots, flights, hours) are removed from the public landing page.</div>
+                    </div>
+
+                    <div class="mb-4">
                         <label class="form-label d-block">Who can found new airlines?</label>
                         <div class="btn-group w-100" role="group">
                             <input type="radio" class="btn-check" name="allow_user_airline_creation" id="airline_creation_admin" value="0"

@@ -38,6 +38,7 @@
 </div>
 
 {{-- Platform Stats --}}
+@if(\App\Models\Setting::get('show_public_stats', '1') === '1')
 <div class="row g-3 mb-5">
     <div class="col-6 col-md-3">
         <div class="card h-100 text-center py-3">
@@ -81,6 +82,7 @@
     </div>
 </div>
 
+
 {{-- Airlines Section --}}
 <div class="d-flex align-items-center justify-content-between mb-3">
     <h2 class="h4 fw-bold mb-0">
@@ -90,6 +92,7 @@
         {{ $stats['airlines'] }} {{ Str::plural('airline', $stats['airlines']) }}
     </span>
 </div>
+
 
 @if($airlines->isEmpty())
     <div class="card text-center py-5">
@@ -181,10 +184,11 @@
         @endforeach
     </div>
 @endif
+@endif
 
 {{-- CTA Footer Band --}}
 @guest
-<div class="card border-0 mb-4" style="background: linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 100%); color: white; border-radius: 1rem;">
+<div class="card border-0 mb-4 mt-auto" style="background: linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 100%); color: white; border-radius: 1rem;">
     <div class="card-body py-4 px-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
         <div>
             <h5 class="fw-bold mb-1">Ready to join the virtual skies?</h5>

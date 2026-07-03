@@ -45,6 +45,7 @@ class SetupController extends Controller
             'unit_is_lbs'                  => 'nullable|boolean',
             'allow_user_airline_creation'  => 'required|boolean',
             'allow_registration'           => 'required|boolean',
+            'show_public_stats'            => 'required|boolean',
             'support_email'                => 'nullable|email|max:255',
             'admin_name'                   => 'required|string|max:255',
             'admin_email'      => 'required|email|max:255',
@@ -85,6 +86,7 @@ class SetupController extends Controller
                 ['key' => 'app_name',                    'value' => $request->app_name,                                          'created_at' => $now, 'updated_at' => $now],
                 ['key' => 'allow_user_airline_creation', 'value' => $request->boolean('allow_user_airline_creation') ? '1' : '0', 'created_at' => $now, 'updated_at' => $now],
                 ['key' => 'allow_registration',          'value' => $request->boolean('allow_registration') ? '1' : '0',          'created_at' => $now, 'updated_at' => $now],
+                ['key' => 'show_public_stats',           'value' => $request->boolean('show_public_stats') ? '1' : '0',           'created_at' => $now, 'updated_at' => $now],
                 ['key' => 'support_email',               'value' => $request->support_email,                                     'created_at' => $now, 'updated_at' => $now],
             ], ['key'], ['value', 'updated_at']);
 
