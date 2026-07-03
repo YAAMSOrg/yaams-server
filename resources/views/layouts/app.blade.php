@@ -167,7 +167,7 @@
                                     <li><a class="dropdown-item" href="{{ route('invitecodes.index') }}"><i class="bi bi-ticket-perforated me-2 text-secondary"></i> Invite Codes</a></li>
                                 @endif
                                 <li><a class="dropdown-item" href="{{ route('portal') }}"><i class="bi bi-buildings me-2 text-secondary"></i> Airline Portal</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>
+                                <li><a class="dropdown-item" href="{{ route('settings.profile') }}"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>
                                 @role('Super-Admin')
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bi bi-shield-lock me-2 text-secondary"></i> Administration</a></li>

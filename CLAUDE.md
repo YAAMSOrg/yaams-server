@@ -59,6 +59,18 @@ The **Airline Portal** (`/portal`, always accessible from the nav) lets users:
 
 The `RequiresActiveAirline` middleware (`airline` alias in `Kernel.php`) guards all routes that depend on an active airline session and redirects to `/portal` if none is set. Apply it to any new airline-dependent routes.
 
+### User Account Settings
+
+User-facing account settings live at `/settings/*` (`App\Http\Controllers\SettingsController`, views in `resources/views/settings/`) — do not confuse this with `Admin\SettingsController`, which edits instance-wide settings. `routes/web.php` imports the admin one aliased as `AdminSettingsController` to avoid the name clash.
+
+The page mirrors the admin dashboard layout (page header + `row g-4` with a `settings._sidebar` nav card and a `col-lg-9` main area). Sections, keyed by the sidebar's `$active` argument:
+- **Profile** (`settings.profile`) — name/email form posting to Fortify's existing `user-profile-information.update` route. Since `User implements MustVerifyEmail`, changing the email re-triggers verification. Errors read from the `updateProfileInformation` bag.
+- **Security** (`settings.security`) — password form posting to Fortify's `user-password.update` route. Errors read from the `updatePassword` bag. Both Fortify features are enabled in `config/fortify.php`.
+- **Notifications** (`settings.notifications`) — toggles the `users.email_notifications` column via `SettingsController::updateNotifications()`. The form uses a hidden `0` + checkbox `1` so unchecking submits a value.
+- **Danger zone** (`settings.danger`) — placeholder only; the "Delete account" button is disabled and no route/logic exists yet.
+
+The `email_notifications` boolean column (`$fillable` + `'boolean'` cast on `User`) is read in each PIREP notification's `via()`: `database` is always on, `mail` is appended only when `$notifiable->email_notifications ?? true`.
+
 ### Active Airline Session Pattern
 
 The currently selected airline is stored in the PHP session as `activeairline` (a full `Airline` model). Controllers retrieve it via `session()->get('activeairline')`. The `FlightController::addFlight()` method intentionally reloads this from the DB on each PIREP submission to avoid stale state.
@@ -80,13 +92,13 @@ When a PIREP is filed (both web and API paths), `event(new FlightFiled($flight))
 
 ### Notifications (Multi-Channel)
 
-Notifications use Laravel's native notification system so delivery channels are pluggable without touching the trigger/listener logic. A notification class (e.g. `app/Notifications/PirepFiled.php`) declares its channels in `via()` — currently `['database', 'mail']` — and renders each with a matching method (`toArray()`, `toMail()`).
+Notifications use Laravel's native notification system so delivery channels are pluggable without touching the trigger/listener logic. A notification class (e.g. `app/Notifications/PirepFiled.php`) declares its channels in `via()` — `database` is always included, `mail` is appended only when the recipient's `email_notifications` preference is on (see User Account Settings) — and renders each with a matching method (`toArray()`, `toMail()`).
 
 - **`database`** is Laravel's built-in channel. It persists to the standard `notifications` table (uuid PK, polymorphic `notifiable`, JSON `data`, `read_at`) via `Illuminate\Notifications\DatabaseNotification`. A notification opts in by returning `'database'` from `via()` and implementing `toArray($notifiable): array` (`title`, `message`, optional `url`) — the payload is stored in `data`. The bell/list UI reads unread rows through the `Notifiable` trait's `unreadNotifications` relation; `User::countNewNotifications()` wraps `unreadNotifications()->count()`. Dismissing a notification calls `$notification->markAsRead()`.
 - **`mail`** is Laravel's built-in channel; `toMail()` returns a `MailMessage`.
 - Notification classes implement `ShouldQueue`, so mail dispatches inline under `QUEUE_CONNECTION=sync` and becomes async automatically once a real queue is configured.
 
-**To add a channel** (e.g. webhook): add a channel class + `Notification::extend('webhook', ...)`, add `'webhook'` to `via()`, and add a `toWebhook()` renderer. No event/listener changes. `via()` receives `$notifiable`, so per-user channel preferences can be added there.
+**To add a channel** (e.g. webhook): add a channel class + `Notification::extend('webhook', ...)`, add `'webhook'` to `via()`, and add a `toWebhook()` renderer. No event/listener changes. `via()` receives `$notifiable`, so per-user channel preferences live there — the `mail` channel is already gated on the recipient's `email_notifications` preference.
 
 Accept/reject actions notify the pilot the same way — `Notification::send($flight->pilot, new PirepAccepted($flight))` (and `PirepRejected`) in `FlightController` / `FlightAPIController`.
 

@@ -12,8 +12,9 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\InviteCodeController;
 use App\Http\Controllers\AirlineController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 
 // Setup wizard — only accessible before any user exists
 Route::get('/setup', [SetupController::class, 'show'])->name('setup.index');
@@ -55,9 +56,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('dashboard');
 
         // Instance settings — edit the key/value rows in the `settings` table
-        Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
-        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::get('/settings', [AdminSettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     });
+
+    // -------------------------------------------------------------------------
+    // User account settings — profile, security, notification preferences
+    // -------------------------------------------------------------------------
+    Route::get('/settings', fn () => redirect()->route('settings.profile'))->name('settings');
+    Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
+    Route::get('/settings/security', [SettingsController::class, 'security'])->name('settings.security');
+    Route::get('/settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');
+    Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
+    Route::get('/settings/danger', [SettingsController::class, 'danger'])->name('settings.danger');
 
     // Dashboard — no airline middleware; controller handles the redirect to /portal itself
     Route::get("/user/dashboard", [DashboardController::class, "index"])->name("dashboard");

@@ -30,7 +30,13 @@ class PirepRejected extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        $channels = ['database'];
+
+        if ($notifiable->email_notifications ?? true) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     /**
