@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding agents when working with code in this repository.
 
 ## Project Overview
 
@@ -118,6 +118,3 @@ Key `.env` values beyond standard Laravel:
 
 Docker setup lives in `Docker/` with `Dockerfile` and `docker-compose.yml`. A Nix flake (`flake.nix`) is also provided for NixOS environments.
 
-## Commit Messages
-
-When asked to write a commit message, keep it short but precise: a concise summary line followed by an unordered list of the key changes. Avoid long paragraphs of prose.
