@@ -32,11 +32,19 @@ Two role systems coexist — do not confuse them:
 
 ### Instance Settings
 
-Instance-wide configuration is stored as key/value rows in the `settings` table. Read values via `Setting::get('key', $default)` (`app/Models/Setting.php`). New settings must be added to the `/setup` wizard (`SetupController` + `resources/views/setup/index.blade.php`) so they are written on first install.
+Instance-wide configuration is stored as key/value rows in the `settings` table (`key` is the string PK). Read values via `Setting::get('key', $default)` (`app/Models/Setting.php`); write via `Setting::set('key', $value)`. Every known key and its fallback value lives in `Setting::defaults()` — `get()` falls back to that when a row is missing, so callers never hardcode defaults. Boolean settings are stored as the strings `'1'`/`'0'`.
+
+New settings must be wired into all three places:
+- `Setting::defaults()` — declare the key and its default value
+- The `/setup` wizard (`SetupController::store()` + `resources/views/setup/index.blade.php`) — written on first install
+- The admin settings page (`Admin\SettingsController` + `resources/views/admin/settings.blade.php`) — editable after install by a Super-Admin
 
 Current setting keys:
-- `app_name` — display name shown in the page title and header
+- `app_name` — display name shown in the page title and header (default: `config('app.name')`, `'YAAMS'`)
+- `support_email` — optional contact address; shown in the site footer as a mailto link when set (default: `null`)
 - `allow_user_airline_creation` — `'1'` if any registered user may found an airline; `'0'` (default) if only Super-Admins can
+- `allow_registration` — `'1'` (default) if public self-registration is open; `'0'` if new users cannot self-register
+- `show_public_stats` — `'1'` if the totals (airlines, pilots, flights, hours) are shown on the public landing page; `'0'` if they are hidden
 
 ### User Onboarding & Invite Code System
 
