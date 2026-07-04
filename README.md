@@ -10,7 +10,8 @@ An decentralised open-source virtual airline management platform. Track PIREPs, 
 * Fleet management with airframe tracking and metrics
 * Pilot dashboard with verified flight hours and statistics
 * Multi-airline support with easy switching
-* In-app notification system
+* In-app and email notification system
+* Activity log / audit trail with a configurable verbosity level
 * REST API (v1) for custom ACARS clients and integrations
 
 ## Technical Foundation
@@ -25,31 +26,36 @@ An decentralised open-source virtual airline management platform. Track PIREPs, 
 
 ### Containerized Environment (Docker/Podman)
 
-1. Build the application image:
-   ```bash
-   cd Docker
-   docker build . -t yaams-app:dev
-   ```
-2. Setup the network and infrastructure:
+1. Create the shared network:
    ```bash
    docker network create yaams
-   cd Docker
-   docker-compose up -d
    ```
-3. Initialize the application:
+2. Install PHP dependencies and prepare the environment file (the compose
+   services mount the repo and expect `vendor/` to exist):
    ```bash
-   docker run -it --rm --network yaams -u $(id -u):$(id -g) -v $(pwd):/app -p 8000:8000 yaams-app:dev bash
-   composer install
    cp .env.example .env
-   php artisan key:generate
-   php artisan migrate --seed
+   docker run --rm -v $(pwd):/app -w /app composer:latest install
    ```
-4. In a separate shell, start the queue worker so notification emails are
-   delivered (they are queued so a slow/failing SMTP can't block PIREP filing):
+3. Bring up the whole stack:
    ```bash
-   docker exec yaams-dev-app php artisan queue:work
+   cd Docker
+   docker compose up -d
    ```
-   Sent mail is viewable in smtp4dev at http://localhost:8081.
+   This starts everything and applies migrations automatically:
+   * `db` - MariaDB (creates the `yaams` schema, with a healthcheck)
+   * `migrate` - one-shot, runs `php artisan migrate` once the DB is healthy
+   * `app` - `php artisan serve --host=0.0.0.0` on http://localhost:8000
+   * `worker` - `queue:work`, so notification emails are delivered (they are
+     queued, so a slow/failing SMTP can't block PIREP filing)
+   * `scheduler` - `schedule:work`, prunes the activity log daily
+   * `phpmyadmin` - http://localhost:8080
+   * `smtp4dev` - catches outgoing mail at http://localhost:8081
+4. Generate the app key and seed the test data (one-time):
+   ```bash
+   docker exec yaams-dev-app php artisan key:generate
+   docker exec yaams-dev-app php artisan migrate --seed
+   ```
+   The seeder prints the Sanctum API tokens for the test users to stdout.
 
 ### Native Setup
 1. Ensure PHP 8.2+, Composer, and a MariaDB/MySQL database are installed.
