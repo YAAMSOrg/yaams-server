@@ -45,6 +45,19 @@ Current setting keys:
 - `allow_user_airline_creation` — `'1'` if any registered user may found an airline; `'0'` (default) if only Super-Admins can
 - `allow_registration` — `'1'` (default) if public self-registration is open; `'0'` if new users cannot self-register
 - `show_public_stats` — `'1'` if the totals (airlines, pilots, flights, hours) are shown on the public landing page; `'0'` if they are hidden
+- `LOG_LEVEL` — activity-log verbosity threshold: `debug` (default) records everything incl. model changes, `info` records user actions only, `warning` records security events only. Wired into `Setting::defaults()` + the admin settings page but **intentionally not** the setup wizard (see Application Logging below).
+
+### Application Logging (Activity Log)
+
+An audit trail of who did what, built on `spatie/laravel-activitylog` (stored in the `activity_log` table). Written synchronously - no queue worker required.
+
+- **Automatic model logging** — core domain models (`Flight`, `Aircraft`, `Airline`, `InviteCode`, `User`) use the `App\Models\Concerns\LogsModelActivity` trait, which wraps Spatie's `LogsActivity` with a shared `LogOptions` (`logFillable()->logOnlyDirty()->logExcept(['password','remember_token'])->dontSubmitEmptyLogs()`). These entries are recorded at the `debug` level. `Setting` is deliberately excluded — its string primary key is incompatible with the `activity_log.subject_id` bigint column, and settings changes are covered by an explicit action log instead.
+- **Explicit action logging** — meaningful user actions call the `activity()` helper directly, tagging a level in properties: login/logout (`info`) and failed login (`warning`) via `App\Listeners\AuthEventSubscriber` (registered in `EventServiceProvider::$subscribe`); PIREP filed/accepted/rejected in `FlightController` + `Api\V1\FlightAPIController` (`info`); invite redeemed in `PortalController::redeem()` (`info`); settings updated in `Admin\SettingsController::update()` (`info`).
+- **Level gate** — every activity carries a `level` (default `debug`). An `Activity::saving` hook in `AppServiceProvider::boot()` copies it onto the dedicated `level` column and drops the record when its weight is below the `LOG_LEVEL` threshold (`App\Support\ActivityLevel`: `debug=10, info=20, warning=30`). This single gate governs both automatic and explicit logs.
+- **Viewer** — Super-Admins browse the log at `/admin/activity` (`Admin\ActivityLogController` + `resources/views/admin/activity.blade.php`), with a level filter and pagination; linked from the admin sidebar.
+- **Subject labels** — the viewer renders each subject via `App\Support\ActivityLabel::for()` (e.g. an aircraft shows `D-EXAM (FVA)`, registration + operating airline ICAO callsign) instead of `Aircraft #1`, falling back to `ClassName #id` for unknown types. The controller eager-loads the aircraft's airline through the polymorphic subject (`morphWith`) to avoid an N+1.
+- **Retention** — the log lives in the DB, so OS `logrotate` does not apply. Pruning is handled by Spatie's `activitylog:clean` command, scheduled daily in `App\Console\Kernel::schedule()`. The window is `ACTIVITYLOG_RETENTION_DAYS` (`.env`, default `180`), read by `config/activitylog.php`. This requires the Laravel scheduler to be running (see Environment → Scheduler).
+- Adding a new setting still requires the three-place wiring described above, **except** `LOG_LEVEL`, which is intentionally omitted from the setup wizard so first-install stays minimal.
 
 ### User Onboarding & Invite Code System
 
@@ -128,12 +141,13 @@ API tokens are printed during `php artisan migrate --seed`.
 Key `.env` values beyond standard Laravel:
 - `FLIGHT_PAGE_LIMIT` — number of flights per page in the pilot flight list (default: 10)
 - `QUEUE_CONNECTION` — background job backend (default: `database`; set to `redis` to use Redis). Notification email is dispatched on this queue, so a worker must be running in every environment where mail should actually be sent — see below.
+- `ACTIVITYLOG_RETENTION_DAYS` — how long activity-log rows are kept before `activitylog:clean` prunes them (default: `180`). Requires the scheduler to be running — see below.
 
 ### Queue / Background Jobs
 
 Outgoing notification email is queued (see the Notifications section) so a slow/failing SMTP server can never block PIREP filing/review. This requires a worker to drain the queue:
 
-- **Dev:** `docker exec yaams-dev-app php artisan queue:work` (mail lands in smtp4dev at http://localhost:8081). Without a running worker, in-app notifications still appear instantly but no email is sent.
+- **Dev:** the `worker` service in `Docker/docker-compose.yml` runs `queue:work --tries=3` automatically (mail lands in smtp4dev at http://localhost:8081) — no manual step. Without a running worker, in-app notifications still appear instantly but no email is sent. To drive the queue by hand instead, run `docker exec yaams-dev-app php artisan queue:work`.
 - **Production:** run `php artisan queue:work --tries=3` under a process supervisor so it restarts on exit, e.g. a Supervisor program:
   ```ini
   [program:yaams-worker]
@@ -145,5 +159,18 @@ Outgoing notification email is queued (see the Notifications section) so a slow/
   Run `php artisan queue:restart` on each deploy so workers pick up new code. Failed sends are recorded in the `failed_jobs` table; inspect with `php artisan queue:failed` and requeue with `php artisan queue:retry`.
 - The `database` driver uses the `jobs`/`job_batches` tables created by migration (`failed_jobs` already existed). Switching to Redis is a pure `QUEUE_CONNECTION` change — no code change, since only the in-app channel is pinned to `sync`.
 
+### Scheduler (Cron)
+
+`App\Console\Kernel::schedule()` registers `activitylog:clean` to run daily (prunes the `activity_log` table per `ACTIVITYLOG_RETENTION_DAYS`). Laravel's scheduler is **not** the queue worker — it is a separate process, and mail delivery (queue worker) is independent of scheduled pruning (scheduler).
+
+- **Dev:** the `scheduler` service in `Docker/docker-compose.yml` runs `php artisan schedule:work` automatically — no cron to set up. `schedule:work` is a foreground process that internally fires `schedule:run` every minute.
+- **Production:** either run `schedule:work` under a process supervisor (mirror of the `yaams-worker` Supervisor program above), or add a single system cron entry:
+  ```cron
+  * * * * * cd /app && php artisan schedule:run >> /dev/null 2>&1
+  ```
+  Without one of these, the activity log is never pruned and grows unbounded (everything else keeps working). A full production deploy runs both the queue worker and the scheduler (plus `php artisan queue:restart` on deploy).
+
 Docker setup lives in `Docker/` with `Dockerfile` and `docker-compose.yml`. A Nix flake (`flake.nix`) is also provided for NixOS environments.
+
+`docker compose up -d` (from `Docker/`) brings up the whole dev stack: `db` (auto-creates the `yaams` schema, with a healthcheck), a one-shot `migrate` service that applies migrations before anything long-running starts, then `app` (`php artisan serve --host=0.0.0.0`, port 8000), `worker`, `scheduler`, `phpmyadmin`, and `smtp4dev`. The `app`/`worker`/`scheduler`/`migrate` services build from `Docker/Dockerfile`, mount the repo at `/app`, and rely on `vendor/` being installed (run `composer install` first on a fresh clone). First-time data still needs a manual seed: `docker exec yaams-dev-app php artisan migrate --seed`.
 

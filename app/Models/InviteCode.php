@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Concerns\LogsModelActivity;
 
 class InviteCode extends Model
 {
+    use LogsModelActivity;
+
     protected $fillable = ['code', 'airline_id', 'created_by', 'role', 'used_by', 'used_at'];
 
     protected $casts = [

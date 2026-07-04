@@ -7,6 +7,7 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use App\Events\FlightFiled;
 use App\Listeners\FlightFiledNotification;
+use App\Listeners\AuthEventSubscriber;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,15 @@ class EventServiceProvider extends ServiceProvider
         FlightFiled::class => [
             FlightFiledNotification::class,
         ],
+    ];
+
+    /**
+     * The subscriber classes to register.
+     *
+     * @var array
+     */
+    protected $subscribe = [
+        AuthEventSubscriber::class,
     ];
 
     /**

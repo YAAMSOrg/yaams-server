@@ -24,7 +24,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Prune activity-log rows older than the configured retention window
+        // (ACTIVITYLOG_RETENTION_DAYS, default 180). Requires the scheduler to
+        // be running (see deployment notes in CLAUDE.md).
+        $schedule->command('activitylog:clean')->daily();
     }
 
     /**

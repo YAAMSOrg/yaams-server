@@ -12,6 +12,7 @@ use App\Models\Airport;
 use App\Events\FlightFiled;
 use App\Notifications\PirepAccepted;
 use App\Notifications\PirepRejected;
+use App\Support\ActivityLevel;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -99,6 +100,13 @@ class FlightAPIController extends Controller
 
         event(new FlightFiled($flight));
 
+        activity()
+            ->causedBy($user)
+            ->performedOn($flight)
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('pirep_filed')
+            ->log('Filed PIREP ' . $flight->full_flight_number);
+
         return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status']));
     }
 
@@ -149,6 +157,13 @@ class FlightAPIController extends Controller
         // Notify the pilot (in-app + email). Channels live in PirepAccepted::via().
         Notification::send($flight->pilot, new PirepAccepted($flight));
 
+        activity()
+            ->causedBy($user)
+            ->performedOn($flight)
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('pirep_accepted')
+            ->log('Accepted PIREP ' . $flight->full_flight_number);
+
         return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status']));
     }
 
@@ -179,6 +194,13 @@ class FlightAPIController extends Controller
 
         // Notify the pilot (in-app + email). Channels live in PirepRejected::via().
         Notification::send($flight->pilot, new PirepRejected($flight));
+
+        activity()
+            ->causedBy($user)
+            ->performedOn($flight)
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('pirep_rejected')
+            ->log('Rejected PIREP ' . $flight->full_flight_number);
 
         return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status']));
     }

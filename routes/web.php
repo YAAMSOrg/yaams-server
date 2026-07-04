@@ -15,6 +15,7 @@ use App\Http\Controllers\AirlineController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 // Setup wizard — only accessible before any user exists
 Route::get('/setup', [SetupController::class, 'show'])->name('setup.index');
@@ -58,6 +59,9 @@ Route::middleware(['auth'])->group(function () {
         // Instance settings — edit the key/value rows in the `settings` table
         Route::get('/settings', [AdminSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
+
+        // Activity log — browse the instance-wide audit trail
+        Route::get('/activity', [ActivityLogController::class, 'index'])->name('activity.index');
     });
 
     // -------------------------------------------------------------------------

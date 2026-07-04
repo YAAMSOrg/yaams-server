@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -21,6 +22,7 @@ class SettingsController extends Controller
             'allow_registration'          => Setting::get('allow_registration'),
             'show_public_stats'           => Setting::get('show_public_stats'),
             'support_email'               => Setting::get('support_email'),
+            'LOG_LEVEL'                   => Setting::get('LOG_LEVEL'),
         ];
 
         return view('admin.settings', compact('settings'));
@@ -34,6 +36,7 @@ class SettingsController extends Controller
             'allow_registration'          => 'required|boolean',
             'show_public_stats'           => 'required|boolean',
             'support_email'               => 'nullable|email|max:255',
+            'LOG_LEVEL'                   => 'required|in:debug,info,warning',
         ]);
 
         Setting::set('app_name', $validated['app_name']);
@@ -41,6 +44,13 @@ class SettingsController extends Controller
         Setting::set('allow_registration', $request->boolean('allow_registration') ? '1' : '0');
         Setting::set('show_public_stats', $request->boolean('show_public_stats') ? '1' : '0');
         Setting::set('support_email', $validated['support_email'] ?? null);
+        Setting::set('LOG_LEVEL', $validated['LOG_LEVEL']);
+
+        activity()
+            ->causedBy(auth()->user())
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('settings_updated')
+            ->log('Updated instance settings');
 
         return redirect()
             ->route('admin.settings.edit')

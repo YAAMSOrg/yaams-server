@@ -126,6 +126,39 @@
                         <div class="form-text">Admins can always create airlines regardless of this setting.</div>
                     </div>
 
+                    {{-- Logging --}}
+                    <hr class="my-4">
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-journal-text me-2 text-warning"></i> Logging</h6>
+
+                    <div class="mb-4">
+                        <label class="form-label d-block">Activity log level</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="LOG_LEVEL" id="log_level_debug" value="debug"
+                                   {{ old('LOG_LEVEL', $settings['LOG_LEVEL']) === 'debug' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="log_level_debug">
+                                <i class="bi bi-bug me-1"></i> Debug
+                            </label>
+
+                            <input type="radio" class="btn-check" name="LOG_LEVEL" id="log_level_info" value="info"
+                                   {{ old('LOG_LEVEL', $settings['LOG_LEVEL']) === 'info' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="log_level_info">
+                                <i class="bi bi-info-circle me-1"></i> Info
+                            </label>
+
+                            <input type="radio" class="btn-check" name="LOG_LEVEL" id="log_level_warning" value="warning"
+                                   {{ old('LOG_LEVEL', $settings['LOG_LEVEL']) === 'warning' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="log_level_warning">
+                                <i class="bi bi-exclamation-triangle me-1"></i> Warning
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            Verbosity threshold for the activity log.
+                            <strong>Debug</strong> records everything including model changes;
+                            <strong>Info</strong> records user actions only (logins, PIREPs, invites);
+                            <strong>Warning</strong> records security events only (failed logins).
+                        </div>
+                    </div>
+
                     <button class="btn btn-primary" type="submit">
                         <i class="bi bi-check2-circle me-2"></i> Save settings
                     </button>

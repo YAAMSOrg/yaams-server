@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InviteCode;
+use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
 
 class PortalController extends Controller
@@ -41,6 +42,13 @@ class PortalController extends Controller
             'used_by' => auth()->id(),
             'used_at' => now(),
         ]);
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($code->airline)
+            ->withProperties(['level' => ActivityLevel::INFO, 'role' => $code->role])
+            ->event('invite_redeemed')
+            ->log('Redeemed invite code to join ' . $code->airline->name);
 
         if (!session('activeairline')) {
             $request->session()->put('activeairline', $code->airline);

@@ -10,6 +10,12 @@ services:
       - 3306:3306
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_DATABASE: yaams
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   phpmyadmin:
     image: docker.io/phpmyadmin:latest
@@ -29,6 +35,81 @@ services:
       ports:
           - "2525:25"
           - "8081:80"
+
+  # Application dev server. `--host=0.0.0.0` binds all interfaces so the mapped
+  # host port is reachable from outside the container. Keeps the `yaams-dev-app`
+  # name so `docker exec yaams-dev-app php artisan …` still works.
+  app:
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile
+    container_name: yaams-dev-app
+    working_dir: /app
+    volumes:
+      - ..:/app
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    ports:
+      - 8000:8000
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - "yaams"
+    restart: unless-stopped
+
+  # One-shot: waits for the DB, then applies migrations before the long-running
+  # workers start — so a fresh `up` never spams "Unknown database" / missing
+  # table errors. Idempotent (safe to re-run); seeding stays a manual step.
+  migrate:
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile
+    container_name: yaams-migrate
+    working_dir: /app
+    volumes:
+      - ..:/app
+    command: php artisan migrate --force
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - "yaams"
+    restart: "no"
+
+  # Queue worker — drains the mail queue so PIREP notifications actually get sent.
+  worker:
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile
+    container_name: yaams-worker
+    working_dir: /app
+    volumes:
+      - ..:/app
+    command: php artisan queue:work --tries=3
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - "yaams"
+    restart: unless-stopped
+
+  # Scheduler — runs schedule:work (the cron-less equivalent of `schedule:run`
+  # every minute) so activitylog:clean prunes the activity log daily.
+  scheduler:
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile
+    container_name: yaams-scheduler
+    working_dir: /app
+    volumes:
+      - ..:/app
+    command: php artisan schedule:work
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - "yaams"
+    restart: unless-stopped
 
 networks:
   yaams:

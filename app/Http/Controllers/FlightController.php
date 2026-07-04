@@ -14,6 +14,7 @@ use App\Events\FlightFiled;
 use App\Notifications\PirepAccepted;
 use App\Notifications\PirepRejected;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
+use App\Support\ActivityLevel;
 
 class FlightController extends Controller
 {
@@ -218,6 +219,13 @@ class FlightController extends Controller
 
             event(new FlightFiled($flight));
 
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($flight)
+                ->withProperties(['level' => ActivityLevel::INFO])
+                ->event('pirep_filed')
+                ->log('Filed PIREP ' . $flight->full_flight_number);
+
             // And redirect the user.
             return redirect()->route("flightlist");
         }
@@ -385,6 +393,13 @@ class FlightController extends Controller
         // Notify the pilot (in-app + email). Channels live in PirepAccepted::via().
         NotificationFacade::send($flight->pilot, new PirepAccepted($flight));
 
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($flight)
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('pirep_accepted')
+            ->log('Accepted PIREP ' . $flight->full_flight_number);
+
         return redirect()->route('flightreviewindex')->with('success', 'Flight successfully approved.');
     }
 
@@ -422,6 +437,13 @@ class FlightController extends Controller
 
         // Notify the pilot (in-app + email). Channels live in PirepRejected::via().
         NotificationFacade::send($flight->pilot, new PirepRejected($flight));
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($flight)
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('pirep_rejected')
+            ->log('Rejected PIREP ' . $flight->full_flight_number);
 
         return redirect()->route('flightreviewindex')->with('success', 'Flight has been rejected.');
     }

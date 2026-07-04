@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10",
         "larswiegers/laravel-maps": "^0.20.0",
+        "spatie/laravel-activitylog": "^4.12",
         "spatie/laravel-permission": "^8.0"
     },
     "require-dev": {

@@ -17,6 +17,9 @@ use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Actions\Fortify\SetActiveAirline;
 use App\Models\Setting;
+use App\Support\ActivityLevel;
+use Spatie\Activitylog\Models\Activity;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -40,12 +43,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Bootstrap 5 markup for framework-rendered pagination links.
+        Paginator::useBootstrapFive();
+
         // Expose the instance name to every view (brand + page title). Guarded
         // with hasTable so `artisan migrate` / fresh installs (before the
         // settings table exists) don't blow up.
         View::share('instanceName', Schema::hasTable('settings')
             ? Setting::get('app_name', config('app.name'))
             : config('app.name'));
+
+        // Activity-log verbosity gate. Every activity carries a `level` in its
+        // properties (default `debug` for automatic model logs); on save we
+        // copy it onto the dedicated `level` column and drop the record when it
+        // sits below the configured `LOG_LEVEL` threshold. Returning false from
+        // the saving hook cancels the insert. This single gate covers both the
+        // automatic model logs (LogsActivity trait) and explicit action logs.
+        Activity::saving(function (Activity $activity) {
+            $level = $activity->getExtraProperty('level') ?? ActivityLevel::DEBUG;
+            $activity->level = $level;
+
+            return ActivityLevel::shouldRecord($level);
+        });
 
         // Fortify rate limiters — referenced by config('fortify.limiters'),
         // which makes Fortify attach throttle:login / throttle:two-factor

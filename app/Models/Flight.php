@@ -8,10 +8,11 @@ use App\Models\Airline;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use DateTime;
+use App\Models\Concerns\LogsModelActivity;
 
 class Flight extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsModelActivity;
 
     protected $fillable = [
         'airline_id',

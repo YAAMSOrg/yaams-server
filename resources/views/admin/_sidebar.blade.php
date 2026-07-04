@@ -1,4 +1,4 @@
-{{-- Admin sections sidebar. Pass $active ('overview' | 'instance') to highlight
+{{-- Admin sections sidebar. Pass $active ('overview' | 'instance' | 'activity') to highlight
      the current section. Users/Airlines management are not built yet. --}}
 @php($active = $active ?? 'overview')
 <div class="col-12 col-lg-3">
@@ -19,6 +19,10 @@
             <a href="{{ route('admin.settings.edit') }}"
                class="list-group-item list-group-item-action {{ $active === 'instance' ? 'active' : '' }}">
                 <i class="bi bi-gear me-2"></i> Instance
+            </a>
+            <a href="{{ route('admin.activity.index') }}"
+               class="list-group-item list-group-item-action {{ $active === 'activity' ? 'active' : '' }}">
+                <i class="bi bi-journal-text me-2"></i> Activity log
             </a>
         </div>
     </div>

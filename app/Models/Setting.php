@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
+    // NOTE: intentionally NOT using LogsModelActivity. This model's primary key
+    // is the string `key`, which is incompatible with the activity_log
+    // polymorphic `subject_id` (unsigned bigint) column. Settings changes are
+    // instead captured explicitly by the `settings_updated` action log in
+    // Admin\SettingsController::update() at the `info` level.
+
     protected $primaryKey = 'key';
     protected $keyType = 'string';
     public $incrementing = false;
@@ -24,6 +30,7 @@ class Setting extends Model
             'allow_user_airline_creation' => '0',
             'allow_registration'          => '1',
             'support_email'               => null,
+            'LOG_LEVEL'                   => 'debug',
         ];
     }
 
