@@ -1,0 +1,76 @@
+# Production image for YAAMS.
+#
+# Multi-stage:
+#   1. `vendor`  - installs PHP dependencies with Composer (no dev, optimized).
+#   2. runtime   - FrankenPHP (Caddy + PHP in one binary) serving public/ over
+#                  plain HTTP. TLS is expected to be terminated by an external
+#                  reverse proxy (see docker-compose.prod.yml / SERVER_NAME).
+#
+# Frontend assets (public/css, public/js, public/vendor) are committed to the
+# repo (Laravel Mix output), so no Node/npm build step is required here.
+
+# ---------------------------------------------------------------------------
+# Stage 1 - Composer dependencies
+# ---------------------------------------------------------------------------
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+# Copy only the files needed to resolve dependencies first, so this layer is
+# cached unless composer.json/lock actually change.
+COPY composer.json composer.lock ./
+
+# `--no-scripts` because artisan isn't available yet (no app code copied).
+# The BuildKit cache mount keeps Composer's download cache warm across builds.
+RUN --mount=type=cache,target=/tmp/composer-cache \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache \
+    composer install \
+        --no-dev \
+        --no-scripts \
+        --no-interaction \
+        --prefer-dist \
+        --optimize-autoloader
+
+# ---------------------------------------------------------------------------
+# Stage 2 - Runtime (FrankenPHP)
+# ---------------------------------------------------------------------------
+FROM dunglas/frankenphp:1-php8.3
+
+LABEL org.opencontainers.image.title="YAAMS" \
+      org.opencontainers.image.description="Yet Another Airline Management System" \
+      org.opencontainers.image.source="https://github.com/YAAMSOrg/yaams-server"
+
+WORKDIR /app
+
+# PHP extensions required by the app (install-php-extensions ships in the image).
+RUN install-php-extensions \
+        pdo_mysql \
+        mysqli \
+        pcntl \
+        gd \
+        zip \
+        intl \
+        opcache
+
+# Production PHP settings (opcache on, no display_errors).
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+# App source + resolved vendor from stage 1.
+COPY . /app
+COPY --from=vendor /app/vendor /app/vendor
+
+# Storage + cache must be writable by the runtime user.
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage /app/bootstrap/cache
+
+COPY Docker/entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
+# Bare port -> FrankenPHP/Caddy serves plain HTTP only (no auto-HTTPS). Override
+# SERVER_NAME with a hostname to enable automatic HTTPS for a proxy-less setup.
+ENV SERVER_NAME=:80
+
+EXPOSE 80
+
+ENTRYPOINT ["entrypoint"]
+CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]

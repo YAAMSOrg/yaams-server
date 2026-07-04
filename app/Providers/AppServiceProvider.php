@@ -21,6 +21,7 @@ use App\Support\ActivityLevel;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -43,6 +44,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Trust the reverse proxy that fronts the app in production (TLS is
+        // terminated there). Lets Laravel see the real client IP and generate
+        // https:// URLs from the forwarded headers. The container is only
+        // reachable via the local proxy, so trusting all proxies is safe.
+        TrustProxies::at('*');
+
         // Bootstrap 5 markup for framework-rendered pagination links.
         Paginator::useBootstrapFive();
 

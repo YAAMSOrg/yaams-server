@@ -1,0 +1,99 @@
+# Production stack for YAAMS - single-file deployment.
+#
+# Pulls the prebuilt multi-arch image from GHCR (built by the release workflow),
+# so the host needs only this file and a `.env` (copy from .env.production.example).
+#
+# Quick start:
+#   cp .env.production.example .env
+#   # edit .env: set APP_KEY, DB_PASSWORD, APP_URL, MAIL_*, domain settings
+#   docker compose -f docker-compose.prod.yml up -d
+#   # then open the /setup wizard in your browser
+#
+# TLS: the `app` service serves plain HTTP on 127.0.0.1:8000. Terminate TLS with
+# your own reverse proxy on the host, e.g. Caddy:
+#   your.domain {
+#       reverse_proxy 127.0.0.1:8000
+#   }
+
+x-app-image: &app-image ghcr.io/yaamsorg/yaams-server:latest
+
+x-app-common: &app-common
+  image: *app-image
+  env_file: .env
+  networks:
+    - yaams
+  restart: unless-stopped
+  volumes:
+    - storage-data:/app/storage
+
+services:
+  db:
+    image: docker.io/mariadb:lts
+    container_name: yaams-db
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-yaams}
+      MARIADB_USER: ${DB_USERNAME:-yaams}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - yaams
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # One-shot: applies migrations once the DB is healthy, before app/worker start.
+  migrate:
+    <<: *app-common
+    container_name: yaams-migrate
+    command: php artisan migrate --force
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    <<: *app-common
+    container_name: yaams-app
+    # Plain HTTP, published to loopback only - front it with a host reverse proxy.
+    ports:
+      - "127.0.0.1:8000:80"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *app-common
+    container_name: yaams-worker
+    command: php artisan queue:work --tries=3
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  scheduler:
+    <<: *app-common
+    container_name: yaams-scheduler
+    command: php artisan schedule:work
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # Optional: uncomment + set QUEUE_CONNECTION=redis / SESSION_DRIVER=redis in .env.
+  # redis:
+  #   image: docker.io/redis:7-alpine
+  #   container_name: yaams-redis
+  #   networks:
+  #     - yaams
+  #   restart: unless-stopped
+
+networks:
+  yaams:
+    name: yaams
+
+volumes:
+  db-data:
+  storage-data:

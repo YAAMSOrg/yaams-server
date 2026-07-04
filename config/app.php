@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | The YAAMS release version, shown in the site footer. Bump this on each
+    | tagged release so the running instance advertises its version.
+    |
+    */
+
+    'version' => '0.1',
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

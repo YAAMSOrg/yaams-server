@@ -22,6 +22,40 @@ An decentralised open-source virtual airline management platform. Track PIREPs, 
 * Permissions: Spatie Laravel Permission
 * Environment: Docker-ready and NixOS support
 
+## Production Deployment
+
+Production runs from a prebuilt multi-arch (amd64 + arm64) image. The image bundles PHP, the app, and [FrankenPHP](https://frankenphp.dev/) as the web server; you only need Docker and the single `docker-compose.prod.yml` file.
+
+### Deploying on a server
+1. Copy `docker-compose.prod.yml` and `.env.production.example` to the server.
+2. Create the environment file and generate an app key:
+   ```bash
+   cp .env.production.example .env
+   docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show
+   # paste the key into APP_KEY, then set DB_PASSWORD, APP_URL, mail + domain settings
+   ```
+3. Start the stack (bundled MariaDB, migrations, app, queue worker, scheduler):
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d
+   ```
+4. Open the app and complete the `/setup` wizard.
+
+### TLS / reverse proxy
+The `app` service serves **plain HTTP on `127.0.0.1:8000`** - terminate TLS with your own reverse proxy on the host. Example Caddy block:
+```
+your.domain {
+    reverse_proxy 127.0.0.1:8000
+}
+```
+Laravel is configured to trust the proxy's forwarded headers, so it generates `https://` URLs and logs real client IPs. (For a proxy-less host, set `SERVER_NAME=your.domain` on the `app` service to enable FrankenPHP's automatic HTTPS instead.)
+
+### Upgrading
+```bash
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+The one-shot `migrate` service applies new migrations on each `up`; the `db` data and uploaded files persist in named volumes.
+
 ## Development Setup
 
 ### Containerized Environment (Docker/Podman)
@@ -57,15 +91,7 @@ An decentralised open-source virtual airline management platform. Track PIREPs, 
    ```
    The seeder prints the Sanctum API tokens for the test users to stdout.
 
-### Native Setup
-1. Ensure PHP 8.2+, Composer, and a MariaDB/MySQL database are installed.
-2. Clone the repository and install dependencies:
-   ```bash
-   composer install
-   php artisan migrate --seed
-   ```
-
-## Default Test Accounts
+### Default Test Accounts
 The database seeder creates three tiers of users for testing (Password for all: `start`):
 * Pilot: `homer@test.com`
 * Manager: `test@test.com`

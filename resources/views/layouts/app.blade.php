@@ -199,7 +199,7 @@
                 @if($supportEmail)
                     <a href="mailto:{{ $supportEmail }}" class="text-decoration-none text-secondary"><i class="bi bi-envelope"></i> Contact</a> |
                 @endif
-                v0.0.1 | <a href="https://www.github.com/flymia/YAAMS/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-github"></i> GitHub</a>
+                v{{ config('app.version') }} | <a href="https://www.github.com/YAAMSOrg/yaams-server/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-github"></i> GitHub</a>
             </small>
         </div>
     </footer>
