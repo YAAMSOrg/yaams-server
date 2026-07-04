@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Flight;
+use App\Notifications\Concerns\QueuesMailChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -18,6 +19,7 @@ use Illuminate\Notifications\Notification;
 class PirepAccepted extends Notification implements ShouldQueue
 {
     use Queueable;
+    use QueuesMailChannel;
 
     public function __construct(public Flight $flight)
     {
