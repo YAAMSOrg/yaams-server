@@ -44,6 +44,12 @@ An decentralised open-source virtual airline management platform. Track PIREPs, 
    php artisan key:generate
    php artisan migrate --seed
    ```
+4. In a separate shell, start the queue worker so notification emails are
+   delivered (they are queued so a slow/failing SMTP can't block PIREP filing):
+   ```bash
+   docker exec yaams-dev-app php artisan queue:work
+   ```
+   Sent mail is viewable in smtp4dev at http://localhost:8081.
 
 ### Native Setup
 1. Ensure PHP 8.2+, Composer, and a MariaDB/MySQL database are installed.

@@ -96,7 +96,7 @@ Notifications use Laravel's native notification system so delivery channels are 
 
 - **`database`** is Laravel's built-in channel. It persists to the standard `notifications` table (uuid PK, polymorphic `notifiable`, JSON `data`, `read_at`) via `Illuminate\Notifications\DatabaseNotification`. A notification opts in by returning `'database'` from `via()` and implementing `toArray($notifiable): array` (`title`, `message`, optional `url`) — the payload is stored in `data`. The bell/list UI reads unread rows through the `Notifiable` trait's `unreadNotifications` relation; `User::countNewNotifications()` wraps `unreadNotifications()->count()`. Dismissing a notification calls `$notification->markAsRead()`.
 - **`mail`** is Laravel's built-in channel; `toMail()` returns a `MailMessage`.
-- Notification classes implement `ShouldQueue`, so mail dispatches inline under `QUEUE_CONNECTION=sync` and becomes async automatically once a real queue is configured.
+- Notification classes implement `ShouldQueue`, and use the `App\Notifications\Concerns\QueuesMailChannel` trait. The trait's `viaConnections()` pins the `database` channel to the `sync` connection (so the in-app/bell notification is written immediately, with no worker needed) while the `mail` channel falls through to the default queue connection (`QUEUE_CONNECTION`, `database` by default). A slow or failing SMTP server therefore never blocks or fails the triggering PIREP request — the email is delivered by the background worker. Any new PIREP notification should `use QueuesMailChannel` for the same guarantee.
 
 **To add a channel** (e.g. webhook): add a channel class + `Notification::extend('webhook', ...)`, add `'webhook'` to `via()`, and add a `toWebhook()` renderer. No event/listener changes. `via()` receives `$notifiable`, so per-user channel preferences live there — the `mail` channel is already gated on the recipient's `email_notifications` preference.
 
@@ -127,6 +127,23 @@ API tokens are printed during `php artisan migrate --seed`.
 
 Key `.env` values beyond standard Laravel:
 - `FLIGHT_PAGE_LIMIT` — number of flights per page in the pilot flight list (default: 10)
+- `QUEUE_CONNECTION` — background job backend (default: `database`; set to `redis` to use Redis). Notification email is dispatched on this queue, so a worker must be running in every environment where mail should actually be sent — see below.
+
+### Queue / Background Jobs
+
+Outgoing notification email is queued (see the Notifications section) so a slow/failing SMTP server can never block PIREP filing/review. This requires a worker to drain the queue:
+
+- **Dev:** `docker exec yaams-dev-app php artisan queue:work` (mail lands in smtp4dev at http://localhost:8081). Without a running worker, in-app notifications still appear instantly but no email is sent.
+- **Production:** run `php artisan queue:work --tries=3` under a process supervisor so it restarts on exit, e.g. a Supervisor program:
+  ```ini
+  [program:yaams-worker]
+  command=php /app/artisan queue:work --tries=3 --sleep=3
+  autostart=true
+  autorestart=true
+  numprocs=1
+  ```
+  Run `php artisan queue:restart` on each deploy so workers pick up new code. Failed sends are recorded in the `failed_jobs` table; inspect with `php artisan queue:failed` and requeue with `php artisan queue:retry`.
+- The `database` driver uses the `jobs`/`job_batches` tables created by migration (`failed_jobs` already existed). Switching to Redis is a pure `QUEUE_CONNECTION` change — no code change, since only the in-app channel is pinned to `sync`.
 
 Docker setup lives in `Docker/` with `Dockerfile` and `docker-compose.yml`. A Nix flake (`flake.nix`) is also provided for NixOS environments.
 
