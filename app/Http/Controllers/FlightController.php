@@ -202,7 +202,7 @@ class FlightController extends Controller
             if (Aircraft::query()
                     ->where("id", "=", $request->post("aircraft_id"))
                     ->where("used_by", "=", $currentActiveAirline->id)
-                    ->where("active", true)
+                    ->where("status", Aircraft::STATUS_ACTIVE)
                     ->count() == 0) {
                 throw ValidationException::withMessages([
                     "aircraft_id" => "This aircraft is not available or not owned by your current airline.",

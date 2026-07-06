@@ -27,14 +27,21 @@ class Aircraft extends Model
         'remarks',
         'current_loc',
         'used_by',
-        'active'
+        'status',
+        'retired_at',
+        'retired_reason',
     ];
 
     protected $casts = [
         'satcom' => 'boolean',
         'winglets' => 'boolean',
-        'active' => 'boolean',
+        'retired_at' => 'datetime',
     ];
+
+    // Lifecycle states stored in the `status` column.
+    public const STATUS_ACTIVE = 'active';       // in service, flyable
+    public const STATUS_INACTIVE = 'inactive';   // temporarily grounded, reversible
+    public const STATUS_RETIRED = 'retired';     // permanently removed, irreversible
 
     protected $appends = [
         'full_type',
@@ -111,6 +118,30 @@ class Aircraft extends Model
 
     public function getInServiceSinceAttribute() {
         return $this->created_at->format('Y-m-d');
+    }
+
+    // Backwards-compatible convenience accessor: `active` is now derived from `status`
+    // so existing views/resources reading $aircraft->active keep working.
+    public function getActiveAttribute(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function isRetired(): bool
+    {
+        return $this->status === self::STATUS_RETIRED;
+    }
+
+    // Only aircraft that are currently in service (flyable).
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    // Everything except permanently retired aircraft.
+    public function scopeNotRetired($query)
+    {
+        return $query->where('status', '<>', self::STATUS_RETIRED);
     }
 
 }

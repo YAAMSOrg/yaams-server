@@ -30,6 +30,26 @@ class AircraftPolicy
     public function update(User $user, Aircraft $aircraft): bool
     {
         $activeAirline = session('activeairline');
-        return $activeAirline && $aircraft->ownedBy($activeAirline) && $user->isManagerOf($activeAirline);
+        // A retired aircraft is permanently locked and can never be edited or reactivated.
+        return $activeAirline
+            && $aircraft->ownedBy($activeAirline)
+            && $user->isManagerOf($activeAirline)
+            && !$aircraft->isRetired();
+    }
+
+    /**
+     * Determine whether the user can retire (permanently remove) the aircraft.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Aircraft  $aircraft
+     * @return bool
+     */
+    public function retire(User $user, Aircraft $aircraft): bool
+    {
+        $activeAirline = session('activeairline');
+        return $activeAirline
+            && $aircraft->ownedBy($activeAirline)
+            && $user->isManagerOf($activeAirline)
+            && !$aircraft->isRetired();
     }
 }

@@ -112,5 +112,8 @@ Route::middleware(['auth'])->group(function () {
         Route::match(["GET", "POST"], "/airline/fleetmanager/edit/{aircraft}", [AircraftController::class, "edit"])
             ->name("editaircraft")
             ->middleware(["can:edit aircraft"]);
+        Route::post("/airline/fleetmanager/retire/{aircraft}", [AircraftController::class, "retire"])
+            ->name("retireaircraft")
+            ->middleware(["can:edit aircraft"]);
     });
 });

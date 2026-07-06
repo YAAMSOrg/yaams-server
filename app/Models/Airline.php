@@ -73,7 +73,7 @@ class Airline extends Model
 
     public function activeAircraft(): HasMany
     {
-        return $this->hasMany(Aircraft::class, 'used_by')->where('active', true);
+        return $this->hasMany(Aircraft::class, 'used_by')->where('status', Aircraft::STATUS_ACTIVE);
     }
 
 }

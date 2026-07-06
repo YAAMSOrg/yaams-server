@@ -238,6 +238,57 @@
             </div>
         </div>
     </form>
+
+    <!-- Danger Zone: permanent, irreversible retirement -->
+    <div class="card border-danger shadow-sm mt-2">
+        <div class="card-header bg-white py-3 fw-bold border-bottom text-danger d-flex align-items-center">
+            <i class="bi bi-exclamation-octagon-fill me-2"></i> Danger Zone
+        </div>
+        <div class="card-body p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <div class="fw-semibold">Retire this aircraft</div>
+                <div class="text-muted fs-7 mb-0">
+                    Permanently removes the aircraft from the fleet. It can no longer fly and
+                    <strong>cannot be reactivated</strong>. Its flight history is preserved.
+                </div>
+            </div>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#retireModal">
+                <i class="bi bi-archive me-1"></i> Retire Aircraft
+            </button>
+        </div>
+    </div>
+
+    <!-- Retire confirmation modal -->
+    <div class="modal fade" id="retireModal" tabindex="-1" aria-labelledby="retireModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="{{ route('retireaircraft', $aircraft->id) }}" method="POST" class="modal-content">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="retireModalLabel">Retire {{ $aircraft->registration }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>This action is <strong>permanent</strong> and cannot be undone.</div>
+                    </div>
+                    <div class="mb-0">
+                        <label for="retired_reason" class="form-label fw-semibold">Reason for retirement</label>
+                        <textarea class="form-control @error('retired_reason') is-invalid @enderror" id="retired_reason" name="retired_reason" rows="3" maxlength="255" required placeholder="e.g. Sold, scrapped, damaged beyond repair...">{{ old('retired_reason') }}</textarea>
+                        @error('retired_reason')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-archive me-1"></i> Retire Aircraft
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -249,6 +300,11 @@
             label.textContent = 'Aircraft inactive';
         }
     });
+
+    @error('retired_reason')
+        // Re-open the retire modal so the validation error is visible.
+        new bootstrap.Modal(document.getElementById('retireModal')).show();
+    @enderror
 </script>
 
 <style>

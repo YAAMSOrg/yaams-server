@@ -99,6 +99,13 @@ Hardcoded integer FK in the `flights.status_id` column (references `flight_statu
 
 Filtering for "accepted" flights always uses `status_id = 2`.
 
+### Aircraft Lifecycle
+
+Aircraft have a three-state lifecycle stored in the `aircraft.status` string column (constants on `App\Models\Aircraft`):
+- `active` (`STATUS_ACTIVE`) — in service, the only state that can be assigned to flights.
+- `inactive` (`STATUS_INACTIVE`) — temporarily grounded; reversible via the edit form's status toggle.
+- `retired` (`STATUS_RETIRED`) — **permanent, irreversible** soft-delete. Cannot fly, cannot be reactivated or edited. The row is never hard-deleted so past flights (which FK `flights.aircraft_id`) keep their history intact.
+
 ### PIREP Workflow (Event-Driven)
 
 When a PIREP is filed (both web and API paths), `event(new FlightFiled($flight))` is dispatched. The `FlightFiledNotification` listener (`app/Listeners/FlightFiledNotification.php`) resolves the airline's reviewers (per-airline `Dispatcher`/`Manager`, excluding the filing pilot) and hands them to Laravel's notification system via `Notification::send($reviewers, new PirepFiled($flight))`.

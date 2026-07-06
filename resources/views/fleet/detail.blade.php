@@ -21,10 +21,12 @@
         <div>
             <h1 class="display-5 fw-bold mb-1">
                 {{ $aircraft->registration }}
-                @if($aircraft->active == 1)
+                @if($aircraft->status === \App\Models\Aircraft::STATUS_ACTIVE)
                     <span class="badge bg-success ms-2 fs-6 vertical-align-middle">Active</span>
+                @elseif($aircraft->status === \App\Models\Aircraft::STATUS_RETIRED)
+                    <span class="badge bg-dark ms-2 fs-6 vertical-align-middle">Retired</span>
                 @else
-                    <span class="badge bg-danger ms-2 fs-6 vertical-align-middle">Inactive</span>
+                    <span class="badge bg-secondary ms-2 fs-6 vertical-align-middle">Inactive</span>
                 @endif
             </h1>
             <p class="text-muted mb-0">
@@ -32,7 +34,7 @@
             </p>
         </div>
         <div>
-            @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
+            @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')) && !$aircraft->isRetired())
                 <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-outline-primary me-2">
                     <i class="bi bi-pencil-square me-1"></i> Edit Aircraft
                 </a>
@@ -43,7 +45,15 @@
         </div>
     </div>
 
-    @if($aircraft->active == 0)
+    @if($aircraft->isRetired())
+        <div class="alert alert-dark border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-archive-fill fs-5 me-3"></i>
+            <div>
+                This aircraft was retired on <strong>{{ $aircraft->retired_at?->format('Y-m-d') }}</strong>@if($aircraft->retired_reason) &middot; {{ $aircraft->retired_reason }}@endif.
+                It can no longer fly and cannot be reactivated. Its flight history is preserved.
+            </div>
+        </div>
+    @elseif($aircraft->status === \App\Models\Aircraft::STATUS_INACTIVE)
         <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
             <i class="bi bi-info-circle-fill fs-5 me-3"></i>
             <div>

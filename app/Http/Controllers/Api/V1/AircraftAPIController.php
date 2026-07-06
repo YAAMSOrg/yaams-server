@@ -78,7 +78,7 @@ class AircraftAPIController extends Controller
         }
 
         // Check if user given aircraft exists for the same airline and status = active. If not, throw exception.
-        if (Aircraft::where('active', 1)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $airline->id)->count() >= 1) {
+        if (Aircraft::where('status', Aircraft::STATUS_ACTIVE)->where('registration', '=', $request->post('registration'))->where('used_by', '=', $airline->id)->count() >= 1) {
             throw ValidationException::withMessages(['registration' => 'An active aircraft with this tail number already exist in this airline. Please set the aircraft inactive or choose another tail number.']);
         } else {
             $aircraft = Aircraft::create($validated + ['used_by' => $airline->id]);

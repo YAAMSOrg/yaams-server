@@ -45,13 +45,17 @@
                 <h1 class="display-5 fw-bold text-dark tracking-tight mb-1">Fleet Overview</h1>
                 <p class="text-muted lead mb-0 fs-6">Monitor all operational aircraft and their current hubs based on recent flight logs.</p>
             </div>
-            @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
-                <div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ request()->fullUrlWithQuery(['show_retired' => $showRetired ? null : 1, 'page' => 1]) }}"
+                   class="btn btn-outline-secondary px-3 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
+                    <i class="bi bi-archive"></i> {{ $showRetired ? 'Hide retired' : 'Show retired' }}
+                </a>
+                @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
                     <a href="{{ route('createaircraft') }}" class="btn btn-success px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
                         <i class="bi bi-plus-circle"></i> Add Aircraft
                     </a>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
 
         @if($errors->any())
@@ -75,6 +79,9 @@
                     @endif
                     @if(request()->has('sort_order'))
                         <input type="hidden" name="sort_order" value="{{ request('sort_order') }}">
+                    @endif
+                    @if($showRetired)
+                        <input type="hidden" name="show_retired" value="1">
                     @endif
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0">
@@ -120,8 +127,8 @@
                                         </a>
                                     </th>
                                     <th scope="col" class="py-3 text-center">
-                                        <a href="{!! sortUrl('active') !!}" class="text-decoration-none text-secondary d-inline-flex align-items-center justify-content-center w-100">
-                                            Status {!! sortIcon('active') !!}
+                                        <a href="{!! sortUrl('status') !!}" class="text-decoration-none text-secondary d-inline-flex align-items-center justify-content-center w-100">
+                                            Status {!! sortIcon('status') !!}
                                         </a>
                                     </th>
                                     @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
@@ -159,8 +166,10 @@
                                         </td>
  
                                         <td class="py-3 text-center">
-                                            @if($aircraft->active == 1)
+                                            @if($aircraft->status === \App\Models\Aircraft::STATUS_ACTIVE)
                                                 <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">Active</span>
+                                            @elseif($aircraft->isRetired())
+                                                <span class="badge bg-dark-subtle text-dark border border-dark-subtle px-2 py-1 small">Retired</span>
                                             @else
                                                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 small">Inactive</span>
                                             @endif
@@ -168,9 +177,15 @@
                                         
                                         @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
                                             <td class="py-3 text-end pe-4">
-                                                <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary px-2.5 py-1 shadow-xs fs-7">
-                                                    <i class="bi bi-pencil-square"></i> Edit
-                                                </a>
+                                                @if($aircraft->isRetired())
+                                                    <a href="{{ route('viewaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary px-2.5 py-1 shadow-xs fs-7">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary px-2.5 py-1 shadow-xs fs-7">
+                                                        <i class="bi bi-pencil-square"></i> Edit
+                                                    </a>
+                                                @endif
                                             </td>
                                         @endif
                                     </tr>

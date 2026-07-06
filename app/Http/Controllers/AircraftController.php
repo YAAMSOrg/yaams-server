@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Aircraft;
 use App\Models\Airport;
+use App\Support\ActivityLevel;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -22,6 +23,12 @@ class AircraftController extends Controller
         // Base query with airline and search filters
         $fleetQuery = Aircraft::query()
             ->where('used_by', '=', $currentActiveAirline->id);
+
+        // Retired aircraft are hidden from the fleet list unless explicitly requested.
+        $showRetired = $request->boolean('show_retired');
+        if (!$showRetired) {
+            $fleetQuery->notRetired();
+        }
 
         if ($search = $request->get('search')) {
             $fleetQuery->where(function($q) use ($search) {
@@ -66,8 +73,8 @@ class AircraftController extends Controller
             case 'logged_hours':
                 $fleetQuery->orderBy('logged_seconds', $sortOrder);
                 break;
-            case 'active':
-                $fleetQuery->orderBy('active', $sortOrder);
+            case 'status':
+                $fleetQuery->orderBy('status', $sortOrder);
                 break;
             default:
                 $fleetQuery->orderBy('created_at', 'desc');
@@ -90,7 +97,7 @@ class AircraftController extends Controller
             ->limit($limit)
             ->get();
 
-        return view('fleet.index', ['fleet' => $fleet, 'maxPages' => $maxPages, 'currentPage' => $page]);
+        return view('fleet.index', ['fleet' => $fleet, 'maxPages' => $maxPages, 'currentPage' => $page, 'showRetired' => $showRetired]);
     }
 
     public function create(Request $request) {
@@ -132,7 +139,7 @@ class AircraftController extends Controller
                 throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
             }
 
-            $existingAircraft = Aircraft::where('active', 1)
+            $existingAircraft = Aircraft::where('status', Aircraft::STATUS_ACTIVE)
                 ->where('registration', $validated['registration'])
                 ->where('used_by', $currentActiveAirline->id)
                 ->exists();
@@ -185,8 +192,9 @@ class AircraftController extends Controller
                 'remarks' => 'nullable|string|max:1000',
             ]);
 
-            // Convert to boolean and format strings
-            $finalStatus = $request->boolean('active');
+            // Convert to boolean and format strings. The toggle only moves between the two
+            // reversible states - retiring an aircraft is a separate, dedicated action.
+            $finalStatus = $request->boolean('active') ? Aircraft::STATUS_ACTIVE : Aircraft::STATUS_INACTIVE;
             $satcom = $request->boolean('satcom');
             $winglets = $request->boolean('winglets');
             $selcal = $request->filled('selcal') ? strtoupper($request->post('selcal')) : null;
@@ -207,16 +215,16 @@ class AircraftController extends Controller
             $targetAircraft->mtow = $request->post('mtow');
             $targetAircraft->mzfw = $request->post('mzfw');
             $targetAircraft->mlw = $request->post('mlw');
-            $targetAircraft->active = $finalStatus;
+            $targetAircraft->status = $finalStatus;
             $targetAircraft->remarks = $request->post('remarks');
 
             // If we notice that the registration has changed or active status, we need to check if there is another active aircraft with same tail number
-            if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('active')) {
+            if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('status')) {
 
                 $existingAircraft = Aircraft::where('registration', $request->post('registration'))
                     ->where('used_by', $currentActiveAirline->id)
                     ->where('id', '<>', $aircraft->id) // Exclude current aircraft
-                    ->where('active', true)
+                    ->where('status', Aircraft::STATUS_ACTIVE)
                     ->exists();
 
                 if ($existingAircraft) {
@@ -262,6 +270,32 @@ class AircraftController extends Controller
             'lat' => $curLat,
             'lastFlights' => $lastFlights
         ]);
+    }
+
+    public function retire(Request $request, Aircraft $aircraft) {
+        // Authorize using AircraftPolicy - denies non-managers and already-retired aircraft.
+        if ($request->user()->cannot('retire', $aircraft)) {
+            return redirect()->route('fleetmanager')->with('error', 'You cannot retire this aircraft.');
+        }
+
+        $validated = $request->validate([
+            'retired_reason' => 'required|string|max:255',
+        ]);
+
+        // Permanent, one-way transition: the aircraft can no longer fly and cannot be reactivated.
+        $aircraft->status = Aircraft::STATUS_RETIRED;
+        $aircraft->retired_at = now();
+        $aircraft->retired_reason = $validated['retired_reason'];
+        $aircraft->save();
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($aircraft)
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('aircraft_retired')
+            ->log('Retired aircraft ' . $aircraft->registration);
+
+        return redirect()->route('fleetmanager')->with('success', 'Aircraft ' . $aircraft->registration . ' has been retired.');
     }
 }
 

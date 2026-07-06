@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
         <div>
             <h1 class="display-5 fw-bold mb-1">Add New Aircraft</h1>
-            <p class="text-muted mb-0">Register a new airframe in your fleet with detailed engine variants, configurations, and weights.</p>
+            <p class="text-muted mb-0">Register a new aircraft in your fleet with detailed engine variants, configurations, and weights.</p>
         </div>
         <div>
             <a href="{{ route('fleetmanager') }}" class="btn btn-secondary">
@@ -206,7 +206,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4 d-grid gap-2">
                         <button type="submit" class="btn btn-success py-2.5 fw-semibold d-flex align-items-center justify-content-center gap-2">
-                            <i class="bi bi-check-circle-fill"></i> Register Airframe
+                            <i class="bi bi-check-circle-fill"></i> Register Aircraft
                         </button>
                         <a href="{{ route('fleetmanager') }}" class="btn btn-outline-secondary py-2.5 text-center">
                             Cancel

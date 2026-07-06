@@ -91,7 +91,7 @@ class FlightAPIController extends Controller
         if (Aircraft::query()
                 ->where("id", "=", $validated['aircraft_id'])
                 ->where("used_by", "=", $airline->id)
-                ->where("active", true)
+                ->where("status", Aircraft::STATUS_ACTIVE)
                 ->count() == 0) {
             return response()->json(['error' => 'This aircraft is not available or not owned by your airline.'], 422);
         }

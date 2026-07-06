@@ -34,7 +34,10 @@ class AircraftResource extends JsonResource
             // We don't have to return this, since this can only be accessed through a route, which already specifies the airline.
             //'usedBy' => $this->used_by,
 
+            'status' => $this->status,
             'active' => $this->active,
+            'retiredAt' => $this->retired_at,
+            'retiredReason' => $this->retired_reason,
             'inServiceSince' => $this->in_service_since,
             'firstFlight' => $this->first_flight,
             'createdAt' => $this->created_at,
