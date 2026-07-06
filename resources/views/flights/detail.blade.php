@@ -91,22 +91,25 @@
                             Flight {{ $flight->full_flight_number }} // ATC: {{ $flight->full_icao_callsign }}
                         </span>
                         
-                        <div class="d-flex align-items-center gap-3 my-2 flex-wrap">
-                            <div class="text-center bg-white bg-opacity-10 px-3 py-2 rounded border border-white border-opacity-10">
-                                <h1 class="h2 mb-0 fw-bold tracking-tight font-monospace">{{ $flight->departure_airport->icao_code }}</h1>
-                                <span class="small text-white-50 text-truncate d-block" style="max-width: 150px;">{{ $flight->departure_airport->name }}</span>
-                            </div>
-                            
-                            <div class="d-flex flex-column align-items-center flex-grow-1 px-2 text-center" style="max-width: 120px;">
-                                <i class="bi bi-airplane fs-4 text-primary animate-fly"></i>
-                                <div class="w-100 border-top border-dashed border-white border-opacity-25 my-2"></div>
-                                <span class="small text-white-50 font-monospace"><i class="bi bi-clock me-1"></i>{{ $flight->flight_duration }}</span>
-                                <span class="small text-white-50 font-monospace"><i class="bi bi-geo-alt me-1"></i>{{ $flight->raw_distance }} nm</span>
+                        <div class="d-flex align-items-center gap-3 gap-md-4 my-3">
+                            <div class="text-center flex-shrink-0">
+                                <h1 class="display-6 mb-0 fw-bold tracking-tight font-monospace lh-1">{{ $flight->departure_airport->icao_code }}</h1>
+                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;">{{ $flight->departure_airport->name }}</span>
                             </div>
 
-                            <div class="text-center bg-white bg-opacity-10 px-3 py-2 rounded border border-white border-opacity-10">
-                                <h1 class="h2 mb-0 fw-bold tracking-tight font-monospace">{{ $flight->arrival_icao }}</h1>
-                                <span class="small text-white-50 text-truncate d-block" style="max-width: 150px;">{{ $flight->arrival_airport->name }}</span>
+                            <div class="flex-grow-1 px-1 text-center" style="min-width: 80px;">
+                                <div class="d-flex justify-content-center gap-3 mb-2 small text-white-50 font-monospace">
+                                    <span><i class="bi bi-clock me-1"></i>{{ $flight->flight_duration }}</span>
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ $flight->raw_distance !== null ? number_format($flight->raw_distance) : '—' }} nm</span>
+                                </div>
+                                <div class="route-line position-relative">
+                                    <span class="route-plane"><i class="bi bi-airplane-fill text-primary"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="text-center flex-shrink-0">
+                                <h1 class="display-6 mb-0 fw-bold tracking-tight font-monospace lh-1">{{ $flight->arrival_airport->icao_code }}</h1>
+                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;">{{ $flight->arrival_airport->name }}</span>
                             </div>
                         </div>
                     </div>
@@ -134,8 +137,35 @@
             </div>
         </div>
 
+        <div class="row g-3 mb-4">
+            @php
+                $fuelUnit = session('activeairline')->unit_is_lbs ? 'lbs' : 'kg';
+                $stats = [
+                    ['icon' => 'stopwatch',   'label' => 'Duration',     'value' => $flight->flight_duration],
+                    ['icon' => 'geo-alt',     'label' => 'Distance',     'value' => ($flight->raw_distance !== null ? number_format($flight->raw_distance) : '—') . ' nm'],
+                    ['icon' => 'fuel-pump',   'label' => 'Fuel Burned',  'value' => number_format($flight->burned_fuel) . ' ' . $fuelUnit],
+                    ['icon' => 'arrows-expand', 'label' => 'Cruise Alt', 'value' => 'FL' . round($flight->crzalt / 100)],
+                ];
+            @endphp
+            @foreach ($stats as $stat)
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center gap-3 py-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary flex-shrink-0" style="width: 44px; height: 44px;">
+                                <i class="bi bi-{{ $stat['icon'] }} fs-5"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <span class="text-muted small text-uppercase tracking-wider d-block">{{ $stat['label'] }}</span>
+                                <span class="fw-bold text-dark font-monospace text-truncate d-block">{{ $stat['value'] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
         <div class="row g-4">
-            
+
             <div class="col-md-7">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
@@ -270,6 +300,34 @@
     }
     .w-40 {
         width: 40%;
+    }
+
+    /* Boarding-pass style route connector in the hero */
+    .route-line {
+        height: 2px;
+        background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, .45) 0 6px, transparent 6px 13px);
+    }
+    .route-line::before,
+    .route-line::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--bs-primary);
+        transform: translateY(-50%);
+    }
+    .route-line::before { left: 0; }
+    .route-line::after  { right: 0; }
+    .route-plane {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 0 .6rem;
+        background: #1e293b;
+        line-height: 1;
     }
 </style>
 @endsection
