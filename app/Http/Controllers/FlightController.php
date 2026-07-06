@@ -306,6 +306,18 @@ class FlightController extends Controller
             ->with('pilot')
             ->get();
 
+        // Leaderboard: top aircraft this month by accepted-flight count
+        $aircraftLeaderboard = Flight::query()
+            ->where('airline_id', $currentActiveAirline->id)
+            ->where('status_id', 2)
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->selectRaw('aircraft_id, COUNT(*) as flights_count')
+            ->groupBy('aircraft_id')
+            ->orderByDesc('flights_count')
+            ->limit(5)
+            ->with('aircraft')
+            ->get();
+
         // Community stats
         $flightsThisWeek = Flight::query()
             ->where('airline_id', $currentActiveAirline->id)
@@ -337,6 +349,7 @@ class FlightController extends Controller
             'activeAirline' => $currentActiveAirline,
             'feed' => $feed,
             'leaderboard' => $leaderboard,
+            'aircraftLeaderboard' => $aircraftLeaderboard,
             'flightsThisWeek' => $flightsThisWeek,
             'activePilots' => $activePilots,
             'crewSize' => $roster->count(),

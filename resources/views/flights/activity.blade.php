@@ -140,6 +140,24 @@
                     </div>
                 </div>
 
+                {{-- Top aircraft --}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-3 pb-0">
+                        <h2 class="h6 fw-bold mb-0"><i class="bi bi-airplane-fill text-warning me-1"></i> Top Aircraft This Month</h2>
+                    </div>
+                    <div class="card-body pt-2">
+                        @forelse($aircraftLeaderboard as $index => $entry)
+                            <div class="d-flex align-items-center gap-3 py-2 rounded {{ !$loop->last ? 'border-bottom' : '' }}">
+                                <span class="fw-bold text-secondary text-center" style="width: 1.5rem;">{{ $index + 1 }}</span>
+                                <div class="flex-grow-1 fw-semibold text-truncate font-monospace" style="min-width: 0;">{{ $entry->aircraft?->registration ?? 'Unknown' }}</div>
+                                <span class="badge bg-primary rounded-pill">{{ $entry->flights_count }}</span>
+                            </div>
+                        @empty
+                            <p class="text-secondary small mb-0">No flights logged yet this month.</p>
+                        @endforelse
+                    </div>
+                </div>
+
                 {{-- Crew roster --}}
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0 pt-3 pb-0">
