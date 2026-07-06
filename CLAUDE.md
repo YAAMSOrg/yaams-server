@@ -174,15 +174,3 @@ Docker setup lives in `Docker/` with `Dockerfile` and `docker-compose.yml`. A Ni
 
 `docker compose up -d` (from `Docker/`) brings up the whole dev stack: `db` (auto-creates the `yaams` schema, with a healthcheck), a one-shot `migrate` service that applies migrations before anything long-running starts, then `app` (`php artisan serve --host=0.0.0.0`, port 8000), `worker`, `scheduler`, `phpmyadmin`, and `smtp4dev`. The `app`/`worker`/`scheduler`/`migrate` services build from `Docker/Dockerfile`, mount the repo at `/app`, and rely on `vendor/` being installed (run `composer install` first on a fresh clone). First-time data still needs a manual seed: `docker exec yaams-dev-app php artisan migrate --seed`.
 
-### Production Deployment
-
-Do **not** confuse the dev stack above with the production one - they are separate files:
-- **Dev:** `Docker/docker-compose.yml` + `Docker/Dockerfile` (php-cli, `php artisan serve`, repo bind-mounted, vendor from host). For local development only.
-- **Prod:** root-level `docker-compose.prod.yml` + `Docker/Dockerfile.prod`. The prod image is a self-contained multi-stage build (Composer `--no-dev` vendor stage → `dunglas/frankenphp` runtime) that bakes in the app + vendor and serves `public/` over HTTP via FrankenPHP. `Docker/entrypoint.sh` runs at container start: recreates the `storage/` skeleton (a named volume masks the baked one), `storage:link`, and `php artisan optimize`. The prod compose pulls the image from GHCR (`image:`, no `build:`), bundles MariaDB, and reuses the same image for the `app`/`worker`/`scheduler`/`migrate` services (only the command differs, mirroring dev).
-
-The app version shown in the footer comes from `config/app.php` `version` (rendered in both `layouts/app.blade.php` and `layouts/landing.blade.php`) - bump it there on each release.
-
-FrankenPHP serves **plain HTTP** (`SERVER_NAME=:80`, a bare port that disables Caddy auto-HTTPS); TLS is terminated by the operator's own reverse proxy, and `AppServiceProvider::boot()` calls `TrustProxies::at('*')` so forwarded headers are honored. Frontend assets are committed to the repo (Laravel Mix output), so the prod image needs **no Node/npm** build step.
-
-**Release pipeline:** `.github/workflows/release.yml` triggers on a published GitHub Release, builds `linux/amd64` and `linux/arm64` on **native runners** (`ubuntu-24.04` / `ubuntu-24.04-arm`, no QEMU) with per-arch GitHub Actions layer cache, pushes each by digest, then merges them into one multi-arch manifest on GHCR tagged `latest`/`X.Y`/`X.Y.Z`.
-
