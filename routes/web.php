@@ -102,6 +102,7 @@ Route::middleware(['auth'])->group(function () {
         // Notifications
         Route::get("/user/notifications", [NotificationsController::class, "viewNotifications"])->name("usernotifications");
         Route::post("/user/notifications/{notification}/acknowledge", [NotificationsController::class, "acknowledge"])->name("notificationsacknowledge");
+        Route::post("/user/notifications/acknowledge-all", [NotificationsController::class, "acknowledgeAll"])->name("notificationsacknowledgeall");
 
         // Fleet Management
         Route::match(["GET", "POST"], "/airline/fleetmanager", [AircraftController::class, "index"])->name("fleetmanager");

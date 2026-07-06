@@ -11,9 +11,17 @@
                 <p class="text-muted lead mb-0">Stay updated on your airline's activity.</p>
             </div>
             @if (!$notifications->isEmpty())
-                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill fw-bold">
-                    {{ $notifications->count() }} New
-                </span>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill fw-bold">
+                        {{ $notifications->count() }} New
+                    </span>
+                    <form action="{{ route('notificationsacknowledgeall') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">
+                            <i class="bi bi-check2-all me-1"></i> Clear all
+                        </button>
+                    </form>
+                </div>
             @endif
         </div>
 

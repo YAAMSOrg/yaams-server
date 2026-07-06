@@ -30,4 +30,11 @@ class NotificationsController extends Controller
         return redirect()->back()->with('success', 'Notification dismissed.');
     }
 
+    public function acknowledgeAll()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+
+        return redirect()->back()->with('success', 'All notifications cleared.');
+    }
+
 }
