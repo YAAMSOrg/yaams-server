@@ -12,10 +12,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | API Routes (v1)
 |--------------------------------------------------------------------------
-|
-| JSON API under /api/v1, authenticated via Sanctum tokens. Aircraft are a
-| nested resource of airlines; flights are top-level because a pilot's
-| flight log spans airlines.
+| JSON API under /api/v1, authenticated via Sanctum tokens. Aircraft and
+| flights are nested resources of airlines, to mirror the active-airline
+| scope of the web UI.
 |
 */
 
@@ -26,7 +25,7 @@ Route::get('v1/info', [InfoController::class, 'index'])->name('api.v1.info');
 Route::group(['prefix' => 'v1', 'as' => 'api.v1.', 'middleware' => 'auth:sanctum'], function () {
     // "Who am I" - token sanity check for API clients.
     Route::get('user', function (Request $request) {
-        return new UserResource($request->user());
+        return new UserResource($request->user()->load('airlines'));
     })->name('user');
 
     // Only the actions AirlineAPIController implements - update/destroy do not exist.
@@ -39,9 +38,9 @@ Route::group(['prefix' => 'v1', 'as' => 'api.v1.', 'middleware' => 'auth:sanctum
         ->scoped();
 
     // Flights / PIREPs
-    Route::get('flights', [FlightAPIController::class, 'index'])->name('flights.index');
-    Route::post('flights', [FlightAPIController::class, 'store'])->name('flights.store');
-    Route::get('airlines/{airline}/flights/review', [FlightAPIController::class, 'reviewList'])->name('flights.review');
+    Route::get('airlines/{airline}/flights', [FlightAPIController::class, 'index'])->name('airlines.flights.index');
+    Route::post('airlines/{airline}/flights', [FlightAPIController::class, 'store'])->name('airlines.flights.store');
+    Route::get('airlines/{airline}/flights/review', [FlightAPIController::class, 'reviewList'])->name('airlines.flights.review');
     Route::post('flights/{flight}/accept', [FlightAPIController::class, 'accept'])->name('flights.accept');
     Route::post('flights/{flight}/reject', [FlightAPIController::class, 'reject'])->name('flights.reject');
 });

@@ -23,17 +23,18 @@ class FlightAPIController extends Controller
     }
 
     /**
-     * List current user's flights.
+     * List current user's flights for a specific airline.
      */
-    public function index(Request $request)
+    public function index(Request $request, Airline $airline)
     {
+        if (! $request->user()->isMemberOf($airline)) {
+            return response()->json(['message' => 'You are not a member of this airline.'], 403);
+        }
+
         $user = $request->user();
         $query = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
-            ->where('pilot_id', $user->id);
-
-        if ($request->has('airline_id')) {
-            $query->where('airline_id', $request->airline_id);
-        }
+            ->where('pilot_id', $user->id)
+            ->where('airline_id', $airline->id);
 
         if ($request->has('status_id')) {
             $query->where('status_id', $request->status_id);
@@ -46,14 +47,16 @@ class FlightAPIController extends Controller
      * Submit a new PIREP. Membership, airport/aircraft existence and the
      * location-continuity rule are enforced by StoreFlightRequest.
      */
-    public function store(StoreFlightRequest $request)
+    public function store(StoreFlightRequest $request, Airline $airline)
     {
         $user = $request->user();
         $validated = $request->validated();
-        $airline = $request->airline();
         $aircraft = $request->aircraft();
 
-        $flight = Flight::create($validated + ['pilot_id' => $user->id]);
+        $flight = Flight::create($validated + [
+            'pilot_id' => $user->id,
+            'airline_id' => $airline->id,
+        ]);
 
         // Location continuity: the airframe has physically moved to the arrival airport
         if ($airline->location_continuity) {

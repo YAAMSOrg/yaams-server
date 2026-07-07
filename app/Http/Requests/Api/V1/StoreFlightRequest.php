@@ -28,7 +28,6 @@ class StoreFlightRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'airline_id' => 'required|exists:airlines,id',
             'flightnumber' => 'numeric|digits_between:1,4|required',
             'departure_icao' => 'alpha|max:4|required|exists:airports,icao_code',
             'arrival_icao' => 'alpha|max:4|required|exists:airports,icao_code',
@@ -93,7 +92,7 @@ class StoreFlightRequest extends FormRequest
 
     public function airline(): ?Airline
     {
-        return $this->airline ??= Airline::find($this->input('airline_id'));
+        return $this->airline ??= $this->route('airline');
     }
 
     /**

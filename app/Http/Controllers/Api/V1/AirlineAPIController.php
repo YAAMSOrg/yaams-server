@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\StoreAirlineRequest;
 use App\Http\Resources\V1\AirlineCollection;
 use App\Http\Resources\V1\AirlineResource;
 use App\Models\Airline;
+use Illuminate\Http\Request;
 
 class AirlineAPIController extends Controller
 {
@@ -15,8 +16,12 @@ class AirlineAPIController extends Controller
         $this->middleware('auth:sanctum');
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->boolean('members_only')) {
+            return new AirlineCollection($request->user()->airlines);
+        }
+
         return new AirlineCollection(Airline::all());
     }
 
