@@ -15,7 +15,7 @@ class CreateAircraftTable extends Migration
     {
         Schema::create('aircraft', function (Blueprint $table) {
             $table->id(); # internal id
-            $table->string("registration", 6);
+            $table->string("registration", 9);
             $table->string("manufacturer", 100);
             $table->string("model", 100);
             $table->string("current_loc", 4);
