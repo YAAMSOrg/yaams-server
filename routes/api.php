@@ -1,49 +1,47 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AircraftAPIController;
+use App\Http\Controllers\Api\V1\AirlineAPIController;
+use App\Http\Controllers\Api\V1\FlightAPIController;
+use App\Http\Controllers\Api\V1\InfoController;
+use App\Http\Resources\V1\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Api\V1\ApiTestController;
-use App\Http\Controllers\Api\V1\AirlineAPIController;
-use App\Http\Controllers\Api\V1\InfoController;
-
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes (v1)
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| JSON API under /api/v1, authenticated via Sanctum tokens. Aircraft are a
+| nested resource of airlines; flights are top-level because a pilot's
+| flight log spans airlines.
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-// API V1
-
 // Public instance metadata - intentionally outside auth:sanctum so clients
 // can identify the instance before the user has a token.
-Route::get('v1/info', [InfoController::class, 'index'])->name('api.info');
+Route::get('v1/info', [InfoController::class, 'index'])->name('api.v1.info');
 
-// Route Group for api/v1 PROTECTED routes
-Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1', 'middleware' => 'auth:sanctum' ], function() {
-    Route::get('apitest', [ApiTestController::class, 'index'])->name('apitest');
+Route::group(['prefix' => 'v1', 'as' => 'api.v1.', 'middleware' => 'auth:sanctum'], function () {
+    // "Who am I" - token sanity check for API clients.
+    Route::get('user', function (Request $request) {
+        return new UserResource($request->user());
+    })->name('user');
 
     // Only the actions AirlineAPIController implements - update/destroy do not exist.
     Route::apiResource('airlines', AirlineAPIController::class)->only(['index', 'show', 'store']);
 
-    Route::get('/airline/{airline}/aircraft/', [AircraftAPIController::class, 'listAircraftForAirline'])->name('aircraftlistforairline');
-    Route::post('/airline/{airline}/aircraft/', [AircraftAPIController::class, 'addAircraftForAirline'])->name('aircraftaddforairline');
+    // scoped() resolves {aircraft} through the airline's aircraft() relation,
+    // so an aircraft outside {airline} is a 404.
+    Route::apiResource('airlines.aircraft', AircraftAPIController::class)
+        ->only(['index', 'store', 'show'])
+        ->scoped();
 
-    // Flight API
-    Route::get('/flights', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'index'])->name('api.flights.index');
-    Route::post('/flights', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'store'])->name('api.flights.store');
-    Route::get('/airline/{airline}/flights/review', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'reviewList'])->name('api.flights.review');
-    Route::post('/flights/{flight}/accept', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'accept'])->name('api.flights.accept');
-    Route::post('/flights/{flight}/reject', [\App\Http\Controllers\Api\V1\FlightAPIController::class, 'reject'])->name('api.flights.reject');
-
+    // Flights / PIREPs
+    Route::get('flights', [FlightAPIController::class, 'index'])->name('flights.index');
+    Route::post('flights', [FlightAPIController::class, 'store'])->name('flights.store');
+    Route::get('airlines/{airline}/flights/review', [FlightAPIController::class, 'reviewList'])->name('flights.review');
+    Route::post('flights/{flight}/accept', [FlightAPIController::class, 'accept'])->name('flights.accept');
+    Route::post('flights/{flight}/reject', [FlightAPIController::class, 'reject'])->name('flights.reject');
 });

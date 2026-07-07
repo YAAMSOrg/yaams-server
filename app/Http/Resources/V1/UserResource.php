@@ -17,7 +17,9 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'email' => $this->email,
+            // Only the user themself gets to see their email address - this
+            // resource is also nested as "pilot" in flight payloads.
+            'email' => $this->when((bool) $request->user()?->is($this->resource), $this->email),
         ];
     }
 }
