@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Airline;
 use App\Models\Setting;
+use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
 
 class AirlineController extends Controller
@@ -63,6 +64,42 @@ class AirlineController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', $airline->name . ' has been founded. Welcome aboard as Manager!');
+    }
+
+    public function settings()
+    {
+        $airline = session('activeairline');
+
+        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+
+        // Reload from DB — the session model is a snapshot
+        $airline = Airline::findOrFail($airline->id);
+
+        return view('manager.settings', compact('airline'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $airline = session('activeairline');
+
+        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+
+        $airline = Airline::findOrFail($airline->id);
+        $airline->update([
+            'location_continuity' => $request->boolean('location_continuity'),
+        ]);
+
+        // Keep the session snapshot in sync so the PIREP form sees the new flag immediately
+        $request->session()->put('activeairline', $airline);
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($airline)
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('airline_settings_updated')
+            ->log('Updated airline settings for ' . $airline->name);
+
+        return back()->with('success', 'Airline settings saved.');
     }
 }
 

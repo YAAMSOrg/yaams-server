@@ -88,6 +88,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/airline/invitecodes/generate', [InviteCodeController::class, 'generate'])->name('invitecodes.generate');
         Route::delete('/airline/invitecodes/{inviteCode}', [InviteCodeController::class, 'destroy'])->name('invitecodes.destroy');
 
+        // Airline settings (manager check enforced in controller)
+        Route::get('/airline/settings', [AirlineController::class, 'settings'])->name('airline.settings');
+        Route::put('/airline/settings', [AirlineController::class, 'updateSettings'])->name('airline.settings.update');
+
         // Flight Management
         Route::match(["GET", "POST"], "/user/flights/add", [FlightController::class, "addFlight"])->name("flightadd");
         Route::get("/user/flights/review", [FlightController::class, "listReviewFlights"])->name("flightreviewindex");

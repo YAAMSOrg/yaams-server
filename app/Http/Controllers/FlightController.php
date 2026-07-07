@@ -199,13 +199,23 @@ class FlightController extends Controller
             }
 
             // Check if the aircraft is indeed part of the active airline AND is active
-            if (Aircraft::query()
-                    ->where("id", "=", $request->post("aircraft_id"))
-                    ->where("used_by", "=", $currentActiveAirline->id)
-                    ->where("status", Aircraft::STATUS_ACTIVE)
-                    ->count() == 0) {
+            $aircraft = Aircraft::query()
+                ->where("id", "=", $request->post("aircraft_id"))
+                ->where("used_by", "=", $currentActiveAirline->id)
+                ->where("status", Aircraft::STATUS_ACTIVE)
+                ->first();
+            if (is_null($aircraft)) {
                 throw ValidationException::withMessages([
                     "aircraft_id" => "This aircraft is not available or not owned by your current airline.",
+                ]);
+            }
+
+            // Location continuity: the flight must depart from where the airframe currently is
+            if ($tempAirline->location_continuity
+                && strtoupper($validated["departure_icao"]) !== strtoupper((string) $aircraft->current_loc)) {
+                throw ValidationException::withMessages([
+                    "departure_icao" => "Location continuity is enabled: " . $aircraft->registration
+                        . " is currently located at " . ($aircraft->current_loc ?: "an unknown location") . ".",
                 ]);
             }
 
@@ -216,6 +226,11 @@ class FlightController extends Controller
                     "pilot_id" => auth()->user()->id,
                 ]
             );
+
+            // Location continuity: the airframe has physically moved to the arrival airport
+            if ($tempAirline->location_continuity) {
+                $aircraft->update(["current_loc" => strtoupper($validated["arrival_icao"])]);
+            }
 
             event(new FlightFiled($flight));
 
@@ -247,6 +262,7 @@ class FlightController extends Controller
         return view("flights.add", [
             "prefill_online_network" => $prefill_select_online_network,
             "prefill_aircraft" => $prefill_select_aircraft,
+            "location_continuity" => $tempAirline->location_continuity,
         ]);
     }
 
@@ -438,15 +454,24 @@ class FlightController extends Controller
             return redirect()->route('flightreviewindex')->with('error', 'You cannot reject your own PIREP.');
         }
 
+        $wasPending = $flight->status_id === 1;
+
         // Status auf 'Rejected' setzen (Status ID 3)
         $flight->status_id = 3;
-        
+
         // Optional: Rejection Remarks speichern
         if ($request->has('rejection_remarks')) {
             $flight->rejection_remarks = $request->input('rejection_remarks');
         }
-        
+
         $flight->save();
+
+        // Location continuity: undo the movement from filing, unless a later flight has already moved the airframe on
+        if ($wasPending
+            && $flight->airline->location_continuity
+            && strtoupper((string) $flight->aircraft->current_loc) === strtoupper($flight->arrival_icao)) {
+            $flight->aircraft->update(['current_loc' => strtoupper($flight->departure_icao)]);
+        }
 
         // Notify the pilot (in-app + email). Channels live in PirepRejected::via().
         NotificationFacade::send($flight->pilot, new PirepRejected($flight));

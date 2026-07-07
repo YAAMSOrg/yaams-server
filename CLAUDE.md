@@ -106,6 +106,17 @@ Aircraft have a three-state lifecycle stored in the `aircraft.status` string col
 - `inactive` (`STATUS_INACTIVE`) — temporarily grounded; reversible via the edit form's status toggle.
 - `retired` (`STATUS_RETIRED`) — **permanent, irreversible** soft-delete. Cannot fly, cannot be reactivated or edited. The row is never hard-deleted so past flights (which FK `flights.aircraft_id`) keep their history intact.
 
+### Location Continuity (opt-in realism mode)
+
+Per-airline boolean `airlines.location_continuity` (default off), toggled by per-airline Managers at `/airline/settings` (`AirlineController::settings()`/`updateSettings()`, view `manager/settings.blade.php`). `updateSettings()` puts the reloaded airline back into the session so the flag takes effect immediately. When enabled for an airline:
+
+- **Filing restriction** — a PIREP's `departure_icao` must equal the aircraft's `current_loc` (checked case-insensitively in `FlightController::addFlight()` and `Api\V1\FlightAPIController::store()`; both fetch the Aircraft model where they previously only counted).
+- **Movement on filing** — after `Flight::create()`, the aircraft's `current_loc` is set to the (uppercased) arrival ICAO. The plane moves immediately, so pilots can chain legs before review.
+- **Revert on rejection** — rejecting a *pending* PIREP moves the aircraft back to the flight's departure, but only if `current_loc` still equals that flight's arrival (i.e. no later flight has moved it on). Accepting a PIREP changes nothing (the plane already moved at filing).
+- **Escape hatch** — managers can still relocate an aircraft manually via the fleet edit form (e.g. to fix a typo'd arrival or ferry a stranded airframe).
+
+Airlines that have not opted in keep fully manual `current_loc` management — flights never move their aircraft. The flag is exposed as `locationContinuity` in `AirlineResource`, and the PIREP web form (`flights/add.blade.php`) auto-fills + locks the departure field from the selected aircraft's `data-location` when the mode is on.
+
 ### PIREP Workflow (Event-Driven)
 
 When a PIREP is filed (both web and API paths), `event(new FlightFiled($flight))` is dispatched. The `FlightFiledNotification` listener (`app/Listeners/FlightFiledNotification.php`) resolves the airline's reviewers (per-airline `Dispatcher`/`Manager`, excluding the filing pilot) and hands them to Laravel's notification system via `Notification::send($reviewers, new PirepFiled($flight))`.

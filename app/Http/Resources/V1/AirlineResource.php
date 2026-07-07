@@ -21,6 +21,7 @@ class AirlineResource extends JsonResource
             'icaoCallsign' => $this->icao_callsign,
             'atcCallsign' => $this->atc_callsign,
             'unitIsLbs' => $this->unit_is_lbs,
+            'locationContinuity' => $this->location_continuity,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at
         ];

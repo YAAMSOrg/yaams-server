@@ -26,6 +26,7 @@ class Airline extends Model
         'founded_at',
         'active',
         'require_pirep_review',
+        'location_continuity',
     ];
 
     protected $casts = [
@@ -33,6 +34,7 @@ class Airline extends Model
         'unit_is_lbs'          => 'boolean',
         'active'               => 'boolean',
         'require_pirep_review' => 'boolean',
+        'location_continuity'  => 'boolean',
     ];
 
     /***

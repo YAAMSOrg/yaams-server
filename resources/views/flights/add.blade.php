@@ -15,6 +15,16 @@
             </div>
         </div>
 
+        @if($location_continuity)
+        <div class="alert alert-info d-flex align-items-center gap-2 shadow-sm" role="alert">
+            <i class="bi bi-geo-alt-fill"></i>
+            <div>
+                <strong>Realism mode:</strong> flights must depart from the aircraft's current location.
+                The departure field is filled in automatically when you select an aircraft.
+            </div>
+        </div>
+        @endif
+
         @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
             <h4 class="alert-heading fs-6 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Submission Failed</h4>
@@ -86,8 +96,8 @@
                             <select id="aircraft_id" name="aircraft_id" class="form-select" required>
                                 <option value="" disabled selected>Select Aircraft...</option>
                                 @foreach($prefill_aircraft as $aircraft)
-                                    <option {{ old('aircraft_id') == $aircraft->id ? "selected" : "" }} value="{{ $aircraft->id }}">
-                                        {{ $aircraft->registration }} ({{ $aircraft->full_type }})
+                                    <option {{ old('aircraft_id') == $aircraft->id ? "selected" : "" }} value="{{ $aircraft->id }}" data-location="{{ $aircraft->current_loc }}">
+                                        {{ $aircraft->registration }} ({{ $aircraft->full_type }}){{ $location_continuity ? ' @ ' . $aircraft->current_loc : '' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -95,7 +105,7 @@
 
                         <div class="col-md-4">
                             <label for="departure" class="form-label">Departure ICAO</label>
-                            <input type="text" name="departure_icao" class="form-control text-uppercase font-monospace fs-5" id="departure" required placeholder="EDDK" minlength="4" maxlength="4" value="{{ old('departure_icao') }}">
+                            <input type="text" name="departure_icao" class="form-control text-uppercase font-monospace fs-5" id="departure" required placeholder="EDDK" minlength="4" maxlength="4" value="{{ old('departure_icao') }}" @if($location_continuity) readonly @endif>
                         </div>
                         <div class="col-md-4">
                             <label for="arrival" class="form-label">Arrival ICAO</label>
@@ -171,6 +181,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', () => { el.value = el.value.toUpperCase(); });
     });
+
+    @if($location_continuity)
+    // Location continuity: departure is locked to the selected aircraft's current location
+    const aircraftSelect = document.getElementById('aircraft_id');
+    const departureInput = document.getElementById('departure');
+    const syncDeparture = function () {
+        const opt = aircraftSelect.options[aircraftSelect.selectedIndex];
+        if (opt && opt.dataset.location) {
+            departureInput.value = opt.dataset.location;
+        }
+    };
+    aircraftSelect.addEventListener('change', syncDeparture);
+    syncDeparture();
+    @endif
 
     // Auto-fill callsign from flight number until the user manually edits the callsign
     const flightNumber = document.getElementById('flightnumber');
