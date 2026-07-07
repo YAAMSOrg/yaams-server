@@ -70,6 +70,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/settings', fn () => redirect()->route('settings.profile'))->name('settings');
     Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
     Route::get('/settings/security', [SettingsController::class, 'security'])->name('settings.security');
+    Route::post('/settings/tokens', [SettingsController::class, 'storeToken'])->name('settings.tokens.store');
+    Route::delete('/settings/tokens/{tokenId}', [SettingsController::class, 'destroyToken'])->name('settings.tokens.destroy');
     Route::get('/settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');
     Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
     Route::get('/settings/danger', [SettingsController::class, 'danger'])->name('settings.danger');
