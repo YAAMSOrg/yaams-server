@@ -4,82 +4,92 @@
 
 @section('content')
 
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
-
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="fw-bold mb-0">Invite Codes</h2>
-        <p class="text-muted mb-0 small">{{ $airline->name }} ({{ $airline->icao_callsign }})</p>
+        <h1 class="h3 mb-1"><i class="bi bi-sliders me-2"></i> Airline Settings</h1>
+        <p class="text-muted mb-0">{{ $airline->name }} ({{ $airline->icao_callsign }})</p>
     </div>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateModal">
-        <i class="bi bi-plus-lg me-1"></i> Generate Code
-    </button>
 </div>
 
-<div class="card">
-    <div class="card-header">All Invite Codes</div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Code</th>
-                    <th>Role</th>
-                    <th>Created by</th>
-                    <th>Status</th>
-                    <th>Used by</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($codes as $code)
-                    <tr>
-                        <td><span class="font-monospace fw-semibold">{{ $code->code }}</span></td>
-                        <td>
-                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                {{ $code->role }}
-                            </span>
-                        </td>
-                        <td class="text-muted small">{{ $code->creator->name ?? '—' }}</td>
-                        <td>
-                            @if($code->isUsed())
-                                <span class="badge bg-success-subtle text-success border border-success-subtle">Used</span>
-                            @else
-                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
-                            @endif
-                        </td>
-                        <td class="text-muted small">
-                            @if($code->usedBy)
-                                {{ $code->usedBy->name }}
-                                <span class="text-muted"> · {{ $code->used_at->diffForHumans() }}</span>
-                            @else
-                                —
-                            @endif
-                        </td>
-                        <td class="text-end">
-                            @unless($code->isUsed())
-                                <form action="{{ route('invitecodes.destroy', $code) }}" method="POST"
-                                      onsubmit="return confirm('Delete this code?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            @endunless
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">No invite codes yet.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+<div class="row g-4">
+    {{-- Sidebar: airline settings sections --}}
+    @include('manager._sidebar', ['active' => 'invitecodes'])
+
+    {{-- Main: invite codes --}}
+    <div class="col-12 col-lg-9">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Invite Codes</span>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#generateModal">
+                    <i class="bi bi-plus-lg me-1"></i> Generate Code
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Role</th>
+                            <th>Created by</th>
+                            <th>Status</th>
+                            <th>Used by</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($codes as $code)
+                            <tr>
+                                <td><span class="font-monospace fw-semibold">{{ $code->code }}</span></td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                        {{ $code->role }}
+                                    </span>
+                                </td>
+                                <td class="text-muted small">{{ $code->creator->name ?? '—' }}</td>
+                                <td>
+                                    @if($code->isUsed())
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Used</span>
+                                    @else
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
+                                    @endif
+                                </td>
+                                <td class="text-muted small">
+                                    @if($code->usedBy)
+                                        {{ $code->usedBy->name }}
+                                        <span class="text-muted"> · {{ $code->used_at->diffForHumans() }}</span>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="text-end">
+                                    @unless($code->isUsed())
+                                        <form action="{{ route('invitecodes.destroy', $code) }}" method="POST"
+                                              onsubmit="return confirm('Delete this code?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endunless
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">No invite codes yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
