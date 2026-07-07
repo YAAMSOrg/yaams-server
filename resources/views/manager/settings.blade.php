@@ -11,6 +11,13 @@
     </div>
 @endif
 
+@if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ $errors->first() }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="fw-bold mb-0">Airline Settings</h2>
@@ -24,6 +31,19 @@
         <form action="{{ route('airline.settings.update') }}" method="POST">
             @csrf
             @method('PUT')
+
+            <div class="form-check form-switch mb-1">
+                <input type="hidden" name="require_pirep_review" value="0">
+                <input class="form-check-input" type="checkbox" role="switch" id="require_pirep_review"
+                       name="require_pirep_review" value="1" @checked($airline->require_pirep_review)>
+                <label class="form-check-label fw-semibold" for="require_pirep_review">
+                    Require PIREP review
+                </label>
+            </div>
+            <p class="text-muted small mb-4">
+                When enabled, filed PIREPs stay pending until a Dispatcher or Manager accepts or rejects them.
+                When disabled, PIREPs are accepted automatically on filing and no review notifications are sent.
+            </p>
 
             <div class="form-check form-switch mb-1">
                 <input type="hidden" name="location_continuity" value="0">

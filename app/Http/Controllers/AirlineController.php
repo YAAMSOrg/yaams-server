@@ -85,8 +85,20 @@ class AirlineController extends Controller
         abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
 
         $airline = Airline::findOrFail($airline->id);
+
+        // Review cannot be switched off while flights are still pending — they would be
+        // stranded in a review queue that is no longer reachable from the nav.
+        if ($airline->require_pirep_review
+            && ! $request->boolean('require_pirep_review')
+            && $airline->flights()->where('status_id', 1)->exists()) {
+            return back()->withErrors([
+                'require_pirep_review' => 'PIREP review cannot be disabled while flights are still pending review. Accept or reject them first.',
+            ]);
+        }
+
         $airline->update([
-            'location_continuity' => $request->boolean('location_continuity'),
+            'location_continuity'  => $request->boolean('location_continuity'),
+            'require_pirep_review' => $request->boolean('require_pirep_review'),
         ]);
 
         // Keep the session snapshot in sync so the PIREP form sees the new flag immediately

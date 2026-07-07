@@ -117,9 +117,15 @@ Per-airline boolean `airlines.location_continuity` (default off), toggled by per
 
 Airlines that have not opted in keep fully manual `current_loc` management — flights never move their aircraft. The flag is exposed as `locationContinuity` in `AirlineResource`, and the PIREP web form (`flights/add.blade.php`) auto-fills + locks the departure field from the selected aircraft's `data-location` when the mode is on.
 
+### PIREP Review Requirement (per-airline)
+
+Per-airline boolean `airlines.require_pirep_review` (default on at founding/setup), toggled on the same `/airline/settings` page as location continuity. When **on**, filed PIREPs stay pending (`status_id = 1`) and the `FlightFiled` event notifies reviewers. When **off**, both filing paths set `status_id = 2` (accepted) immediately after create and skip the `FlightFiled` event entirely — no reviewer notifications, nothing in the review queue. Location continuity is unaffected either way (the aircraft moves at filing time).
+
+Two safeguards: `AirlineController::updateSettings()` refuses to switch review **off while flights are still pending** (they would be stranded in an unreachable queue — accept/reject them first), and the "Review flights" nav entry is hidden when the active airline has review disabled (the session airline is refreshed on settings save, so this applies immediately).
+
 ### PIREP Workflow (Event-Driven)
 
-When a PIREP is filed (both web and API paths), `event(new FlightFiled($flight))` is dispatched. The `FlightFiledNotification` listener (`app/Listeners/FlightFiledNotification.php`) resolves the airline's reviewers (per-airline `Dispatcher`/`Manager`, excluding the filing pilot) and hands them to Laravel's notification system via `Notification::send($reviewers, new PirepFiled($flight))`.
+When a PIREP is filed (both web and API paths) and the airline requires PIREP review (see above), `event(new FlightFiled($flight))` is dispatched. The `FlightFiledNotification` listener (`app/Listeners/FlightFiledNotification.php`) resolves the airline's reviewers (per-airline `Dispatcher`/`Manager`, excluding the filing pilot) and hands them to Laravel's notification system via `Notification::send($reviewers, new PirepFiled($flight))`.
 
 ### Notifications (Multi-Channel)
 

@@ -113,7 +113,13 @@ class FlightAPIController extends Controller
             $aircraft->update(['current_loc' => strtoupper($validated['arrival_icao'])]);
         }
 
-        event(new FlightFiled($flight));
+        if ($airline->require_pirep_review) {
+            event(new FlightFiled($flight));
+        } else {
+            // Auto-accept: the airline does not require PIREP review, so nothing is dispatched to reviewers
+            $flight->status_id = 2;
+            $flight->save();
+        }
 
         activity()
             ->causedBy($user)
