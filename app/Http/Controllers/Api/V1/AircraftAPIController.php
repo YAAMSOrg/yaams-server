@@ -24,7 +24,7 @@ class AircraftAPIController extends Controller
 
         // Check if the user is member of the airline.
         if(!$get_asking_user->isMemberOf($airline)){
-            return response()->json(['error' => 'You are not a member of this airline.'], 403);
+            return response()->json(['message' => 'You are not a member of this airline.'], 403);
         }
 
         //Return every aircraft which is used by the airline.
@@ -35,12 +35,12 @@ class AircraftAPIController extends Controller
         $get_asking_user = request()->user('sanctum');
 
         if(!$get_asking_user->can('add aircraft')) {
-            return response()->json(['error' => 'Forbidden: You do not have permission to add aircraft.'], 403);
+            return response()->json(['message' => 'Forbidden: You do not have permission to add aircraft.'], 403);
         }
 
         // Check if the user is member of the airline.
         if(!$get_asking_user->isMemberOf($airline)){
-            return response()->json(['error' => 'You are not a member of this airline.'], 403);
+            return response()->json(['message' => 'You are not a member of this airline.'], 403);
         }
 
         $validated = $request->validate([

@@ -76,15 +76,15 @@ class FlightAPIController extends Controller
 
         // Check if user is member of the airline
         if (!$user->isMemberOf($airline)) {
-            return response()->json(['error' => 'You are not a member of this airline.'], 403);
+            return response()->json(['message' => 'You are not a member of this airline.'], 403);
         }
 
         // Validate Airports
         if (!Airport::find($validated['departure_icao'])) {
-            return response()->json(['error' => 'Departure airport not found.'], 422);
+            throw ValidationException::withMessages(['departure_icao' => 'Departure airport not found.']);
         }
         if (!Airport::find($validated['arrival_icao'])) {
-            return response()->json(['error' => 'Arrival airport not found.'], 422);
+            throw ValidationException::withMessages(['arrival_icao' => 'Arrival airport not found.']);
         }
 
         // Validate Aircraft
@@ -94,16 +94,16 @@ class FlightAPIController extends Controller
             ->where("status", Aircraft::STATUS_ACTIVE)
             ->first();
         if (is_null($aircraft)) {
-            return response()->json(['error' => 'This aircraft is not available or not owned by your airline.'], 422);
+            throw ValidationException::withMessages(['aircraft_id' => 'This aircraft is not available or not owned by your airline.']);
         }
 
         // Location continuity: the flight must depart from where the airframe currently is
         if ($airline->location_continuity
             && strtoupper($validated['departure_icao']) !== strtoupper((string) $aircraft->current_loc)) {
-            return response()->json([
-                'error' => 'Location continuity is enabled: ' . $aircraft->registration
+            throw ValidationException::withMessages([
+                'departure_icao' => 'Location continuity is enabled: ' . $aircraft->registration
                     . ' is currently located at ' . ($aircraft->current_loc ?: 'an unknown location') . '.',
-            ], 422);
+            ]);
         }
 
         $flight = Flight::create($validated + ['pilot_id' => $user->id]);
@@ -138,12 +138,9 @@ class FlightAPIController extends Controller
     {
         $user = request()->user();
 
-        if (!$user->can('review flight')) {
-            return response()->json(['error' => 'Unauthorized to review flights.'], 403);
-        }
-
-        if (!$user->isMemberOf($airline)) {
-            return response()->json(['error' => 'You are not a member of this airline.'], 403);
+        // Per-airline Dispatcher/Manager role - same rule as the web review pages.
+        if (!$user->canReviewFlightsFor($airline)) {
+            return response()->json(['message' => 'You do not have permission to review flights for this airline.'], 403);
         }
 
         $flights = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
@@ -162,14 +159,15 @@ class FlightAPIController extends Controller
     {
         $user = request()->user();
 
-        if (!$user->can('review flight') || !$user->isMemberOf($flight->airline)) {
-            return response()->json(['error' => 'Unauthorized to review this flight.'], 403);
+        // Per-airline Dispatcher/Manager role - same rule as the web review pages.
+        if (!$user->canReviewFlightsFor($flight->airline)) {
+            return response()->json(['message' => 'You do not have permission to review flights for this airline.'], 403);
         }
 
         if ($flight->pilot_id === $user->id
             && !$user->isManagerOf($flight->airline)
             && !$user->hasRole('Super-Admin')) {
-            return response()->json(['error' => 'Dispatchers cannot accept their own PIREP.'], 403);
+            return response()->json(['message' => 'Dispatchers cannot accept their own PIREP.'], 403);
         }
 
         $flight->status_id = 2;
@@ -195,14 +193,15 @@ class FlightAPIController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->can('review flight') || !$user->isMemberOf($flight->airline)) {
-            return response()->json(['error' => 'Unauthorized to review this flight.'], 403);
+        // Per-airline Dispatcher/Manager role - same rule as the web review pages.
+        if (!$user->canReviewFlightsFor($flight->airline)) {
+            return response()->json(['message' => 'You do not have permission to review flights for this airline.'], 403);
         }
 
         if ($flight->pilot_id === $user->id
             && !$user->isManagerOf($flight->airline)
             && !$user->hasRole('Super-Admin')) {
-            return response()->json(['error' => 'Dispatchers cannot reject their own PIREP.'], 403);
+            return response()->json(['message' => 'Dispatchers cannot reject their own PIREP.'], 403);
         }
 
         $wasPending = $flight->status_id === 1;

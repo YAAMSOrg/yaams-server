@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\V1\ApiTestController;
 use App\Http\Controllers\Api\V1\AirlineAPIController;
+use App\Http\Controllers\Api\V1\InfoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,15 +23,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
 // API V1
-// Route Group for api/v1 PROTECTED routes
 
+// Public instance metadata - intentionally outside auth:sanctum so clients
+// can identify the instance before the user has a token.
+Route::get('v1/info', [InfoController::class, 'index'])->name('api.info');
+
+// Route Group for api/v1 PROTECTED routes
 Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1', 'middleware' => 'auth:sanctum' ], function() {
     Route::get('apitest', [ApiTestController::class, 'index'])->name('apitest');
 
-    // Can receive GET or POST.
-    Route::apiResource('airlines', AirlineAPIController::class);
+    // Only the actions AirlineAPIController implements - update/destroy do not exist.
+    Route::apiResource('airlines', AirlineAPIController::class)->only(['index', 'show', 'store']);
 
     Route::get('/airline/{airline}/aircraft/', [AircraftAPIController::class, 'listAircraftForAirline'])->name('aircraftlistforairline');
     Route::post('/airline/{airline}/aircraft/', [AircraftAPIController::class, 'addAircraftForAirline'])->name('aircraftaddforairline');
