@@ -1,4 +1,4 @@
-{{-- Airline dashboard sections sidebar. Pass $active
+{{-- Airline management sections sidebar. Pass $active
      ('operations' | 'invitecodes' | 'announcements') to highlight the current section. --}}
 @php($active = $active ?? 'operations')
 <div class="col-12 col-lg-3">
