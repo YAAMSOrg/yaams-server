@@ -76,6 +76,27 @@
             </div>
         @endif
 
+        @if(isset($notams) && $notams->isNotEmpty())
+            <div class="card mb-4 border-primary border-opacity-25">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-megaphone text-primary"></i>
+                    <span>Airline NOTAMs</span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-auto">{{ $notams->count() }}</span>
+                </div>
+                <div class="card-body p-0">
+                    @foreach($notams as $notam)
+                        <div class="p-4 {{ !$loop->last ? 'border-bottom' : '' }}">
+                            <h6 class="fw-semibold mb-1">{{ $notam->title }}</h6>
+                            <p class="mb-2 text-body" style="white-space: pre-line;">{{ $notam->body }}</p>
+                            <p class="text-muted small mb-0">
+                                {{ $notam->author->name ?? '—' }} · {{ $notam->created_at->diffForHumans() }}
+                            </p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <div class="card">
             <div class="card-header d-flex align-items-center gap-2">
                 <i class="bi bi-globe-americas text-primary"></i>

@@ -164,7 +164,7 @@
                                     </a>
                                 </li>
                                 @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
-                                    <li><a class="dropdown-item" href="{{ route('airline.settings') }}"><i class="bi bi-sliders me-2 text-secondary"></i> Airline Settings</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('airline.settings') }}"><i class="bi bi-speedometer2 me-2 text-secondary"></i> Airline Dashboard</a></li>
                                 @endif
                                 <li><a class="dropdown-item" href="{{ route('portal') }}"><i class="bi bi-buildings me-2 text-secondary"></i> Airline Portal</a></li>
                                 <li><a class="dropdown-item" href="{{ route('settings.profile') }}"><i class="bi bi-gear me-2 text-secondary"></i> Settings</a></li>

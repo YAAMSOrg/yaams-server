@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Airline Settings — YAAMS')
+@section('title', 'Airline Dashboard — YAAMS')
 
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-1"><i class="bi bi-sliders me-2"></i> Airline Settings</h1>
+        <h1 class="h3 mb-1"><i class="bi bi-speedometer2 me-2"></i> Airline Dashboard</h1>
         <p class="text-muted mb-0">{{ $airline->name }} ({{ $airline->icao_callsign }})</p>
     </div>
 </div>

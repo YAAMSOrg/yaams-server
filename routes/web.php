@@ -11,6 +11,7 @@ use App\Http\Controllers\SetupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\InviteCodeController;
+use App\Http\Controllers\NotamController;
 use App\Http\Controllers\AirlineController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\AdminController;
@@ -93,6 +94,12 @@ Route::middleware(['auth'])->group(function () {
         // Airline settings (manager check enforced in controller)
         Route::get('/airline/settings', [AirlineController::class, 'settings'])->name('airline.settings');
         Route::put('/airline/settings', [AirlineController::class, 'updateSettings'])->name('airline.settings.update');
+
+        // Announcements / NOTAMs (manager check enforced in controller)
+        Route::get('/airline/announcements', [NotamController::class, 'index'])->name('notams.index');
+        Route::post('/airline/announcements', [NotamController::class, 'store'])->name('notams.store');
+        Route::put('/airline/announcements/{notam}', [NotamController::class, 'update'])->name('notams.update');
+        Route::delete('/airline/announcements/{notam}', [NotamController::class, 'destroy'])->name('notams.destroy');
 
         // Flight Management
         Route::match(["GET", "POST"], "/user/flights/add", [FlightController::class, "addFlight"])->name("flightadd");

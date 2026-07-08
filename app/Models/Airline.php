@@ -78,4 +78,9 @@ class Airline extends Model
         return $this->hasMany(Aircraft::class, 'used_by')->where('status', Aircraft::STATUS_ACTIVE);
     }
 
+    public function notams(): HasMany
+    {
+        return $this->hasMany(Notam::class);
+    }
+
 }
