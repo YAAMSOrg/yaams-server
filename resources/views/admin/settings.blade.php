@@ -68,6 +68,22 @@
                         <div class="form-text">Displayed in the site footer as a contact link when set.</div>
                     </div>
 
+                    <div class="mb-4">
+                        <label for="timezone" class="form-label">Display timezone</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-clock text-secondary"></i></span>
+                            <select id="timezone"
+                                    name="timezone"
+                                    class="form-select @error('timezone') is-invalid @enderror"
+                                    required>
+                                @foreach (timezone_identifiers_list() as $tz)
+                                    <option value="{{ $tz }}" {{ old('timezone', $settings['timezone']) === $tz ? 'selected' : '' }}>{{ $tz }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-text">Used for admin- and crew-facing times such as announcement (NOTAM) expiry. Flight and PIREP times always stay in UTC (Zulu).</div>
+                    </div>
+
                     {{-- Policies --}}
                     <hr class="my-4">
                     <h6 class="fw-semibold mb-3"><i class="bi bi-shield-check me-2 text-info"></i> Policies</h6>

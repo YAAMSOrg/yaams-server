@@ -50,6 +50,25 @@
                 <div class="form-text">Shown in the page title and header across the app.</div>
             </div>
 
+            <div class="mb-3">
+                <label for="timezone" class="form-label">Display timezone</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-clock text-secondary"></i></span>
+                    <select id="timezone"
+                            name="timezone"
+                            class="form-select @error('timezone') is-invalid @enderror"
+                            required>
+                        @foreach (timezone_identifiers_list() as $tz)
+                            <option value="{{ $tz }}" {{ old('timezone', config('app.timezone', 'UTC')) === $tz ? 'selected' : '' }}>{{ $tz }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @error('timezone')
+                    <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                @enderror
+                <div class="form-text">Used for admin- and crew-facing times. Flight and PIREP times always stay in UTC (Zulu).</div>
+            </div>
+
             {{-- Section 2: Airline --}}
             <div class="step-divider">
                 <span class="section-icon bg-success bg-opacity-10 text-success">

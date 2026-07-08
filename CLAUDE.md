@@ -41,6 +41,7 @@ New settings must be wired into all three places:
 
 Current setting keys:
 - `app_name` — display name shown in the page title and header (default: `config('app.name')`, `'YAAMS'`)
+- `timezone` — instance display timezone (a PHP timezone identifier, default: `config('app.timezone')`, `'UTC'`). The DB stores everything in UTC; this is used only for admin- and crew-facing datetimes (e.g. NOTAM expiry) via `App\Support\Timezone` (`current()`, `toUtc()`, `format()`). Flight/PIREP times are aviation data and intentionally stay in UTC (Zulu) — never route them through `Timezone`.
 - `support_email` — optional contact address; shown in the site footer as a mailto link when set (default: `null`)
 - `allow_user_airline_creation` — `'1'` if any registered user may found an airline; `'0'` (default) if only Super-Admins can
 - `allow_registration` — `'1'` (default) if public self-registration is open; `'0'` if new users cannot self-register

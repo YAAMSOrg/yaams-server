@@ -18,6 +18,7 @@ class SettingsController extends Controller
     {
         $settings = [
             'app_name'                    => Setting::get('app_name'),
+            'timezone'                    => Setting::get('timezone'),
             'allow_user_airline_creation' => Setting::get('allow_user_airline_creation'),
             'allow_registration'          => Setting::get('allow_registration'),
             'show_public_stats'           => Setting::get('show_public_stats'),
@@ -32,6 +33,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'app_name'                    => 'required|string|max:255',
+            'timezone'                    => 'required|timezone',
             'allow_user_airline_creation' => 'required|boolean',
             'allow_registration'          => 'required|boolean',
             'show_public_stats'           => 'required|boolean',
@@ -40,6 +42,7 @@ class SettingsController extends Controller
         ]);
 
         Setting::set('app_name', $validated['app_name']);
+        Setting::set('timezone', $validated['timezone']);
         Setting::set('allow_user_airline_creation', $request->boolean('allow_user_airline_creation') ? '1' : '0');
         Setting::set('allow_registration', $request->boolean('allow_registration') ? '1' : '0');
         Setting::set('show_public_stats', $request->boolean('show_public_stats') ? '1' : '0');

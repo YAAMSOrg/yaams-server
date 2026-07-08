@@ -56,7 +56,7 @@
                         <label class="form-label fw-semibold" for="expires_at">Expires at <span class="text-muted fw-normal">(optional)</span></label>
                         <input type="datetime-local" class="form-control" id="expires_at" name="expires_at"
                                value="{{ old('expires_at') }}">
-                        <p class="text-muted small mb-0 mt-1">Leave empty to keep the NOTAM visible until you delete it.</p>
+                        <p class="text-muted small mb-0 mt-1">Times are in {{ \App\Support\Timezone::current() }}. Leave empty to keep the NOTAM visible until you delete it.</p>
                     </div>
 
                     <button type="submit" class="btn btn-primary">
@@ -87,7 +87,7 @@
                                 <p class="text-muted small mb-0">
                                     {{ $notam->author->name ?? '—' }} · {{ $notam->created_at->diffForHumans() }}
                                     @if($notam->expires_at)
-                                        · Expires {{ $notam->expires_at->format('M d, Y H:i') }}
+                                        · Expires {{ \App\Support\Timezone::format($notam->expires_at, 'M d, Y H:i') }} {{ \App\Support\Timezone::current() }}
                                     @else
                                         · No expiry
                                     @endif
@@ -137,7 +137,8 @@
                                         <div class="mb-3">
                                             <label class="form-label fw-semibold" for="expires_at{{ $notam->id }}">Expires at <span class="text-muted fw-normal">(optional)</span></label>
                                             <input type="datetime-local" class="form-control" id="expires_at{{ $notam->id }}"
-                                                   name="expires_at" value="{{ $notam->expires_at?->format('Y-m-d\TH:i') }}">
+                                                   name="expires_at" value="{{ \App\Support\Timezone::format($notam->expires_at, 'Y-m-d\TH:i') }}">
+                                            <p class="text-muted small mb-0 mt-1">Times are in {{ \App\Support\Timezone::current() }}.</p>
                                         </div>
                                     </div>
                                     <div class="modal-footer">

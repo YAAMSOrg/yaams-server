@@ -27,6 +27,7 @@ class Setting extends Model
     {
         return [
             'app_name'                    => config('app.name', 'YAAMS'),
+            'timezone'                    => config('app.timezone', 'UTC'),
             'allow_user_airline_creation' => '0',
             'allow_registration'          => '1',
             'support_email'               => null,

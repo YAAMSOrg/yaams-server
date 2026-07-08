@@ -33,6 +33,7 @@ class SetupController extends Controller
 
         $request->validate([
             'app_name'         => 'required|string|max:255',
+            'timezone'         => 'required|timezone',
             'airline_name'     => 'required|string|max:255',
             'airline_prefix'   => 'required|string|max:2|min:2|alpha',
             'airline_icao'     => 'required|string|max:3|min:2|alpha',
@@ -84,6 +85,7 @@ class SetupController extends Controller
             // Instance settings
             DB::table('settings')->upsert([
                 ['key' => 'app_name',                    'value' => $request->app_name,                                          'created_at' => $now, 'updated_at' => $now],
+                ['key' => 'timezone',                    'value' => $request->timezone,                                          'created_at' => $now, 'updated_at' => $now],
                 ['key' => 'allow_user_airline_creation', 'value' => $request->boolean('allow_user_airline_creation') ? '1' : '0', 'created_at' => $now, 'updated_at' => $now],
                 ['key' => 'allow_registration',          'value' => $request->boolean('allow_registration') ? '1' : '0',          'created_at' => $now, 'updated_at' => $now],
                 ['key' => 'show_public_stats',           'value' => $request->boolean('show_public_stats') ? '1' : '0',           'created_at' => $now, 'updated_at' => $now],

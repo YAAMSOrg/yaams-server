@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Notam;
 use App\Notifications\NotamPosted;
+use App\Support\Timezone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
@@ -37,15 +38,23 @@ class NotamController extends Controller
         $validated = $request->validate([
             'title'      => 'required|string|max:255',
             'body'       => 'required|string',
-            'expires_at' => 'nullable|date|after:now',
+            'expires_at' => 'nullable|date',
         ]);
+
+        // The datetime-local field carries a naive wall-clock time in the
+        // instance display timezone; store it as UTC.
+        $expiresAt = Timezone::toUtc($validated['expires_at'] ?? null);
+
+        if ($expiresAt && $expiresAt->isPast()) {
+            return back()->withInput()->withErrors(['expires_at' => 'The expiry must be in the future.']);
+        }
 
         $notam = Notam::create([
             'airline_id' => $airline->id,
             'created_by' => auth()->id(),
             'title'      => $validated['title'],
             'body'       => $validated['body'],
-            'expires_at' => $validated['expires_at'] ?? null,
+            'expires_at' => $expiresAt,
         ]);
 
         // Notify every airline member except the author (in-app + email).
@@ -69,13 +78,19 @@ class NotamController extends Controller
         $validated = $request->validate([
             'title'      => 'required|string|max:255',
             'body'       => 'required|string',
-            'expires_at' => 'nullable|date|after:now',
+            'expires_at' => 'nullable|date',
         ]);
+
+        $expiresAt = Timezone::toUtc($validated['expires_at'] ?? null);
+
+        if ($expiresAt && $expiresAt->isPast()) {
+            return back()->withInput()->withErrors(['expires_at' => 'The expiry must be in the future.']);
+        }
 
         $notam->update([
             'title'      => $validated['title'],
             'body'       => $validated['body'],
-            'expires_at' => $validated['expires_at'] ?? null,
+            'expires_at' => $expiresAt,
         ]);
 
         return back()->with('success', 'NOTAM updated.');
