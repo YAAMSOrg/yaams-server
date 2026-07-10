@@ -3,8 +3,8 @@
 #
 # Runs the runtime-only preparation that needs the real environment (.env) -
 # so it happens on container start, not at image build time - then hands off to
-# the passed command (Apache by default; the worker/scheduler services pass
-# their own artisan command).
+# the passed command (supervisord running nginx + php-fpm by default; the
+# worker/scheduler services pass their own artisan command).
 set -e
 
 # The compose stack mounts a named volume at /app/storage so uploads and logs

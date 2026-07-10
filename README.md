@@ -24,7 +24,7 @@ An decentralised open-source virtual airline management platform. Track PIREPs, 
 
 ## Production Deployment
 
-Production runs from a prebuilt multi-arch (amd64 + arm64) image. The image bundles PHP, the app, and Apache as the web server; you only need Docker and the single `docker-compose.prod.yml` file.
+Production runs from a prebuilt multi-arch (amd64 + arm64) image. The image bundles the app with nginx + PHP-FPM (Alpine-based); you only need Docker and the single `docker-compose.prod.yml` file.
 
 ### Deploying on a server
 1. Copy `docker-compose.prod.yml` and `.env.production.example` to the server.

@@ -17,7 +17,7 @@
 #     owned by group root (see Docker/Dockerfile.prod). The entrypoint no longer
 #     chowns storage when it isn't root, so no more "Operation not permitted".
 #   - `:z` relabels the bind mounts for SELinux so the containers may access them.
-#   - Apache listens on :8080 (a non-privileged port) because an unprivileged
+#   - nginx listens on :8080 (a non-privileged port) because an unprivileged
 #     UID cannot bind :80 inside the container netns.
 #
 # TLS: the `app` service serves plain HTTP on 127.0.0.1:8000. Terminate TLS with
@@ -73,7 +73,7 @@ services:
   app:
     <<: *app-common
     container_name: yaams-app
-    # Apache on a non-privileged port; publish to loopback only and front it
+    # nginx on a non-privileged port; publish to loopback only and front it
     # with a host reverse proxy for TLS.
     ports:
       - "127.0.0.1:8000:8080"
