@@ -6,8 +6,19 @@
 # Quick start:
 #   cp .env.production.example .env
 #   # edit .env: set APP_KEY, DB_PASSWORD, APP_URL, MAIL_*, domain settings
+#   mkdir -p storage-data db-data
 #   docker compose -f docker-compose.prod.yml up -d
 #   # then open the /setup wizard in your browser
+#
+# Rootless Podman + SELinux notes:
+#   - The app services run as your unprivileged host user via `keep-id`, mapped
+#     to UID 1000 / GID 0 inside the container. GID 0 (not 1000) is deliberate:
+#     it lets that UID write bootstrap/cache, which is baked into the image and
+#     owned by group root (see Docker/Dockerfile.prod). The entrypoint no longer
+#     chowns storage when it isn't root, so no more "Operation not permitted".
+#   - `:z` relabels the bind mounts for SELinux so the containers may access them.
+#   - FrankenPHP listens on :8080 (a non-privileged port) because an unprivileged
+#     UID cannot bind :80 inside the container netns.
 #
 # TLS: the `app` service serves plain HTTP on 127.0.0.1:8000. Terminate TLS with
 # your own reverse proxy on the host, e.g. Caddy:
@@ -23,8 +34,11 @@ x-app-common: &app-common
   networks:
     - yaams
   restart: unless-stopped
+  # Run as the invoking host user (mapped to UID 1000 / GID 0 in the container).
+  user: "1000:0"
+  userns_mode: "keep-id:uid=1000,gid=0"
   volumes:
-    - storage-data:/app/storage
+    - ./storage-data:/app/storage:z
 
 services:
   db:
@@ -36,7 +50,7 @@ services:
       MARIADB_PASSWORD: ${DB_PASSWORD}
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
     volumes:
-      - db-data:/var/lib/mysql
+      - ./db-data:/var/lib/mysql:z
     networks:
       - yaams
     healthcheck:
@@ -59,9 +73,12 @@ services:
   app:
     <<: *app-common
     container_name: yaams-app
-    # Plain HTTP, published to loopback only - front it with a host reverse proxy.
+    # FrankenPHP on a non-privileged port; publish to loopback only and front it
+    # with a host reverse proxy for TLS.
+    environment:
+      SERVER_NAME: ":8080"
     ports:
-      - "127.0.0.1:8000:80"
+      - "127.0.0.1:8000:8080"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -93,7 +110,3 @@ services:
 networks:
   yaams:
     name: yaams
-
-volumes:
-  db-data:
-  storage-data:

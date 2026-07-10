@@ -59,9 +59,19 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY . /app
 COPY --from=vendor /app/vendor /app/vendor
 
-# Storage + cache must be writable by the runtime user.
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
-    && chmod -R 775 /app/storage /app/bootstrap/cache
+# Storage + cache must be writable by the runtime user. Own them by the root
+# group (GID 0) with group perms mirroring the owner, so the app works both when
+# it runs as root (the default) and as an arbitrary unprivileged UID under
+# rootless Podman/OpenShift - such a UID runs with GID 0 and can then write here
+# even on paths baked into the image (e.g. bootstrap/cache). See
+# docker-compose.prod.yml for the matching `user:` / `userns_mode:` settings.
+RUN chown -R www-data:0 /app/storage /app/bootstrap/cache \
+    && chmod -R g=u /app/storage /app/bootstrap/cache
+
+# Bake the public storage symlink at build time. The entrypoint also runs
+# `storage:link`, but an unprivileged runtime UID can't write into public/, so
+# without this baked symlink user uploads would not be served under /storage.
+RUN ln -sfn ../storage/app/public /app/public/storage
 
 COPY Docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint

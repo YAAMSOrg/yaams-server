@@ -17,8 +17,15 @@ mkdir -p \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs
-chown -R www-data:www-data storage
-chmod -R 775 storage
+
+# Only root can hand the tree to www-data. Under rootless Podman/OpenShift the
+# container runs as an arbitrary unprivileged UID that already owns (or shares
+# the GID-0 group of) these paths, and a chown would fail with EPERM - so skip
+# it there. The chmod is best-effort for the same reason.
+if [ "$(id -u)" = "0" ]; then
+    chown -R www-data:www-data storage
+fi
+chmod -R 775 storage 2>/dev/null || true
 
 # Public symlink for user-uploaded storage (idempotent).
 php artisan storage:link --quiet || true
