@@ -5,14 +5,9 @@
 
 {{-- Hero --}}
 <div class="py-5 mb-5">
-    <div class="d-flex align-items-center gap-3 mb-3">
-        <span style="font-size: 3.5rem; line-height: 1; color: #0d6efd;">
-            <i class="bi bi-airplane-fill" style="display: inline-block; transform: rotate(45deg);"></i>
-        </span>
-        <div>
-            <h1 class="display-3 fw-bold mb-0" style="letter-spacing: -0.03em;">YAAMS</h1>
-            <p class="text-muted mb-0 fs-6 fw-semibold text-uppercase" style="letter-spacing: 0.08em;">Yet Another Airline Management System</p>
-        </div>
+    <div class="mb-3">
+        <img src="{{ asset('img/yaams-nexttoeach.svg') }}" alt="YAAMS" height="100" class="mb-2 d-block">
+        <p class="text-muted mb-0 fs-6 fw-semibold text-uppercase" style="letter-spacing: 0.08em;">Yet Another Airline Management System</p>
     </div>
     <p class="lead text-muted mb-4" style="max-width: 560px;">
         An open-source virtual airline management platform. Track PIREPs, manage fleets,
