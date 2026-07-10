@@ -51,7 +51,7 @@
                     <i class="bi bi-archive"></i> {{ $showRetired ? 'Hide retired' : 'Show retired' }}
                 </a>
                 @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
-                    <a href="{{ route('createaircraft') }}" class="btn btn-success px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
+                    <a href="{{ route('createaircraft') }}" class="btn btn-primary px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
                         <i class="bi bi-plus-circle"></i> Add Aircraft
                     </a>
                 @endif
@@ -237,7 +237,7 @@
                         <h5 class="fw-bold text-dark mb-1">No Aircraft Found</h5>
                         <p class="text-secondary small max-w-md mx-auto mb-3">Your airline fleet is currently empty. Get started by registering your first airframe.</p>
                         @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')))
-                            <a href="{{ route('createaircraft') }}" class="btn btn-sm btn-success px-3 shadow-sm">
+                            <a href="{{ route('createaircraft') }}" class="btn btn-sm btn-primary px-3 shadow-sm">
                                 Add First Aircraft
                             </a>
                         @endif

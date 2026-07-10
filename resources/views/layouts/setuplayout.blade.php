@@ -35,10 +35,10 @@
             border-radius: 0.5rem;
         }
         .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+            box-shadow: 0 0 0 0.25rem rgba(134, 95, 49, 0.15);
         }
         .btn-primary {
-            background-color: #0d6efd;
+            background-color: #865F31;
             border: none;
             padding: 0.75rem;
             font-weight: 600;
@@ -70,6 +70,7 @@
             border-top: 1px solid #dee2e6;
         }
     </style>
+    <link href="{{ asset('css/yaams-theme.css') }}" rel="stylesheet">
 </head>
 
 <body>

@@ -48,9 +48,10 @@
             font-weight: 600;
         }
         .form-control:focus, .form-select:focus {
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15); /* Softer focus ring */
+            box-shadow: 0 0 0 0.25rem rgba(134, 95, 49, 0.15); /* Softer focus ring */
         }
     </style>
+    <link href="{{ asset('css/yaams-theme.css') }}" rel="stylesheet">
 </head>
 
 <body class="d-flex flex-column min-vh-100">

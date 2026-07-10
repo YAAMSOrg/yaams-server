@@ -1,0 +1,214 @@
+/*
+ * YAAMS brand theme
+ * -----------------
+ * Single source of truth for the design language: self-hosted brand font
+ * (Space Grotesk) and the brand colour that replaces Bootstrap's default blue.
+ *
+ * Loaded AFTER vendor/bootstrap/css/bootstrap.min.css in every layout, so it
+ * overrides Bootstrap. Bootstrap 5.3.3 derives .text-primary / .bg-primary /
+ * .border-primary / .alert-primary etc. from --bs-primary-rgb, so the :root
+ * block below recolours all of those automatically; only components that bake
+ * a literal hex (buttons, focus rings, pagination, form checks) need explicit
+ * rules.
+ *
+ * Palette: amber #E8A53F (accent), brown #865F31 (primary),
+ *          dark brown #574736, slate #282E3A, dark slate #20242E.
+ */
+
+/* Self-hosted brand font (drop the woff2 into public/fonts/space-grotesk/). */
+@font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url('../fonts/space-grotesk/SpaceGrotesk-VariableFont_wght.woff2') format('woff2');
+}
+
+/* Brand colour remap. Recolours every utility/emphasis/subtle class. */
+:root {
+    --bs-primary: #865F31;
+    --bs-primary-rgb: 134, 95, 49;
+    --bs-primary-text-emphasis: #4d3720;
+    --bs-primary-bg-subtle: #f3ebe0;
+    --bs-primary-border-subtle: #d9c3a6;
+
+    --bs-link-color: #865F31;
+    --bs-link-color-rgb: 134, 95, 49;
+    --bs-link-hover-color: #6b4c27;
+    --bs-link-hover-color-rgb: 107, 76, 39;
+
+    /* Amber highlight token for our own use. */
+    --yaams-accent: #E8A53F;
+}
+
+/* Buttons: Bootstrap 5.3 bakes the blue into per-component vars. */
+.btn-primary {
+    --bs-btn-bg: #865F31;
+    --bs-btn-border-color: #865F31;
+    --bs-btn-hover-bg: #6f4f29;
+    --bs-btn-hover-border-color: #684a26;
+    --bs-btn-active-bg: #684a26;
+    --bs-btn-active-border-color: #614524;
+    --bs-btn-disabled-bg: #865F31;
+    --bs-btn-disabled-border-color: #865F31;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: #865F31;
+    --bs-btn-border-color: #865F31;
+    --bs-btn-hover-bg: #865F31;
+    --bs-btn-hover-border-color: #865F31;
+    --bs-btn-active-bg: #865F31;
+    --bs-btn-active-border-color: #865F31;
+}
+
+/* Focus ring. */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus,
+.btn-check:focus + .btn,
+.btn:focus {
+    border-color: #b99a72;
+    box-shadow: 0 0 0 0.25rem rgba(134, 95, 49, 0.15);
+}
+
+.form-check-input:checked {
+    background-color: #865F31;
+    border-color: #865F31;
+}
+
+/* Pagination. */
+.pagination {
+    --bs-pagination-color: #865F31;
+    --bs-pagination-hover-color: #6b4c27;
+    --bs-pagination-focus-color: #6b4c27;
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(134, 95, 49, 0.25);
+    --bs-pagination-active-bg: #865F31;
+    --bs-pagination-active-border-color: #865F31;
+}
+
+/* Pill nav active state. */
+.nav-pills {
+    --bs-nav-pills-link-active-bg: #865F31;
+}
+
+/* Active list-group item (e.g. settings / airline-settings sidebars). */
+.list-group {
+    --bs-list-group-active-bg: #865F31;
+    --bs-list-group-active-border-color: #865F31;
+}
+
+/*
+ * Status colours (warmed to harmonise with the brand palette).
+ * Each status is a pair: a solid TEXT colour and a light BG tint. Setting the
+ * main var + rgb recolours .text-*/.bg-*/.border-* utilities; the subtle/
+ * emphasis trio recolours .bg-*-subtle badges and .alert-*; .btn-* need
+ * explicit rules because Bootstrap bakes a literal hex into their component
+ * vars. Brand primary/accent stay brown/amber - these are feedback only.
+ */
+:root {
+    --bs-success: #3a8f42;
+    --bs-success-rgb: 58, 143, 66;
+    --bs-success-text-emphasis: #2c6e33;
+    --bs-success-bg-subtle: #d9f4d9;
+    --bs-success-border-subtle: #b3e2b6;
+
+    --bs-danger: #cc272e;
+    --bs-danger-rgb: 204, 39, 46;
+    --bs-danger-text-emphasis: #9e1f26;
+    --bs-danger-bg-subtle: #ffdfda;
+    --bs-danger-border-subtle: #f3b5b3;
+
+    --bs-warning: #ccac16;
+    --bs-warning-rgb: 204, 172, 22;
+    --bs-warning-text-emphasis: #8a7410;
+    --bs-warning-bg-subtle: #f9efc9;
+    --bs-warning-border-subtle: #ecdf9a;
+
+    --bs-info: #2c94b0;
+    --bs-info-rgb: 44, 148, 176;
+    --bs-info-text-emphasis: #227488;
+    --bs-info-bg-subtle: #d6f0f9;
+    --bs-info-border-subtle: #a9dcec;
+
+    --bs-secondary: #69737d;
+    --bs-secondary-rgb: 105, 115, 125;
+    --bs-secondary-text-emphasis: #515960;
+    --bs-secondary-bg-subtle: #e2e5e8;
+    --bs-secondary-border-subtle: #c7ccd1;
+
+    /* Form validation follows the status palette (Bootstrap bakes these too). */
+    --bs-form-valid-color: #3a8f42;
+    --bs-form-valid-border-color: #3a8f42;
+    --bs-form-invalid-color: #cc272e;
+    --bs-form-invalid-border-color: #cc272e;
+}
+
+.btn-success {
+    --bs-btn-bg: #3a8f42;
+    --bs-btn-border-color: #3a8f42;
+    --bs-btn-hover-bg: #327a39;
+    --bs-btn-hover-border-color: #2c6e33;
+    --bs-btn-active-bg: #2c6e33;
+    --bs-btn-active-border-color: #29632f;
+    --bs-btn-disabled-bg: #3a8f42;
+    --bs-btn-disabled-border-color: #3a8f42;
+}
+
+.btn-danger {
+    --bs-btn-bg: #cc272e;
+    --bs-btn-border-color: #cc272e;
+    --bs-btn-hover-bg: #b0222a;
+    --bs-btn-hover-border-color: #9e1f26;
+    --bs-btn-active-bg: #9e1f26;
+    --bs-btn-active-border-color: #941d23;
+    --bs-btn-disabled-bg: #cc272e;
+    --bs-btn-disabled-border-color: #cc272e;
+}
+
+.btn-warning {
+    --bs-btn-color: #20242e;
+    --bs-btn-bg: #ccac16;
+    --bs-btn-border-color: #ccac16;
+    --bs-btn-hover-color: #20242e;
+    --bs-btn-hover-bg: #b39813;
+    --bs-btn-hover-border-color: #a88f12;
+    --bs-btn-active-color: #20242e;
+    --bs-btn-active-bg: #a88f12;
+    --bs-btn-active-border-color: #9e8611;
+    --bs-btn-disabled-color: #20242e;
+    --bs-btn-disabled-bg: #ccac16;
+    --bs-btn-disabled-border-color: #ccac16;
+}
+
+.btn-info {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #2c94b0;
+    --bs-btn-border-color: #2c94b0;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #26809a;
+    --bs-btn-hover-border-color: #227488;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #227488;
+    --bs-btn-active-border-color: #206b7f;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #2c94b0;
+    --bs-btn-disabled-border-color: #2c94b0;
+}
+
+.btn-secondary {
+    --bs-btn-bg: #69737d;
+    --bs-btn-border-color: #69737d;
+    --bs-btn-hover-bg: #59626b;
+    --bs-btn-hover-border-color: #515960;
+    --bs-btn-active-bg: #515960;
+    --bs-btn-active-border-color: #4b535a;
+    --bs-btn-disabled-bg: #69737d;
+    --bs-btn-disabled-border-color: #69737d;
+}
+
+/* Brand wordmark uses the logo font (nav links keep the body font). */
+.navbar-brand span {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.01em;
+}

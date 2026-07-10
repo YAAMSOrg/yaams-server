@@ -227,7 +227,7 @@
                 <!-- Submit / Cancel Card -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4 d-grid gap-2">
-                        <button type="submit" class="btn btn-success py-2.5 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                        <button type="submit" class="btn btn-primary py-2.5 fw-semibold d-flex align-items-center justify-content-center gap-2">
                             <i class="bi bi-check-circle-fill"></i> Save Changes
                         </button>
                         <a href="{{ route('fleetmanager') }}" class="btn btn-outline-secondary py-2.5 text-center">
