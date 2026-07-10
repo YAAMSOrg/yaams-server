@@ -24,7 +24,7 @@ An decentralised open-source virtual airline management platform. Track PIREPs, 
 
 ## Production Deployment
 
-Production runs from a prebuilt multi-arch (amd64 + arm64) image. The image bundles PHP, the app, and [FrankenPHP](https://frankenphp.dev/) as the web server; you only need Docker and the single `docker-compose.prod.yml` file.
+Production runs from a prebuilt multi-arch (amd64 + arm64) image. The image bundles PHP, the app, and Apache as the web server; you only need Docker and the single `docker-compose.prod.yml` file.
 
 ### Deploying on a server
 1. Copy `docker-compose.prod.yml` and `.env.production.example` to the server.
@@ -47,7 +47,7 @@ your.domain {
     reverse_proxy 127.0.0.1:8000
 }
 ```
-Laravel is configured to trust the proxy's forwarded headers, so it generates `https://` URLs and logs real client IPs. (For a proxy-less host, set `SERVER_NAME=your.domain` on the `app` service to enable FrankenPHP's automatic HTTPS instead.)
+Laravel is configured to trust the proxy's forwarded headers, so it generates `https://` URLs and logs real client IPs. The container itself never handles TLS or certificates - that is entirely the reverse proxy's job.
 
 ### Upgrading
 ```bash

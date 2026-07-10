@@ -2,9 +2,9 @@
 #
 # Multi-stage:
 #   1. `vendor`  - installs PHP dependencies with Composer (no dev, optimized).
-#   2. runtime   - FrankenPHP (Caddy + PHP in one binary) serving public/ over
-#                  plain HTTP. TLS is expected to be terminated by an external
-#                  reverse proxy (see docker-compose.prod.yml / SERVER_NAME).
+#   2. runtime   - Apache + mod_php serving public/ over plain HTTP. TLS is
+#                  expected to be terminated by an external reverse proxy
+#                  (see docker-compose.prod.yml).
 #
 # Frontend assets (public/css, public/js, public/vendor) are committed to the
 # repo (Laravel Mix output), so no Node/npm build step is required here.
@@ -32,9 +32,9 @@ RUN --mount=type=cache,target=/tmp/composer-cache \
         --optimize-autoloader
 
 # ---------------------------------------------------------------------------
-# Stage 2 - Runtime (FrankenPHP)
+# Stage 2 - Runtime (Apache + mod_php)
 # ---------------------------------------------------------------------------
-FROM dunglas/frankenphp:1-php8.3-alpine
+FROM php:8.3-apache
 
 LABEL org.opencontainers.image.title="YAAMS" \
       org.opencontainers.image.description="Yet Another Airline Management System" \
@@ -42,13 +42,14 @@ LABEL org.opencontainers.image.title="YAAMS" \
 
 WORKDIR /app
 
-# PHP extensions required by the app (install-php-extensions ships in the image).
+# PHP extensions required by the app. install-php-extensions resolves and
+# cleans up the build-time apt dependencies (e.g. libicu-dev for intl).
 # Kept minimal - only what the app/dependencies actually use:
 #   pdo_mysql  DB driver (Laravel `mysql` connection uses PDO, not mysqli)
 #   pcntl      graceful signal handling for queue:work / schedule:work
 #   intl       ICU-backed formatting used transitively by framework/deps
 #   opcache    bytecode cache (perf)
-# Dropped vs. the old image: mysqli, gd, zip (no runtime users found).
+COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
         pdo_mysql \
         pcntl \
@@ -58,18 +59,31 @@ RUN install-php-extensions \
 # Production PHP settings (opcache on, no display_errors).
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
+# Apache: serve public/ on 8080 (an unprivileged runtime UID cannot bind :80),
+# with mod_rewrite for Laravel's public/.htaccess. The base image already
+# routes access/error logs to the container's stdout/stderr.
+COPY Docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+RUN a2enmod rewrite \
+    && sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/ports.conf \
+    && echo 'ServerName yaams' > /etc/apache2/conf-available/servername.conf \
+    && a2enconf servername
+
 # App source + resolved vendor from stage 1.
 COPY . /app
 COPY --from=vendor /app/vendor /app/vendor
 
-# Storage + cache must be writable by the runtime user. Own them by the root
-# group (GID 0) with group perms mirroring the owner, so the app works both when
-# it runs as root (the default) and as an arbitrary unprivileged UID under
-# rootless Podman/OpenShift - such a UID runs with GID 0 and can then write here
-# even on paths baked into the image (e.g. bootstrap/cache). See
+# Storage + cache must be writable by the runtime user, and Apache needs its
+# run/lock dirs (pid file) writable too. Own them by the root group (GID 0)
+# with group perms mirroring the owner, so the app works both when it runs as
+# root (the default) and as an arbitrary unprivileged UID under rootless
+# Podman/OpenShift - such a UID runs with GID 0 and can then write here even
+# on paths baked into the image (e.g. bootstrap/cache). See
 # docker-compose.prod.yml for the matching `user:` / `userns_mode:` settings.
-RUN chown -R www-data:0 /app/storage /app/bootstrap/cache \
-    && chmod -R g=u /app/storage /app/bootstrap/cache
+RUN mkdir -p /var/run/apache2 /var/lock/apache2 \
+    && chown -R www-data:0 /app/storage /app/bootstrap/cache \
+        /var/run/apache2 /var/lock/apache2 /var/log/apache2 \
+    && chmod -R g=u /app/storage /app/bootstrap/cache \
+        /var/run/apache2 /var/lock/apache2 /var/log/apache2
 
 # Bake the public storage symlink at build time. The entrypoint also runs
 # `storage:link`, but an unprivileged runtime UID can't write into public/, so
@@ -79,11 +93,7 @@ RUN ln -sfn ../storage/app/public /app/public/storage
 COPY Docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
-# Bare port -> FrankenPHP/Caddy serves plain HTTP only (no auto-HTTPS). Override
-# SERVER_NAME with a hostname to enable automatic HTTPS for a proxy-less setup.
-ENV SERVER_NAME=:80
-
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["entrypoint"]
-CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
+CMD ["apache2-foreground"]

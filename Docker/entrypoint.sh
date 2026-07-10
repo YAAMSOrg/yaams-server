@@ -3,7 +3,7 @@
 #
 # Runs the runtime-only preparation that needs the real environment (.env) -
 # so it happens on container start, not at image build time - then hands off to
-# the passed command (FrankenPHP by default; the worker/scheduler services pass
+# the passed command (Apache by default; the worker/scheduler services pass
 # their own artisan command).
 set -e
 
