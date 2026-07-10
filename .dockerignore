@@ -1,0 +1,44 @@
+# Keep the build context (and image) small. Only what the app needs at runtime
+# should reach `COPY . /app`; dependencies come from dedicated build stages.
+
+# Version control / CI
+.git
+.github
+.gitignore
+.gitattributes
+
+# Secrets & local env - MUST NOT be baked into a published image.
+# The container gets its config at runtime via `env_file` (see compose).
+.env
+.env.*
+!.env.production.example
+
+# Dependencies - installed in build stages, not copied from the host.
+vendor
+node_modules
+
+# Tests & dev-only tooling
+tests
+phpunit.xml
+.phpunit.result.cache
+.styleci.yml
+.editorconfig
+.claude
+
+# Dev-only container / infra files (the prod build needs Docker/entrypoint.sh,
+# which is copied explicitly, so Docker/ itself is not ignored).
+docker-compose*.yml
+Docker/docker-compose.yml
+flake.nix
+flake.lock
+
+# Editor / OS cruft
+.DS_Store
+*.swp
+
+# Runtime state the entrypoint regenerates on boot (keep the dirs via .gitignore)
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*.php

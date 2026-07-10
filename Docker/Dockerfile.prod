@@ -34,7 +34,7 @@ RUN --mount=type=cache,target=/tmp/composer-cache \
 # ---------------------------------------------------------------------------
 # Stage 2 - Runtime (FrankenPHP)
 # ---------------------------------------------------------------------------
-FROM dunglas/frankenphp:1-php8.3
+FROM dunglas/frankenphp:1-php8.3-alpine
 
 LABEL org.opencontainers.image.title="YAAMS" \
       org.opencontainers.image.description="Yet Another Airline Management System" \
@@ -43,12 +43,15 @@ LABEL org.opencontainers.image.title="YAAMS" \
 WORKDIR /app
 
 # PHP extensions required by the app (install-php-extensions ships in the image).
+# Kept minimal - only what the app/dependencies actually use:
+#   pdo_mysql  DB driver (Laravel `mysql` connection uses PDO, not mysqli)
+#   pcntl      graceful signal handling for queue:work / schedule:work
+#   intl       ICU-backed formatting used transitively by framework/deps
+#   opcache    bytecode cache (perf)
+# Dropped vs. the old image: mysqli, gd, zip (no runtime users found).
 RUN install-php-extensions \
         pdo_mysql \
-        mysqli \
         pcntl \
-        gd \
-        zip \
         intl \
         opcache
 
