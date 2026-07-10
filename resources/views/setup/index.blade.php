@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="text-center mb-4">
-    <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="YAAMS Logo" height="60" class="mb-3">
+    <img src="{{ asset('img/yaams-logo-icon.svg') }}" alt="YAAMS Logo" height="60" class="mb-3">
     <h1 class="h4 fw-bold mb-1">Welcome to YAAMS</h1>
     <p class="text-muted small">Complete the setup below to get started.</p>
 </div>

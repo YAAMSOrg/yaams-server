@@ -5,7 +5,7 @@
 <div class="card shadow-sm">
     <div class="card-body p-4">
         <div class="text-center mb-4">
-            <img src="{{ asset('img/yaams-temp-logo.png') }}" alt="YAAMS Logo" height="60" class="mb-3">
+            <img src="{{ asset('img/yaams-logo-icon.svg') }}" alt="YAAMS Logo" height="60" class="mb-3">
             <h1 class="h4 mb-3 fw-bold">Register as a new pilot</h1>
         </div>
 
