@@ -127,16 +127,16 @@
                     <div class="mb-4">
                         <label class="form-label d-block">Who can found new airlines?</label>
                         <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="allow_user_airline_creation" id="airline_creation_admin" value="0"
-                                   {{ old('allow_user_airline_creation', $settings['allow_user_airline_creation']) === '0' ? 'checked' : '' }}>
-                            <label class="btn btn-outline-secondary" for="airline_creation_admin">
-                                <i class="bi bi-person-lock me-1"></i> Admins only
-                            </label>
-
                             <input type="radio" class="btn-check" name="allow_user_airline_creation" id="airline_creation_all" value="1"
                                    {{ old('allow_user_airline_creation', $settings['allow_user_airline_creation']) === '1' ? 'checked' : '' }}>
                             <label class="btn btn-outline-secondary" for="airline_creation_all">
                                 <i class="bi bi-people me-1"></i> Any registered user
+                            </label>
+
+                            <input type="radio" class="btn-check" name="allow_user_airline_creation" id="airline_creation_admin" value="0"
+                                   {{ old('allow_user_airline_creation', $settings['allow_user_airline_creation']) === '0' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary" for="airline_creation_admin">
+                                <i class="bi bi-person-lock me-1"></i> Admins only
                             </label>
                         </div>
                         <div class="form-text">Admins can always create airlines regardless of this setting.</div>
