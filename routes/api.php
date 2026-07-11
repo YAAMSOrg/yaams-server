@@ -4,8 +4,7 @@ use App\Http\Controllers\Api\V1\AircraftAPIController;
 use App\Http\Controllers\Api\V1\AirlineAPIController;
 use App\Http\Controllers\Api\V1\FlightAPIController;
 use App\Http\Controllers\Api\V1\InfoController;
-use App\Http\Resources\V1\UserResource;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,9 +23,7 @@ Route::get('v1/info', [InfoController::class, 'index'])->name('api.v1.info');
 
 Route::group(['prefix' => 'v1', 'as' => 'api.v1.', 'middleware' => 'auth:sanctum'], function () {
     // "Who am I" - token sanity check for API clients.
-    Route::get('user', function (Request $request) {
-        return new UserResource($request->user()->load('airlines'));
-    })->name('user');
+    Route::get('user', [UserController::class, 'show'])->name('user');
 
     // Only the actions AirlineAPIController implements - update/destroy do not exist.
     Route::apiResource('airlines', AirlineAPIController::class)->only(['index', 'show', 'store']);

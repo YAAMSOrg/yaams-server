@@ -153,6 +153,14 @@ Accept/reject actions notify the pilot the same way — `Notification::send($fli
 
 All API responses go through Laravel API Resources at `app/Http/Resources/V1/`. Controllers return `FlightResource`, `FlightCollection`, etc. — never raw model data.
 
+### API Documentation (Scribe)
+
+The `/api/v1` REST API is documented with [Scribe](https://scribe.knuckles.wtf) (`knuckleswtf/scribe`, a dev dependency), served through the app at **`/docs`** (route name `scribe`, publicly accessible). An OpenAPI spec (`/docs.openapi`) and Postman collection (`/docs.postman`) are generated alongside. An "API Reference" link is in the footer of both the `app` and `landing` layouts (`route('scribe')`).
+
+- **Config** — `config/scribe.php`: `type => 'laravel'`, `routes.match.prefixes => ['api/*']` (only API routes are documented), bearer-token auth (`auth.default => true`, so every endpoint requires a Sanctum token except those marked `@unauthenticated` — currently only `GET /api/v1/info`). The live `ResponseCalls` strategy is removed so generation is deterministic and never touches the DB.
+- **Doc content lives in source** — example responses, request-body fields, groups and auth flags are Scribe docblock annotations (`@group`, `@authenticated`/`@unauthenticated`, `@urlParam`, `@queryParam`, `@bodyParam`, `@response`) on the `app/Http/Controllers/Api/V1/*` controllers. `@bodyParam` values mirror the matching `Store*Request` rules. Keep them in sync when the API changes. The `GET /api/v1/user` endpoint was extracted from an inline route closure into `UserController` so it could be annotated.
+- **Generation** — `docker exec yaams-dev-app php artisan scribe:generate`. The generated output (`resources/views/scribe/`, `public/vendor/scribe/`, `.scribe/`, `storage/app/scribe/`) is **gitignored** — run `scribe:generate` once in dev after a fresh clone and **on every deploy** (alongside `queue:restart`), or `/docs` 404s.
+
 ### Key Model Relationships
 
 - `Aircraft::used_by` — FK to `airlines.id` (not `airline_id`)

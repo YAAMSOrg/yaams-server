@@ -204,6 +204,7 @@
                 @if($supportEmail)
                     <a href="mailto:{{ $supportEmail }}" class="text-decoration-none text-secondary"><i class="bi bi-envelope"></i> Contact</a> |
                 @endif
+                <a href="{{ route('scribe') }}" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-journal-code"></i> API Reference</a> |
                 v{{ config('app.version') }} | <a href="https://www.github.com/YAAMSOrg/yaams-server/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-github"></i> GitHub</a>
             </small>
         </div>

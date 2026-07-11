@@ -8,6 +8,8 @@ services:
       - "yaams"
     ports:
       - 3306:3306
+    volumes:
+      - "yaams-dev-db:/var/lib/mysql"
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: true
       MYSQL_DATABASE: yaams
@@ -110,6 +112,9 @@ services:
     networks:
       - "yaams"
     restart: unless-stopped
+
+volumes:
+  yaams-dev-db:
 
 networks:
   yaams:

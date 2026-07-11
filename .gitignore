@@ -21,3 +21,10 @@ yarn-error.log
 .composer/
 .claude/
 .DS_Store
+
+# Scribe generated API docs - regenerated via `php artisan scribe:generate`
+# (doc content lives in config/scribe.php + controller annotations)
+/.scribe
+/public/vendor/scribe
+/resources/views/scribe
+/storage/app/scribe
