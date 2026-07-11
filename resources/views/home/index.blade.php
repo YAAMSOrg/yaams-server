@@ -183,7 +183,7 @@
 
 {{-- CTA Footer Band --}}
 @guest
-<div class="card border-0 mb-4 mt-auto" style="background: linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 100%); color: white; border-radius: 1rem;">
+<div class="card border-0 mb-4 mt-auto" style="background: linear-gradient(135deg, #20242E 0%, #574736 100%); color: white; border-radius: 1rem;">
     <div class="card-body py-4 px-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
         <div>
             <h5 class="fw-bold mb-1">Ready to join the virtual skies?</h5>
@@ -191,7 +191,7 @@
         </div>
         <div class="d-flex gap-2 flex-shrink-0">
             @if(\App\Models\Setting::get('allow_registration', '1') === '1')
-            <a href="{{ route('register') }}" class="btn btn-primary px-4">
+            <a href="{{ route('register') }}" class="btn btn-yaams-accent px-4">
                 <i class="bi bi-person-plus me-2"></i>Sign Up Free
             </a>
             @endif

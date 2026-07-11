@@ -62,6 +62,22 @@
     --bs-btn-active-border-color: #865F31;
 }
 
+/* Amber accent CTA (dark text for contrast, mirrors .btn-warning). */
+.btn-yaams-accent {
+    --bs-btn-color: #20242e;
+    --bs-btn-bg: #E8A53F;
+    --bs-btn-border-color: #E8A53F;
+    --bs-btn-hover-color: #20242e;
+    --bs-btn-hover-bg: #d6942f;
+    --bs-btn-hover-border-color: #c98a28;
+    --bs-btn-active-color: #20242e;
+    --bs-btn-active-bg: #c98a28;
+    --bs-btn-active-border-color: #bd8226;
+    --bs-btn-disabled-color: #20242e;
+    --bs-btn-disabled-bg: #E8A53F;
+    --bs-btn-disabled-border-color: #E8A53F;
+}
+
 /* Focus ring. */
 .form-control:focus,
 .form-select:focus,
