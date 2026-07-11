@@ -55,6 +55,8 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      docs:
+        condition: service_completed_successfully
     networks:
       - "yaams"
     restart: unless-stopped
@@ -74,6 +76,23 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - "yaams"
+    restart: "no"
+
+  # One-shot: generates the Scribe API docs (served at /docs) into the mounted
+  # repo before the app starts, so a fresh deploy never 404s the docs page. The
+  # generated output is gitignored and deterministic (no DB needed), so it is
+  # safe to re-run on every `up`.
+  docs:
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile
+    container_name: yaams-docs
+    working_dir: /app
+    volumes:
+      - ..:/app
+    command: php artisan scribe:generate
     networks:
       - "yaams"
     restart: "no"
