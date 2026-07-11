@@ -1,5 +1,5 @@
 @extends('layouts.setuplayout')
-@section('title', 'YAAMS Setup Wizard')
+@section('title', 'Setup Wizard')
 @section('content')
 
 <div class="text-center mb-4">

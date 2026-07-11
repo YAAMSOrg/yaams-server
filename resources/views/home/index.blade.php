@@ -1,5 +1,4 @@
 @extends('layouts.landing')
-@section('title', 'Welcome to YAAMS')
 
 @section('content')
 

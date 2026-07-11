@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: View Flight #' . $flight->id)
+@section('title', 'Flight #' . $flight->id)
 
 @section('content')
 <div class="row justify-content-center">

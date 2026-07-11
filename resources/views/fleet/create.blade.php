@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Add Aircraft')
+@section('title', 'Add Aircraft')
 @section('content')
 
 <div class="container py-4">

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'View Aircraft - ' . $aircraft->registration)
+@section('title', 'Aircraft ' . $aircraft->registration)
 @section('content')
 
 <div class="container py-4">

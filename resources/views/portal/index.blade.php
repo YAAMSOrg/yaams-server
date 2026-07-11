@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Airline Portal — YAAMS')
+@section('title', 'Airline Portal')
 
 @section('content')
 @php($emailVerified = auth()->user()->hasVerifiedEmail())

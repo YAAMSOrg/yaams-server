@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Flight list')
+@section('title', 'Flight List')
 
 @section('content')
 @php

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Review Flights')
+@section('title', 'Review Flights')
 @section('content')
 
     <div class="row mb-4 align-items-center">

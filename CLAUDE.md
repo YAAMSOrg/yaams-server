@@ -20,6 +20,15 @@ Seeder prints Sanctum API tokens for the three test users to stdout.
 
 ## Architecture
 
+### Page Titles
+
+Every web page uses the single title scheme `{Page Title} - {Instance Name}`:
+
+- All four layouts (`app`, `landing`, `loginlayout`, `setuplayout` in `resources/views/layouts/`) render the tag themselves: `<title>@hasSection('title')@yield('title') - {{ $instanceName }}@else{{ $instanceName }}@endif</title>`
+- Views declare only the bare page name, e.g. `@section('title', 'Fleet Overview')` - never hardcode the app name, "YAAMS", or a separator in a view
+- `$instanceName` is `View::share`d in `AppServiceProvider` (the `app_name` setting, falling back to `config('app.name')`), so the configured instance name appears in every title
+- The public landing page (`home/index.blade.php`) sets no title section on purpose - it shows just the instance name
+
 ### Authentication & Authorization
 
 Two auth systems coexist:

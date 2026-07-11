@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Activity Log')
+@section('title', 'Activity Log')
 
 @php
     $levelBadges = [

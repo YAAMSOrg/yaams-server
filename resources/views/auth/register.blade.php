@@ -1,5 +1,5 @@
 @extends('layouts.loginlayout')
-@section('title', 'Register as pilot')
+@section('title', 'Register')
 @section('content')
 
 <div class="card shadow-sm">

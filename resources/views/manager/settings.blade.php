@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Airline Management — YAAMS')
+@section('title', 'Airline Settings')
 
 @section('content')
 

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Instance Settings')
+@section('title', 'Instance Settings')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">

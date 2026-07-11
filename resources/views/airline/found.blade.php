@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Found a New Airline — YAAMS')
+@section('title', 'Found a New Airline')
 
 @section('content')
 <div class="row justify-content-center">

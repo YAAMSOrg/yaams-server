@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Fleet Overview')
+@section('title', 'Fleet Overview')
 
 @section('content')
 @php

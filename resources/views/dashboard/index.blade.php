@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'YAAMS: Pilot Dashboard')
+@section('title', 'Pilot Dashboard')
 
 @section('content')
 <div class="row g-4">
