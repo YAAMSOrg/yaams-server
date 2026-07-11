@@ -69,23 +69,23 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ auth()->check() ? route('dashboard') : route('home') }}"><i class="bi bi-house-door"></i> Home</a>
+                        <a class="nav-link {{ request()->routeIs('dashboard', 'home') ? 'active' : '' }}" href="{{ auth()->check() ? route('dashboard') : route('home') }}"><i class="bi bi-house-door"></i> Home</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFlights" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle {{ request()->routeIs('flightlist', 'flightadd', 'flightreviewindex') ? 'active' : '' }}" href="#" id="navbarDropdownFlights" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-journal-album"></i> Flights
                         </a>
                         <ul class="dropdown-menu shadow-sm border-0" aria-labelledby="navbarDropdownFlights">
-                            <li><a class="dropdown-item" href="{{ route('flightlist') }}">My PIREPs</a></li>
-                            <li><a class="dropdown-item" href="{{ route('flightadd') }}">File a PIREP</a></li>
+                            <li><a class="dropdown-item {{ request()->routeIs('flightlist') ? 'active' : '' }}" href="{{ route('flightlist') }}">My PIREPs</a></li>
+                            <li><a class="dropdown-item {{ request()->routeIs('flightadd') ? 'active' : '' }}" href="{{ route('flightadd') }}">File a PIREP</a></li>
                             @if(session('activeairline') && session('activeairline')->require_pirep_review && auth()->user()->canReviewFlightsFor(session('activeairline')))
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('flightreviewindex') }}">Review flights</a></li>
+                            <li><a class="dropdown-item {{ request()->routeIs('flightreviewindex') ? 'active' : '' }}" href="{{ route('flightreviewindex') }}">Review flights</a></li>
                             @endif
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('fleetmanager') }}"><i class="bi bi-airplane-fill"></i> Fleet</a>
+                        <a class="nav-link {{ request()->routeIs('fleetmanager') ? 'active' : '' }}" href="{{ route('fleetmanager') }}"><i class="bi bi-airplane-fill"></i> Fleet</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('crewactivity') ? 'active' : '' }}" href="{{ route('crewactivity') }}"><i class="bi bi-people-fill"></i> Crew Activity</a>
