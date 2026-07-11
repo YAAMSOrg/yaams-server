@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('airline_id');
             $table->foreign('airline_id')->references('id')->on('airlines');
             $table->foreignId('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }

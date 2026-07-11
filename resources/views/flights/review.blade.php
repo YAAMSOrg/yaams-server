@@ -93,7 +93,7 @@
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <i class="bi bi-person text-secondary"></i>
-                                    <span class="fw-medium text-dark">{{ $flight->pilot->name }}</span>
+                                    <span class="fw-medium text-dark">{{ $flight->pilot_name }}</span>
                                 </div>
                             </td>
                             <td class="text-end pe-4">

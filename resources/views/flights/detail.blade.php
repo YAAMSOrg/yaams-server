@@ -215,15 +215,15 @@
                                 <tbody>
                                     <tr>
                                         <td class="py-2 text-muted">Name</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot->name }}</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot_name }}</td>
                                     </tr>
                                     <tr>
                                         <td class="py-2 text-muted">Total flights</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot->logged_flights($flight->airline) }}</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot ? $flight->pilot->logged_flights($flight->airline) : '—' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="py-2 text-muted">Member since</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot->created_at->format('M j, Y') }}</td>
+                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot ? $flight->pilot->created_at->format('M j, Y') : '—' }}</td>
                                     </tr>
                                 </tbody>
                             </table>

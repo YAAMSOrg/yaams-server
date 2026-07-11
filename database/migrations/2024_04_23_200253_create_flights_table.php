@@ -32,8 +32,8 @@ class CreateFlightsTable extends Migration
             $table->text('route');
             $table->foreignId('online_network_id');
             $table->foreign('online_network_id')->references('id')->on('online_networks');
-            $table->foreignId('pilot_id');
-            $table->foreign('pilot_id')->references('id')->on('users');
+            $table->foreignId('pilot_id')->nullable();
+            $table->foreign('pilot_id')->references('id')->on('users')->nullOnDelete();
             $table->foreignId('status_id')->default(1);
             $table->foreign('status_id')->references('id')->on('flight_statuses');
             $table->text('remarks')->nullable();

@@ -163,7 +163,7 @@
                                         </div>
                                     </td>
                                     <td class="pe-4 fw-semibold text-dark">
-                                        {{ $flight->pilot->name }}
+                                        {{ $flight->pilot_name }}
                                     </td>
                                 </tr>
                                 @endforeach

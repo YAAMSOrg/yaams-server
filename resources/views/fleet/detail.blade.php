@@ -238,7 +238,7 @@
                                                 </a>
                                             </td>
                                             <td>
-                                                {{ $flight->pilot->name }}
+                                                {{ $flight->pilot_name }}
                                             </td>
                                             <td class="font-monospace">
                                                 <abbr title="{{ $flight->departure_airport->name }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->departure_icao }}</abbr>

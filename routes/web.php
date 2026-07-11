@@ -76,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');
     Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
     Route::get('/settings/danger', [SettingsController::class, 'danger'])->name('settings.danger');
+    Route::delete('/settings', [SettingsController::class, 'destroy'])->name('settings.destroy');
 
     // Dashboard — no airline middleware; controller handles the redirect to /portal itself
     Route::get("/user/dashboard", [DashboardController::class, "index"])->name("dashboard");

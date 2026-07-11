@@ -69,10 +69,10 @@
                         @php $isMine = $flight->pilot_id === auth()->id(); @endphp
                         <div class="card border-0 shadow-sm mb-3 {{ $isMine ? 'border-start border-primary border-4' : '' }}">
                             <div class="card-body d-flex align-items-center gap-3">
-                                <x-pilot-avatar :name="$flight->pilot?->name ?? 'Unknown'" :size="48" />
+                                <x-pilot-avatar :name="$flight->pilot_name" :size="48" />
                                 <div class="flex-grow-1" style="min-width: 0;">
                                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                                        <span class="fw-semibold">{{ $flight->pilot?->name ?? 'Unknown pilot' }}</span>
+                                        <span class="fw-semibold">{{ $flight->pilot_name }}</span>
                                         @if($isMine)
                                             <span class="badge bg-primary-subtle text-primary">You</span>
                                         @endif
@@ -130,8 +130,8 @@
                             @php $topIsMine = $entry->pilot_id === auth()->id(); @endphp
                             <div class="d-flex align-items-center gap-3 py-2 rounded {{ !$loop->last ? 'border-bottom' : '' }} {{ $topIsMine ? 'bg-primary-subtle px-2' : '' }}">
                                 <span class="fw-bold text-secondary text-center" style="width: 1.5rem;">{{ $index + 1 }}</span>
-                                <x-pilot-avatar :name="$entry->pilot?->name ?? 'Unknown'" :size="36" />
-                                <div class="flex-grow-1 fw-semibold text-truncate" style="min-width: 0;">{{ $entry->pilot?->name ?? 'Unknown' }}</div>
+                                <x-pilot-avatar :name="$entry->pilot?->name ?? 'Deleted pilot'" :size="36" />
+                                <div class="flex-grow-1 fw-semibold text-truncate" style="min-width: 0;">{{ $entry->pilot?->name ?? 'Deleted pilot' }}</div>
                                 <span class="badge bg-primary rounded-pill">{{ $entry->flights_count }}</span>
                             </div>
                         @empty

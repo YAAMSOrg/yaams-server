@@ -31,7 +31,7 @@ class FlightResource extends JsonResource
             'burnedFuel' => $this->burned_fuel,
             'route' => $this->route,
             'onlineNetwork' => $this->online_network_id, // Could be a resource if expanded
-            'pilot' => new UserResource($this->whenLoaded('pilot')),
+            'pilot' => $this->pilot ? new UserResource($this->whenLoaded('pilot')) : null,
             'status' => [
                 'id' => $this->status_id,
                 'name' => $this->status->name ?? 'Unknown',

@@ -57,6 +57,10 @@ class Flight extends Model
         return $this->belongsTo(User::class, 'pilot_id');
     }
 
+    public function getPilotNameAttribute(): string {
+        return $this->pilot?->name ?? 'Deleted pilot';
+    }
+
     public function departure_airport() {
         return $this->belongsTo(Airport::class, 'departure_icao');
     }
