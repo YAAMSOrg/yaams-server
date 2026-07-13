@@ -53,12 +53,18 @@ class AppServiceProvider extends ServiceProvider
         // Bootstrap 5 markup for framework-rendered pagination links.
         Paginator::useBootstrapFive();
 
-        // Expose the instance name to every view (brand + page title). Guarded
-        // with hasTable so `artisan migrate` / fresh installs (before the
-        // settings table exists) don't blow up.
-        View::share('instanceName', Schema::hasTable('settings')
-            ? Setting::get('app_name', config('app.name'))
-            : config('app.name'));
+        // Expose the instance name to every view (brand + page title). Wrapped
+        // in rescue() so boot never depends on the database: fresh installs
+        // (before the settings table exists) and DB-less bootstrapping such as
+        // `artisan package:discover` during CI both fall back to the configured
+        // name instead of blowing up.
+        View::share('instanceName', rescue(
+            fn () => Schema::hasTable('settings')
+                ? Setting::get('app_name', config('app.name'))
+                : config('app.name'),
+            config('app.name'),
+            report: false
+        ));
 
         // Activity-log verbosity gate. Every activity carries a `level` in its
         // properties (default `debug` for automatic model logs); on save we
