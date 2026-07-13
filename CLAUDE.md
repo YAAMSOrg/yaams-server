@@ -18,6 +18,12 @@ docker exec yaams-dev-app php artisan migrate --seed
 ```
 Seeder prints Sanctum API tokens for the three test users to stdout.
 
+### Testing
+```bash
+docker exec yaams-dev-app php artisan test
+```
+PHPUnit suite under `tests/` (Unit + Feature, incl. `tests/Feature/Api`). Tests run against SQLite `:memory:` (configured in `phpunit.xml`), so no database service is needed. Feature tests `use RefreshDatabase, SeedsDomain` (`tests/Concerns/SeedsDomain.php`) — the trait seeds the reference data `RefreshDatabase` does not (flight statuses, online networks, Spatie roles, a few airports) and provides the `memberOf($airline, $role)` builder. Model factories live in `database/factories/`. The suite focuses on the documented tricky rules (location continuity, PIREP review toggle, review authorization, aircraft lifecycle, invite redemption) and web-↔-API parity. CI runs it on every PR/push to `main` via `.github/workflows/tests.yml`.
+
 ## Architecture
 
 ### Page Titles
