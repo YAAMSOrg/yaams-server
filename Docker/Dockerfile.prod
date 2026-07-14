@@ -33,6 +33,47 @@ RUN --mount=type=cache,target=/tmp/composer-cache \
         --optimize-autoloader
 
 # ---------------------------------------------------------------------------
+# Stage 1b - Composer dependencies WITH dev packages (only for doc generation)
+# ---------------------------------------------------------------------------
+# Scribe (knuckleswtf/scribe) is a dev dependency, so it is deliberately absent
+# from the runtime `vendor` stage above. This throwaway stage installs it just
+# so the `docs` stage below can run `artisan scribe:generate`. `--ignore-platform-reqs`
+# because the composer image lacks the app's PHP extensions - we only need the files.
+FROM composer:2 AS vendor-dev
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN --mount=type=cache,target=/tmp/composer-cache \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache \
+    composer install \
+        --no-scripts \
+        --no-interaction \
+        --prefer-dist \
+        --ignore-platform-reqs
+
+# ---------------------------------------------------------------------------
+# Stage 1c - Generate the static API docs (public/docs) with Scribe
+# ---------------------------------------------------------------------------
+# Runs `scribe:generate` (type=static) to emit public/docs/, copied into the
+# runtime image below and served by nginx. App boot here is DB-less: the live
+# ResponseCalls strategy is removed (config/scribe.php) and AppServiceProvider's
+# only boot-time DB access is wrapped in rescue(), so no database is needed.
+FROM php:8.3-cli-alpine AS docs
+COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions pdo_mysql intl
+WORKDIR /app
+COPY --from=vendor-dev /app/vendor ./vendor
+COPY . .
+# Throwaway env for this ephemeral build stage only (never shipped) - set inline on
+# the RUN so it doesn't linger as an image ENV (and doesn't trip secret-in-ENV linters).
+RUN APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
+    APP_ENV=production \
+    CACHE_STORE=array \
+    SESSION_DRIVER=array \
+    QUEUE_CONNECTION=sync \
+    MAIL_MAILER=log \
+    php artisan scribe:generate
+
+# ---------------------------------------------------------------------------
 # Stage 2 - Runtime (nginx + PHP-FPM on Alpine)
 # ---------------------------------------------------------------------------
 FROM php:8.3-fpm-alpine
@@ -73,6 +114,10 @@ COPY Docker/supervisord.conf /etc/supervisord.conf
 # App source + resolved vendor from stage 1.
 COPY . /app
 COPY --from=vendor /app/vendor /app/vendor
+
+# Static API docs (Scribe), pre-generated in the `docs` stage; served by nginx.
+# The runtime image itself has no Scribe (dev-only dependency).
+COPY --from=docs /app/public/docs /app/public/docs
 
 # Storage + cache must be writable by the runtime user, and nginx needs its
 # lib dir writable too. Own them by the root group (GID 0) with group perms

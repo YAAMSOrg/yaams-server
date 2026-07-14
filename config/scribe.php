@@ -9,6 +9,16 @@ use function Knuckles\Scribe\Config\removeStrategies;
 
 // Only the most common configs are shown. See the https://scribe.knuckles.wtf/laravel/reference/config for all.
 
+// Scribe is a dev-only dependency, absent from the production runtime image. The API
+// docs are pre-generated as static HTML at build time (see Docker/Dockerfile.prod) and
+// served directly by nginx, so the app never needs this config at runtime. Return an
+// empty config when Scribe is not installed so config:cache (php artisan optimize, run
+// on every container start) doesn't fatal on the missing Knuckles\Scribe\* classes.
+// The `use` imports above never autoload, so they are safe even when the classes are gone.
+if (! class_exists(AuthIn::class)) {
+    return [];
+}
+
 return [
     // The HTML <title> for the generated documentation.
     'title' => config('app.name').' API Documentation',
@@ -57,7 +67,7 @@ return [
     // - "static" will generate a static HTMl page in the /public/docs folder,
     // - "laravel" will generate the documentation as a Blade view, so you can add routing and authentication.
     // - "external_static" and "external_laravel" do the same as above, but pass the OpenAPI spec as a URL to an external UI template
-    'type' => 'laravel',
+    'type' => 'static',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
     'theme' => 'default',

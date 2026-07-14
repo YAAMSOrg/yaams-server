@@ -48,7 +48,7 @@
     <footer class="bg-white border-top mt-auto py-4">
         <div class="container d-flex justify-content-between align-items-center text-muted">
             <small>&copy; {{ date('Y') }} YAAMS Virtual Airline Management</small>
-            <small><a href="{{ route('scribe') }}" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-journal-code"></i> API Reference</a> | v{{ config('app.version') }} | <a href="https://www.github.com/YAAMSOrg/yaams-server/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-github"></i> GitHub</a></small>
+            <small><a href="{{ url('/docs') }}" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-journal-code"></i> API Reference</a> | v{{ config('app.version') }} | <a href="https://www.github.com/YAAMSOrg/yaams-server/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-github"></i> GitHub</a></small>
         </div>
     </footer>
 

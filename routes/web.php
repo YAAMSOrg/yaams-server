@@ -25,6 +25,11 @@ Route::post('/setup', [SetupController::class, 'store'])->name('setup.store');
 // Global Welcome / Guest landing page
 Route::get("/", [HomeController::class, "index"])->name("home");
 
+// Static Scribe API docs live at public/docs/index.html. In production nginx serves
+// /docs directly (see Docker/nginx.conf); this redirect only fires under the dev
+// `php artisan serve`, whose built-in server won't auto-serve a directory index.
+Route::redirect('/docs', '/docs/index.html');
+
 Route::middleware(['auth'])->group(function () {
 
     // -------------------------------------------------------------------------

@@ -24,8 +24,8 @@ yarn-error.log
 .DS_Store
 
 # Scribe generated API docs - regenerated via `php artisan scribe:generate`
-# (doc content lives in config/scribe.php + controller annotations)
+# (doc content lives in config/scribe.php + controller annotations). Output is
+# static HTML built into the prod image (Docker/Dockerfile.prod `docs` stage).
 /.scribe
-/public/vendor/scribe
-/resources/views/scribe
+/public/docs
 /storage/app/scribe
