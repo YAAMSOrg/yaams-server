@@ -7,6 +7,7 @@ use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Actions\AttemptToAuthenticate;
 use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
+use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 use Laravel\Fortify\Contracts\UpdatesUserPasswords;
@@ -15,7 +16,6 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
-use App\Actions\Fortify\SetActiveAirline;
 use App\Models\Setting;
 use App\Support\ActivityLevel;
 use Spatie\Activitylog\Models\Activity;
@@ -124,13 +124,21 @@ class AppServiceProvider extends ServiceProvider
             return view('auth.reset-password', ['request' => $request]);
         });
 
+        // The two-factor challenge screen shown between password entry and the
+        // second-factor code (mirrors the login page styling).
+        Fortify::twoFactorChallengeView(fn () => view('auth.two-factor-challenge'));
+
         // Die Login-Pipeline von Fortify anpassen:
+        // RedirectIfTwoFactorAuthenticatable diverts users with 2FA enabled to
+        // the challenge screen before the password is accepted. The active
+        // airline is set from the Login event (AuthEventSubscriber) so it runs
+        // for both the normal and the two-factor login paths.
         Fortify::authenticateThrough(function () {
             return array_filter([
                 config('fortify.limiters.login') ? null : EnsureLoginIsNotThrottled::class,
+                RedirectIfTwoFactorAuthenticatable::class,
                 AttemptToAuthenticate::class,
                 PrepareAuthenticatedSession::class,
-                SetActiveAirline::class, // <- Hier klinken wir uns ein, sobald die Session bereit ist!
             ]);
         });
 
