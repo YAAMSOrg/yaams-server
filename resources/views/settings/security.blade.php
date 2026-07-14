@@ -85,6 +85,120 @@
             </div>
         </div>
 
+        {{-- Two-factor authentication --}}
+        @php($tfaUser = auth()->user())
+        <div class="card mt-4">
+            <div class="card-body p-4">
+                <h6 class="fw-semibold mb-3"><i class="bi bi-shield-lock me-2 text-primary"></i> Two-factor authentication</h6>
+                <p class="text-muted">
+                    Add a second step to your login using an authenticator app
+                    (e.g. Google Authenticator, 1Password, Authy). When enabled,
+                    you'll enter a time-based code after your password.
+                </p>
+
+                @if (session('status') === 'two-factor-authentication-confirmed')
+                    <div class="alert alert-success d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i> Two-factor authentication is now enabled.
+                    </div>
+                @elseif (session('status') === 'two-factor-authentication-disabled')
+                    <div class="alert alert-success d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i> Two-factor authentication has been disabled.
+                    </div>
+                @elseif (session('status') === 'recovery-codes-generated')
+                    <div class="alert alert-success d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i> New recovery codes have been generated.
+                    </div>
+                @endif
+
+                @error('code')
+                    <div class="alert alert-danger">{{ $message }}</div>
+                @enderror
+
+                @if (! $tfaUser->two_factor_secret)
+                    {{-- State: disabled --}}
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge text-bg-secondary"><i class="bi bi-shield-slash me-1"></i> Disabled</span>
+                    </div>
+                    <form action="{{ route('two-factor.enable') }}" method="post" class="mt-3">
+                        @csrf
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-shield-plus me-2"></i> Enable two-factor authentication
+                        </button>
+                    </form>
+                @elseif (is_null($tfaUser->two_factor_confirmed_at))
+                    {{-- State: pending confirmation - show QR + confirm form --}}
+                    <div class="alert alert-info">
+                        Scan this QR code with your authenticator app, then enter the generated
+                        code below to finish enabling two-factor authentication.
+                    </div>
+                    <div class="mb-3">
+                        {!! $tfaUser->twoFactorQrCodeSvg() !!}
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Can't scan? Enter this setup key manually:
+                        <code>{{ decrypt($tfaUser->two_factor_secret) }}</code>
+                    </p>
+                    <form action="{{ route('two-factor.confirm') }}" method="post" class="mb-3">
+                        @csrf
+                        <label for="code" class="form-label">Authenticator code</label>
+                        <div class="input-group" style="max-width: 320px;">
+                            <span class="input-group-text"><i class="bi bi-shield-lock text-secondary"></i></span>
+                            <input type="text"
+                                   id="code"
+                                   name="code"
+                                   class="form-control @error('code') is-invalid @enderror"
+                                   inputmode="numeric"
+                                   autocomplete="one-time-code"
+                                   placeholder="123456"
+                                   required>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-check2-circle me-2"></i> Confirm
+                            </button>
+                        </div>
+                    </form>
+                    <form action="{{ route('two-factor.disable') }}" method="post"
+                          onsubmit="return confirm('Cancel two-factor setup?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">Cancel setup</button>
+                    </form>
+                @else
+                    {{-- State: enabled --}}
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge text-bg-success"><i class="bi bi-shield-check me-1"></i> Enabled</span>
+                    </div>
+
+                    <h6 class="fw-semibold mb-2">Recovery codes</h6>
+                    <p class="text-muted small">
+                        Store these in a safe place. Each code can be used once to sign in
+                        if you lose access to your authenticator app.
+                    </p>
+                    <div class="bg-body-secondary rounded p-3 mb-3 font-monospace small">
+                        @foreach ($tfaUser->recoveryCodes() as $recoveryCode)
+                            <div>{{ $recoveryCode }}</div>
+                        @endforeach
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <form action="{{ route('two-factor.regenerate-recovery-codes') }}" method="post">
+                            @csrf
+                            <button class="btn btn-outline-secondary btn-sm" type="submit">
+                                <i class="bi bi-arrow-repeat me-1"></i> Regenerate recovery codes
+                            </button>
+                        </form>
+                        <form action="{{ route('two-factor.disable') }}" method="post"
+                              onsubmit="return confirm('Disable two-factor authentication? Your account will only be protected by your password.')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-outline-danger btn-sm" type="submit">
+                                <i class="bi bi-shield-x me-1"></i> Disable
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            </div>
+        </div>
+
         {{-- API tokens --}}
         <div class="card mt-4">
             <div class="card-body p-4">
