@@ -5,7 +5,7 @@
 @php
     $activeAirline = auth()->check() ? session('activeairline') : null;
 @endphp
-<header class="navbar navbar-expand-lg navbar-dark bg-dark">
+<header class="navbar navbar-expand-lg navbar-dark yaams-navbar sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ auth()->check() ? route('dashboard') : route('home') }}">
             <img src="{{ asset('img/yaams-logo-icon.svg') }}" alt="{{ $instanceName }} Logo" height="32">
@@ -85,7 +85,7 @@
                         <a class="nav-link btn btn-outline-light btn-sm px-3" href="{{ route('login') }}">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-primary btn-sm px-3 text-white" href="{{ route('register') }}">Sign Up</a>
+                        <a class="nav-link btn btn-yaams-accent btn-sm px-3" href="{{ route('register') }}">Sign Up</a>
                     </li>
                 @endguest
 
@@ -99,7 +99,7 @@
                     @if($userAirlines->count() > 0)
                         <li class="nav-item dropdown me-2 border-end border-secondary pe-3 border-opacity-25">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="airlineDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-2 font-monospace">{{ $activeAirline ? $activeAirline->icao_callsign : 'N/A' }}</span>
+                                <span class="badge yaams-airline-chip me-2 font-monospace">{{ $activeAirline ? $activeAirline->icao_callsign : 'N/A' }}</span>
                                 <span class="d-none d-md-inline small fw-semibold text-white-50">{{ $activeAirline ? $activeAirline->name : 'Select Airline' }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="airlineDropdown">

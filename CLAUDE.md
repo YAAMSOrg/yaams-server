@@ -35,15 +35,6 @@ Every web page uses the single title scheme `{Page Title} - {Instance Name}`:
 - `$instanceName` is `View::share`d in `AppServiceProvider` (the `app_name` setting, falling back to `config('app.name')`), so the configured instance name appears in every title
 - The public landing page (`home/index.blade.php`) sets no title section on purpose - it shows just the instance name
 
-### Main Navbar
-
-The site navbar lives in the partial `resources/views/layouts/_navbar.blade.php`, `@include`d by the `app` layout (the only layout with a nav). Structure: `Home | Flights | Fleet | Community | Management` on the left, airline switcher + notification bell + user dropdown on the right.
-
-- The airline-scoped groups (Flights / Fleet / Community / Management) render only when `session('activeairline')` is set - guests and members without an airline see just Home
-- **Management** is shown only to users who can review flights for the active airline (and review is enabled) or are its per-airline Manager; it gathers Review flights, Operations, Invite codes and Announcements
-- "Add aircraft" under Fleet is gated with `@can('add aircraft')`, mirroring the route middleware
-- Active-state highlighting uses `request()->routeIs(...)` per item; parent dropdowns list all their child route names
-
 ### Authentication & Authorization
 
 Two auth systems coexist:

@@ -20,9 +20,6 @@
             background-color: #f4f6f9; /* Soft off-white for contrast against white cards */
             color: #333;
         }
-        .navbar {
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
         .card {
             border: none;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
