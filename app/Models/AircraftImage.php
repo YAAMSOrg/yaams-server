@@ -15,11 +15,19 @@ class AircraftImage extends Model
         'path',
         'is_primary',
         'uploaded_by',
+        'status',
+        'approved_at',
+        'approved_by',
     ];
 
     protected $casts = [
         'is_primary' => 'boolean',
+        'approved_at' => 'datetime',
     ];
+
+    // Moderation states stored in the `status` column.
+    public const STATUS_PENDING = 'pending';    // awaiting manager review, hidden from the gallery
+    public const STATUS_APPROVED = 'approved';  // visible to all airline members
 
     public function aircraft()
     {
@@ -29,6 +37,31 @@ class AircraftImage extends Model
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === self::STATUS_APPROVED;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
     }
 
     /**

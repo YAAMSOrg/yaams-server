@@ -1,29 +1,33 @@
 {{--
-    Aircraft screenshot gallery.
+    Aircraft screenshot gallery with community uploads + manager moderation.
     Expects:
-      $aircraft  - the Aircraft model (with `images` loaded)
-      $canManage - bool, whether the current user may upload/delete/set-primary
+      $aircraft     - Aircraft model (with `approvedImages` and `pendingImages` loaded)
+      $canModerate  - bool, Manager of the owning airline (approve / delete any / set main)
+      $canUpload    - bool, any member of the owning airline (contribute a screenshot)
 
-    Thumbnails open in a self-contained lightbox overlay (see the @once block
-    at the bottom) with keyboard + prev/next navigation - no new tab, no
-    external dependencies.
+    Approved shots render in a lightbox (see the @once block at the bottom).
+    Pending shots appear in a review queue that only Managers, or the uploader,
+    can see.
 --}}
-@php($images = $aircraft->images)
+@php($userId = auth()->id())
+@php($approved = $aircraft->approvedImages)
+@php($pending = $canModerate ? $aircraft->pendingImages : $aircraft->pendingImages->where('uploaded_by', $userId))
 <div class="card border-0 shadow-sm mb-4 aircraft-gallery">
     <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
         <i class="bi bi-images text-muted me-2"></i> Aircraft Gallery
-        <span class="badge bg-secondary ms-2 fs-7">{{ $images->count() }}</span>
+        <span class="badge bg-secondary ms-2 fs-7">{{ $approved->count() }}</span>
     </div>
     <div class="card-body">
-        @if($images->isEmpty())
+        {{-- Approved gallery --}}
+        @if($approved->isEmpty())
             <div class="text-center text-muted py-4">
                 <i class="bi bi-image fs-1 text-secondary opacity-50 d-block mb-2"></i>
                 No screenshots yet.
-                @if($canManage) Upload the first one below. @endif
+                @if($canUpload) Upload the first one below. @endif
             </div>
         @else
-            <div class="row g-3">
-                @foreach($images as $img)
+            <div class="row g-3 gallery-group">
+                @foreach($approved as $img)
                     <div class="col-6 col-md-4">
                         <div class="position-relative gallery-tile">
                             <button type="button"
@@ -43,9 +47,9 @@
                                     <i class="bi bi-star-fill me-1"></i> Main
                                 </span>
                             @endif
-                            @if($canManage)
+                            @if($canModerate || $img->uploaded_by === $userId)
                                 <div class="d-flex gap-1 mt-2">
-                                    @unless($img->is_primary)
+                                    @if($canModerate && !$img->is_primary)
                                         <form action="{{ route('aircraft.images.primary', [$aircraft->id, $img->id]) }}" method="post" class="flex-grow-1">
                                             @csrf
                                             @method('PATCH')
@@ -53,9 +57,9 @@
                                                 <i class="bi bi-star"></i> Main
                                             </button>
                                         </form>
-                                    @endunless
+                                    @endif
                                     <form action="{{ route('aircraft.images.destroy', [$aircraft->id, $img->id]) }}" method="post"
-                                          onsubmit="return confirm('Delete this screenshot?');" class="{{ $img->is_primary ? 'flex-grow-1' : '' }}">
+                                          onsubmit="return confirm('Delete this screenshot?');" class="flex-grow-1">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="Delete">
@@ -70,7 +74,67 @@
             </div>
         @endif
 
-        @if($canManage)
+        {{-- Pending review queue --}}
+        @if($pending->isNotEmpty())
+            <div class="mt-4 pt-3 border-top">
+                <h6 class="fw-semibold text-secondary mb-3">
+                    <i class="bi bi-hourglass-split me-1"></i>
+                    {{ $canModerate ? 'Awaiting review' : 'Your uploads awaiting review' }}
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-1">{{ $pending->count() }}</span>
+                </h6>
+                <div class="row g-3 gallery-group">
+                    @foreach($pending as $img)
+                        <div class="col-6 col-md-4">
+                            <div class="position-relative gallery-tile">
+                                <button type="button"
+                                        class="gallery-thumb is-pending"
+                                        data-gallery-full="{{ route('aircraft.images.show', [$aircraft->id, $img->id]) }}"
+                                        data-gallery-caption="{{ $aircraft->registration }} · pending review"
+                                        aria-label="Open pending screenshot of {{ $aircraft->registration }}">
+                                    <img src="{{ route('aircraft.images.show', [$aircraft->id, $img->id]) }}"
+                                         alt="Pending screenshot of {{ $aircraft->registration }}"
+                                         loading="lazy">
+                                    <span class="gallery-thumb-overlay">
+                                        <i class="bi bi-arrows-fullscreen"></i>
+                                    </span>
+                                </button>
+                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 shadow-sm">
+                                    <i class="bi bi-hourglass me-1"></i> Pending
+                                </span>
+                                @if($canModerate)
+                                    <div class="small text-muted mt-2 text-truncate">by {{ $img->uploader?->name ?? 'Unknown' }}</div>
+                                @endif
+                                <div class="d-flex gap-1 mt-1">
+                                    @if($canModerate)
+                                        <form action="{{ route('aircraft.images.approve', [$aircraft->id, $img->id]) }}" method="post" class="flex-grow-1">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-success w-100" title="Approve">
+                                                <i class="bi bi-check-lg"></i> Approve
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if($canModerate || $img->uploaded_by === $userId)
+                                        <form action="{{ route('aircraft.images.destroy', [$aircraft->id, $img->id]) }}" method="post"
+                                              onsubmit="return confirm('{{ $canModerate ? 'Reject and delete this screenshot?' : 'Delete this screenshot?' }}');"
+                                              class="flex-grow-1">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="{{ $canModerate ? 'Reject' : 'Delete' }}">
+                                                <i class="bi bi-x-lg"></i> {{ $canModerate ? 'Reject' : 'Delete' }}
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- Upload form (any airline member) --}}
+        @if($canUpload)
             <form action="{{ route('aircraft.images.store', $aircraft->id) }}" method="post" enctype="multipart/form-data"
                   class="mt-4 pt-3 border-top">
                 @csrf
@@ -87,6 +151,7 @@
                 @enderror
                 <div class="form-text">
                     JPEG, PNG or WebP. Images are re-encoded to WebP and stripped of metadata on upload.
+                    @unless($canModerate) Your upload is reviewed by a manager before it appears in the gallery. @endunless
                 </div>
             </form>
         @endif
@@ -108,6 +173,7 @@
         background: #0d1117;
         box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
     }
+    .aircraft-gallery .gallery-thumb.is-pending { opacity: .85; }
     .aircraft-gallery .gallery-thumb img {
         display: block;
         width: 100%;
@@ -218,7 +284,7 @@
 
 <script>
 (function () {
-    // Build the lightbox chrome once and reuse it for every gallery on the page.
+    // Build the lightbox chrome once and reuse it for every gallery group.
     const lb = document.createElement('div');
     lb.id = 'gallery-lightbox';
     lb.innerHTML =
@@ -275,12 +341,13 @@
         render();
     }
 
-    // Delegate clicks so it also covers galleries added after load.
+    // Delegate clicks; each lightbox set is scoped to its own .gallery-group so
+    // approved and pending shots don't mix in the prev/next navigation.
     document.addEventListener('click', function (e) {
         const thumb = e.target.closest('.gallery-thumb');
         if (!thumb) return;
-        const gallery = thumb.closest('.aircraft-gallery');
-        const thumbs = Array.from(gallery.querySelectorAll('.gallery-thumb'));
+        const group = thumb.closest('.gallery-group');
+        const thumbs = Array.from(group.querySelectorAll('.gallery-thumb'));
         const list = thumbs.map(function (t) {
             return { src: t.dataset.galleryFull, caption: t.dataset.galleryCaption || '' };
         });

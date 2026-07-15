@@ -145,6 +145,9 @@ Route::middleware(['auth'])->group(function () {
             ->scopeBindings();
         Route::post("/airline/fleetmanager/view/{aircraft}/images", [AircraftImageController::class, "store"])
             ->name("aircraft.images.store");
+        Route::patch("/airline/fleetmanager/view/{aircraft}/images/{image}/approve", [AircraftImageController::class, "approve"])
+            ->name("aircraft.images.approve")
+            ->scopeBindings();
         Route::patch("/airline/fleetmanager/view/{aircraft}/images/{image}/primary", [AircraftImageController::class, "setPrimary"])
             ->name("aircraft.images.primary")
             ->scopeBindings();

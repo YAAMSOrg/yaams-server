@@ -262,9 +262,12 @@
 
             @include('fleet._gallery', [
                 'aircraft' => $aircraft,
-                'canManage' => session('activeairline')
+                'canModerate' => session('activeairline')
                     && auth()->user()->isManagerOf(session('activeairline'))
                     && !$aircraft->isRetired(),
+                // Any member viewing this page may contribute a screenshot,
+                // unless the airframe is retired.
+                'canUpload' => !$aircraft->isRetired(),
             ])
         </div>
 

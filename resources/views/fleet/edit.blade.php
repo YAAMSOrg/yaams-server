@@ -240,7 +240,7 @@
     </form>
 
     <!-- Screenshot gallery -->
-    @include('fleet._gallery', ['aircraft' => $aircraft, 'canManage' => true])
+    @include('fleet._gallery', ['aircraft' => $aircraft, 'canModerate' => true, 'canUpload' => true])
 
     <!-- Danger Zone: permanent, irreversible retirement -->
     <div class="card border-danger shadow-sm mt-2">
