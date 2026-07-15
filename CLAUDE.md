@@ -35,6 +35,15 @@ Every web page uses the single title scheme `{Page Title} - {Instance Name}`:
 - `$instanceName` is `View::share`d in `AppServiceProvider` (the `app_name` setting, falling back to `config('app.name')`), so the configured instance name appears in every title
 - The public landing page (`home/index.blade.php`) sets no title section on purpose - it shows just the instance name
 
+### Main Navbar
+
+The site navbar lives in the partial `resources/views/layouts/_navbar.blade.php`, `@include`d by the `app` layout (the only layout with a nav). Structure: `Home | Flights | Fleet | Community | Management` on the left, airline switcher + notification bell + user dropdown on the right.
+
+- The airline-scoped groups (Flights / Fleet / Community / Management) render only when `session('activeairline')` is set - guests and members without an airline see just Home
+- **Management** is shown only to users who can review flights for the active airline (and review is enabled) or are its per-airline Manager; it gathers Review flights, Operations, Invite codes and Announcements
+- "Add aircraft" under Fleet is gated with `@can('add aircraft')`, mirroring the route middleware
+- Active-state highlighting uses `request()->routeIs(...)` per item; parent dropdowns list all their child route names
+
 ### Authentication & Authorization
 
 Two auth systems coexist:
@@ -145,7 +154,7 @@ Airlines that have not opted in keep fully manual `current_loc` management — f
 
 Per-airline boolean `airlines.require_pirep_review` (default on at founding/setup), toggled on the same `/airline/settings` page as location continuity. When **on**, filed PIREPs stay pending (`status_id = 1`) and the `FlightFiled` event notifies reviewers. When **off**, both filing paths set `status_id = 2` (accepted) immediately after create and skip the `FlightFiled` event entirely — no reviewer notifications, nothing in the review queue. Location continuity is unaffected either way (the aircraft moves at filing time).
 
-Two safeguards: `AirlineController::updateSettings()` refuses to switch review **off while flights are still pending** (they would be stranded in an unreachable queue — accept/reject them first), and the "Review flights" nav entry is hidden when the active airline has review disabled (the session airline is refreshed on settings save, so this applies immediately).
+Two safeguards: `AirlineController::updateSettings()` refuses to switch review **off while flights are still pending** (they would be stranded in an unreachable queue — accept/reject them first), and the "Review flights" entry in the navbar's Management dropdown is hidden when the active airline has review disabled (the session airline is refreshed on settings save, so this applies immediately).
 
 ### PIREP Workflow (Event-Driven)
 
