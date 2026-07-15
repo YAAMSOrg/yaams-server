@@ -75,6 +75,39 @@ class Aircraft extends Model
         return $this->hasMany(Flight::class, 'aircraft_id');
     }
 
+    // Screenshot gallery - every image regardless of moderation state (used for
+    // the per-aircraft cap and lifecycle operations).
+    public function images()
+    {
+        return $this->hasMany(AircraftImage::class, 'aircraft_id')
+            ->orderByDesc('is_primary')
+            ->orderByDesc('created_at');
+    }
+
+    // Approved screenshots, primary (livery) shot first - the public gallery.
+    public function approvedImages()
+    {
+        return $this->hasMany(AircraftImage::class, 'aircraft_id')
+            ->approved()
+            ->orderByDesc('is_primary')
+            ->orderByDesc('created_at');
+    }
+
+    // Pilot uploads awaiting manager review.
+    public function pendingImages()
+    {
+        return $this->hasMany(AircraftImage::class, 'aircraft_id')
+            ->pending()
+            ->orderByDesc('created_at');
+    }
+
+    // The single shot that best shows the aircraft's livery (always approved,
+    // may be null).
+    public function primaryImage()
+    {
+        return $this->hasOne(AircraftImage::class, 'aircraft_id')->where('is_primary', true);
+    }
+
     // This is a dynamic attribute, which simply adds the occurances of a flight entry with the specific $aicraft->id and all accepted flights.
     public function getTotalFlightsCountAttribute() {
         return Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->count();

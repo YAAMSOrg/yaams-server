@@ -240,6 +240,7 @@ class AircraftController extends Controller
         }
 
         // If we just get a GET request, display the manager.
+        $aircraft->load(['approvedImages', 'pendingImages.uploader']);
         return view('fleet.edit', ['aircraft' => $aircraft ]);
     }
 
@@ -255,6 +256,10 @@ class AircraftController extends Controller
         // Get lat and lon for position view
         $curLat = $aircraft->location->latitude_deg;
         $curLon = $aircraft->location->longitude_deg;
+
+        // Screenshot gallery: approved shots (primary first) plus the pending
+        // review queue (with uploader for display/authorization).
+        $aircraft->load(['approvedImages', 'pendingImages.uploader']);
 
         // Fetch last 5 accepted flights for this aircraft
         $lastFlights = $aircraft->flights()

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FlightController;
 use App\Http\Controllers\AircraftController;
+use App\Http\Controllers\AircraftImageController;
 use App\Http\Controllers\AirlineMembershipController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\SetupController;
@@ -135,5 +136,23 @@ Route::middleware(['auth'])->group(function () {
         Route::post("/airline/fleetmanager/retire/{aircraft}", [AircraftController::class, "retire"])
             ->name("retireaircraft")
             ->middleware(["can:edit aircraft"]);
+
+        // Aircraft screenshot gallery. Authorization is enforced in the controller
+        // via AircraftPolicy: `show` requires `view` (any member of the owning
+        // airline), the mutating routes require `update` (per-airline Manager).
+        Route::get("/airline/fleetmanager/view/{aircraft}/images/{image}", [AircraftImageController::class, "show"])
+            ->name("aircraft.images.show")
+            ->scopeBindings();
+        Route::post("/airline/fleetmanager/view/{aircraft}/images", [AircraftImageController::class, "store"])
+            ->name("aircraft.images.store");
+        Route::patch("/airline/fleetmanager/view/{aircraft}/images/{image}/approve", [AircraftImageController::class, "approve"])
+            ->name("aircraft.images.approve")
+            ->scopeBindings();
+        Route::patch("/airline/fleetmanager/view/{aircraft}/images/{image}/primary", [AircraftImageController::class, "setPrimary"])
+            ->name("aircraft.images.primary")
+            ->scopeBindings();
+        Route::delete("/airline/fleetmanager/view/{aircraft}/images/{image}", [AircraftImageController::class, "destroy"])
+            ->name("aircraft.images.destroy")
+            ->scopeBindings();
     });
 });

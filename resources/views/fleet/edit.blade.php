@@ -239,6 +239,9 @@
         </div>
     </form>
 
+    <!-- Screenshot gallery -->
+    @include('fleet._gallery', ['aircraft' => $aircraft, 'canModerate' => true, 'canUpload' => true])
+
     <!-- Danger Zone: permanent, irreversible retirement -->
     <div class="card border-danger shadow-sm mt-2">
         <div class="card-header bg-white py-3 fw-bold border-bottom text-danger d-flex align-items-center">

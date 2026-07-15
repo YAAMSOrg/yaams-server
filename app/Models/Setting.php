@@ -32,6 +32,10 @@ class Setting extends Model
             'allow_registration'          => '1',
             'support_email'               => null,
             'LOG_LEVEL'                   => 'debug',
+            // Aircraft screenshot gallery limits (see AircraftImageProcessor).
+            'aircraft_image_max_filesize_kb'  => '4096',
+            'aircraft_image_max_dimension'    => '4000',
+            'aircraft_image_max_per_aircraft' => '12',
         ];
     }
 

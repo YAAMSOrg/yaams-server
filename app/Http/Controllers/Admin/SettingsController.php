@@ -24,6 +24,9 @@ class SettingsController extends Controller
             'show_public_stats'           => Setting::get('show_public_stats'),
             'support_email'               => Setting::get('support_email'),
             'LOG_LEVEL'                   => Setting::get('LOG_LEVEL'),
+            'aircraft_image_max_filesize_kb'  => Setting::get('aircraft_image_max_filesize_kb'),
+            'aircraft_image_max_dimension'    => Setting::get('aircraft_image_max_dimension'),
+            'aircraft_image_max_per_aircraft' => Setting::get('aircraft_image_max_per_aircraft'),
         ];
 
         return view('admin.settings', compact('settings'));
@@ -39,6 +42,9 @@ class SettingsController extends Controller
             'show_public_stats'           => 'required|boolean',
             'support_email'               => 'nullable|email|max:255',
             'LOG_LEVEL'                   => 'required|in:debug,info,warning',
+            'aircraft_image_max_filesize_kb'  => 'required|integer|min:256|max:51200',
+            'aircraft_image_max_dimension'    => 'required|integer|min:320|max:10000',
+            'aircraft_image_max_per_aircraft' => 'required|integer|min:1|max:100',
         ]);
 
         Setting::set('app_name', $validated['app_name']);
@@ -48,6 +54,9 @@ class SettingsController extends Controller
         Setting::set('show_public_stats', $request->boolean('show_public_stats') ? '1' : '0');
         Setting::set('support_email', $validated['support_email'] ?? null);
         Setting::set('LOG_LEVEL', $validated['LOG_LEVEL']);
+        Setting::set('aircraft_image_max_filesize_kb', (string) $validated['aircraft_image_max_filesize_kb']);
+        Setting::set('aircraft_image_max_dimension', (string) $validated['aircraft_image_max_dimension']);
+        Setting::set('aircraft_image_max_per_aircraft', (string) $validated['aircraft_image_max_per_aircraft']);
 
         activity()
             ->causedBy(auth()->user())

@@ -175,6 +175,38 @@
                         </div>
                     </div>
 
+                    {{-- Aircraft gallery --}}
+                    <hr class="my-4">
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-images me-2 text-primary"></i> Aircraft Screenshots</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="aircraft_image_max_filesize_kb" class="form-label">Max file size (KB)</label>
+                            <input type="number" min="256" max="51200" class="form-control" id="aircraft_image_max_filesize_kb"
+                                   name="aircraft_image_max_filesize_kb"
+                                   value="{{ old('aircraft_image_max_filesize_kb', $settings['aircraft_image_max_filesize_kb']) }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="aircraft_image_max_dimension" class="form-label">Max dimension (px)</label>
+                            <input type="number" min="320" max="10000" class="form-control" id="aircraft_image_max_dimension"
+                                   name="aircraft_image_max_dimension"
+                                   value="{{ old('aircraft_image_max_dimension', $settings['aircraft_image_max_dimension']) }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="aircraft_image_max_per_aircraft" class="form-label">Max images per aircraft</label>
+                            <input type="number" min="1" max="100" class="form-control" id="aircraft_image_max_per_aircraft"
+                                   name="aircraft_image_max_per_aircraft"
+                                   value="{{ old('aircraft_image_max_per_aircraft', $settings['aircraft_image_max_per_aircraft']) }}">
+                        </div>
+                        <div class="col-12">
+                            <div class="form-text">
+                                Limits for uploaded flight-simulator screenshots. Uploads larger than the max
+                                file size or dimension are rejected, then re-encoded to WebP (stripping EXIF).
+                                The max dimension is checked on both width and height.
+                            </div>
+                        </div>
+                    </div>
+
                     <button class="btn btn-primary" type="submit">
                         <i class="bi bi-check2-circle me-2"></i> Save settings
                     </button>

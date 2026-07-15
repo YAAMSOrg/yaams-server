@@ -62,6 +62,10 @@ Current setting keys:
 - `allow_registration` — `'1'` (default) if public self-registration is open; `'0'` if new users cannot self-register
 - `show_public_stats` — `'1'` if the totals (airlines, pilots, flights, hours) are shown on the public landing page; `'0'` if they are hidden
 - `LOG_LEVEL` — activity-log verbosity threshold: `debug` (default) records everything incl. model changes, `info` records user actions only, `warning` records security events only. Wired into `Setting::defaults()` + the admin settings page but **intentionally not** the setup wizard (see Application Logging below).
+- `aircraft_image_max_filesize_kb` — max accepted upload size for an aircraft screenshot, in KB (default `4096`).
+- `aircraft_image_max_dimension` — max accepted width **and** height for an aircraft screenshot, in px (default `4000`). Enforced as a reject rule (also guards against decompression bombs).
+- `aircraft_image_max_per_aircraft` — max number of screenshots per aircraft (default `12`).
+  These three image keys follow the `LOG_LEVEL` precedent: wired into `Setting::defaults()` + the admin settings page but **intentionally not** the setup wizard (post-install fine-tuning, see Aircraft Screenshot Gallery below).
 
 ### Application Logging (Activity Log)
 
@@ -121,6 +125,10 @@ Aircraft have a three-state lifecycle stored in the `aircraft.status` string col
 - `active` (`STATUS_ACTIVE`) — in service, the only state that can be assigned to flights.
 - `inactive` (`STATUS_INACTIVE`) — temporarily grounded; reversible via the edit form's status toggle.
 - `retired` (`STATUS_RETIRED`) — **permanent, irreversible** soft-delete. Cannot fly, cannot be reactivated or edited. The row is never hard-deleted so past flights (which FK `flights.aircraft_id`) keep their history intact.
+
+### Aircraft Screenshot Gallery (community uploads + manager moderation)
+
+Aircraft carry a gallery of flight-simulator screenshots (`aircraft_images` table, `App\Models\AircraftImage`). Any airline member may contribute a shot; **pilot uploads land in a pending queue and stay hidden until a Manager approves them** (Manager uploads are auto-approved). Exactly one approved image is flagged `is_primary` (the shot that best shows the livery).
 
 ### Location Continuity (opt-in realism mode)
 

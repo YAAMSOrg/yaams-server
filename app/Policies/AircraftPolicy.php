@@ -38,6 +38,22 @@ class AircraftPolicy
     }
 
     /**
+     * Determine whether the user can upload a screenshot for the aircraft.
+     *
+     * Any member of the owning airline may contribute (the upload lands in a
+     * pending state for manager review). Membership is implied by the aircraft
+     * being owned by the user's active airline - they can only make an airline
+     * active if they belong to it. Retired aircraft accept no uploads.
+     */
+    public function uploadImage(User $user, Aircraft $aircraft): bool
+    {
+        $activeAirline = session('activeairline');
+        return $activeAirline
+            && $aircraft->ownedBy($activeAirline)
+            && !$aircraft->isRetired();
+    }
+
+    /**
      * Determine whether the user can retire (permanently remove) the aircraft.
      *
      * @param  \App\Models\User  $user

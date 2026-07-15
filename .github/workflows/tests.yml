@@ -19,7 +19,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, pdo_sqlite, sqlite3, bcmath, intl, dom, curl, fileinfo
+          extensions: mbstring, pdo_sqlite, sqlite3, bcmath, intl, dom, curl, fileinfo, gd
           coverage: none
 
       - name: Copy environment file
