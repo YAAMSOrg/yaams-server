@@ -228,3 +228,97 @@
     font-family: 'Space Grotesk', sans-serif;
     letter-spacing: -0.01em;
 }
+
+/*
+ * Main navbar (.yaams-navbar on the <header> in layouts/_navbar.blade.php).
+ * Brand dark-slate gradient with an amber accent line; pill-shaped links with
+ * an amber active state; soft rounded dropdowns.
+ */
+.yaams-navbar {
+    background: linear-gradient(180deg, #282E3A 0%, #20242E 100%);
+    border-bottom: 2px solid var(--yaams-accent);
+    box-shadow: 0 2px 10px rgba(32, 36, 46, 0.25);
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+}
+
+.yaams-navbar .navbar-nav {
+    gap: 0.125rem;
+}
+
+.yaams-navbar .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.72);
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.85rem;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.yaams-navbar .navbar-nav .nav-link:hover,
+.yaams-navbar .navbar-nav .nav-link:focus-visible {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.yaams-navbar .navbar-nav .nav-link.active,
+.yaams-navbar .navbar-nav .nav-link.show {
+    color: var(--yaams-accent);
+    background-color: rgba(232, 165, 63, 0.12);
+}
+
+/* Caret flips while its menu is open. */
+.yaams-navbar .nav-link.dropdown-toggle::after {
+    transition: transform 0.2s ease;
+}
+
+.yaams-navbar .nav-link.dropdown-toggle.show::after {
+    transform: rotate(180deg);
+}
+
+/* Dropdown panels: rounded card with brand hover/active colours. */
+.yaams-navbar .dropdown-menu {
+    --bs-dropdown-link-hover-bg: #f3ebe0;
+    --bs-dropdown-link-hover-color: #4d3720;
+    --bs-dropdown-link-active-bg: #865F31;
+    --bs-dropdown-link-active-color: #fff;
+    border: 0;
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    min-width: 12rem;
+    box-shadow: 0 10px 30px rgba(32, 36, 46, 0.16);
+}
+
+.yaams-navbar .dropdown-item {
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Item icons follow the row state (base colour comes from .text-secondary). */
+.yaams-navbar .dropdown-item:hover .bi,
+.yaams-navbar .dropdown-item:focus .bi {
+    color: #865F31 !important;
+}
+
+.yaams-navbar .dropdown-item.active .bi {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Active-airline chip in the switcher. */
+.yaams-airline-chip {
+    background-color: var(--yaams-accent);
+    color: #20242E;
+    font-weight: 600;
+}
+
+/* Collapsed (mobile) panel: separate it from the brand row. */
+@media (max-width: 991.98px) {
+    .yaams-navbar .navbar-collapse {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .yaams-navbar .navbar-nav.align-items-center {
+        align-items: flex-start !important;
+    }
+}

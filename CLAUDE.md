@@ -145,7 +145,7 @@ Airlines that have not opted in keep fully manual `current_loc` management — f
 
 Per-airline boolean `airlines.require_pirep_review` (default on at founding/setup), toggled on the same `/airline/settings` page as location continuity. When **on**, filed PIREPs stay pending (`status_id = 1`) and the `FlightFiled` event notifies reviewers. When **off**, both filing paths set `status_id = 2` (accepted) immediately after create and skip the `FlightFiled` event entirely — no reviewer notifications, nothing in the review queue. Location continuity is unaffected either way (the aircraft moves at filing time).
 
-Two safeguards: `AirlineController::updateSettings()` refuses to switch review **off while flights are still pending** (they would be stranded in an unreachable queue — accept/reject them first), and the "Review flights" nav entry is hidden when the active airline has review disabled (the session airline is refreshed on settings save, so this applies immediately).
+Two safeguards: `AirlineController::updateSettings()` refuses to switch review **off while flights are still pending** (they would be stranded in an unreachable queue — accept/reject them first), and the "Review flights" entry in the navbar's Management dropdown is hidden when the active airline has review disabled (the session airline is refreshed on settings save, so this applies immediately).
 
 ### PIREP Workflow (Event-Driven)
 
