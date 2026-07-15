@@ -93,6 +93,16 @@
                 </div>
             </div>
 
+            @include('fleet._gallery', [
+                'aircraft' => $aircraft,
+                'canModerate' => session('activeairline')
+                    && auth()->user()->isManagerOf(session('activeairline'))
+                    && !$aircraft->isRetired(),
+                // Any member viewing this page may contribute a screenshot,
+                // unless the airframe is retired.
+                'canUpload' => !$aircraft->isRetired(),
+            ])
+
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
                     <i class="bi bi-card-text text-muted me-2"></i> Technical Specifications & Configuration
@@ -259,16 +269,6 @@
                     @endif
                 </div>
             </div>
-
-            @include('fleet._gallery', [
-                'aircraft' => $aircraft,
-                'canModerate' => session('activeairline')
-                    && auth()->user()->isManagerOf(session('activeairline'))
-                    && !$aircraft->isRetired(),
-                // Any member viewing this page may contribute a screenshot,
-                // unless the airframe is retired.
-                'canUpload' => !$aircraft->isRetired(),
-            ])
         </div>
 
         <div class="col-lg-4">

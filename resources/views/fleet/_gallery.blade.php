@@ -12,18 +12,42 @@
 @php($userId = auth()->id())
 @php($approved = $aircraft->approvedImages)
 @php($pending = $canModerate ? $aircraft->pendingImages : $aircraft->pendingImages->where('uploaded_by', $userId))
+{{-- On a failed upload, open the Upload tab so the error is visible. --}}
+@php($uploadHasError = $errors->has('screenshot'))
 <div class="card border-0 shadow-sm mb-4 aircraft-gallery">
-    <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
-        <i class="bi bi-images text-muted me-2"></i> Aircraft Gallery
-        <span class="badge bg-secondary ms-2 fs-7">{{ $approved->count() }}</span>
+    <div class="card-header bg-white border-bottom p-0">
+        <ul class="nav nav-tabs card-header-tabs m-0 px-3 pt-2" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {{ $uploadHasError ? '' : 'active' }}" id="gallery-tab-btn-{{ $aircraft->id }}"
+                        data-bs-toggle="tab" data-bs-target="#gallery-pane-{{ $aircraft->id }}"
+                        type="button" role="tab" aria-controls="gallery-pane-{{ $aircraft->id }}"
+                        aria-selected="{{ $uploadHasError ? 'false' : 'true' }}">
+                    <i class="bi bi-images me-1"></i> Gallery
+                    <span class="badge bg-secondary ms-1 fs-7">{{ $approved->count() }}</span>
+                </button>
+            </li>
+            @if($canUpload)
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {{ $uploadHasError ? 'active' : '' }}" id="upload-tab-btn-{{ $aircraft->id }}"
+                            data-bs-toggle="tab" data-bs-target="#upload-pane-{{ $aircraft->id }}"
+                            type="button" role="tab" aria-controls="upload-pane-{{ $aircraft->id }}"
+                            aria-selected="{{ $uploadHasError ? 'true' : 'false' }}">
+                        <i class="bi bi-upload me-1"></i> Upload
+                    </button>
+                </li>
+            @endif
+        </ul>
     </div>
     <div class="card-body">
+        <div class="tab-content">
+        <div class="tab-pane fade {{ $uploadHasError ? '' : 'show active' }}" id="gallery-pane-{{ $aircraft->id }}"
+             role="tabpanel" aria-labelledby="gallery-tab-btn-{{ $aircraft->id }}">
         {{-- Approved gallery --}}
         @if($approved->isEmpty())
             <div class="text-center text-muted py-4">
                 <i class="bi bi-image fs-1 text-secondary opacity-50 d-block mb-2"></i>
                 No screenshots yet.
-                @if($canUpload) Upload the first one below. @endif
+                @if($canUpload) Upload the first one from the <strong>Upload</strong> tab. @endif
             </div>
         @else
             <div class="row g-3 gallery-group">
@@ -133,28 +157,33 @@
             </div>
         @endif
 
+        </div>{{-- /gallery pane --}}
+
         {{-- Upload form (any airline member) --}}
         @if($canUpload)
-            <form action="{{ route('aircraft.images.store', $aircraft->id) }}" method="post" enctype="multipart/form-data"
-                  class="mt-4 pt-3 border-top">
-                @csrf
-                <label for="screenshot" class="form-label fw-semibold">Upload a screenshot</label>
-                <div class="input-group">
-                    <input type="file" name="screenshot" id="screenshot" accept="image/jpeg,image/png,image/webp"
-                           class="form-control @error('screenshot') is-invalid @enderror" required>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-upload me-1"></i> Upload
-                    </button>
-                </div>
-                @error('screenshot')
-                    <div class="text-danger small mt-1">{{ $message }}</div>
-                @enderror
-                <div class="form-text">
-                    JPEG, PNG or WebP. Images are re-encoded to WebP and stripped of metadata on upload.
-                    @unless($canModerate) Your upload is reviewed by a manager before it appears in the gallery. @endunless
-                </div>
-            </form>
+            <div class="tab-pane fade {{ $uploadHasError ? 'show active' : '' }}" id="upload-pane-{{ $aircraft->id }}"
+                 role="tabpanel" aria-labelledby="upload-tab-btn-{{ $aircraft->id }}">
+                <form action="{{ route('aircraft.images.store', $aircraft->id) }}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <label for="screenshot" class="form-label fw-semibold">Upload a screenshot</label>
+                    <div class="input-group">
+                        <input type="file" name="screenshot" id="screenshot" accept="image/jpeg,image/png,image/webp"
+                               class="form-control @error('screenshot') is-invalid @enderror" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload me-1"></i> Upload
+                        </button>
+                    </div>
+                    @error('screenshot')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                    <div class="form-text">
+                        JPEG, PNG or WebP. Images are re-encoded to WebP and stripped of metadata on upload.
+                        @unless($canModerate) Your upload is reviewed by a manager before it appears in the gallery. @endunless
+                    </div>
+                </form>
+            </div>
         @endif
+        </div>{{-- /tab-content --}}
     </div>
 </div>
 
