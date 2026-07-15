@@ -256,6 +256,9 @@ class AircraftController extends Controller
         $curLat = $aircraft->location->latitude_deg;
         $curLon = $aircraft->location->longitude_deg;
 
+        // Screenshot gallery (primary first).
+        $aircraft->load('images');
+
         // Fetch last 5 accepted flights for this aircraft
         $lastFlights = $aircraft->flights()
             ->where('status_id', 2)

@@ -75,6 +75,20 @@ class Aircraft extends Model
         return $this->hasMany(Flight::class, 'aircraft_id');
     }
 
+    // Screenshot gallery. Ordered so the primary (livery) shot comes first.
+    public function images()
+    {
+        return $this->hasMany(AircraftImage::class, 'aircraft_id')
+            ->orderByDesc('is_primary')
+            ->orderByDesc('created_at');
+    }
+
+    // The single shot that best shows the aircraft's livery (may be null).
+    public function primaryImage()
+    {
+        return $this->hasOne(AircraftImage::class, 'aircraft_id')->where('is_primary', true);
+    }
+
     // This is a dynamic attribute, which simply adds the occurances of a flight entry with the specific $aicraft->id and all accepted flights.
     public function getTotalFlightsCountAttribute() {
         return Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->count();

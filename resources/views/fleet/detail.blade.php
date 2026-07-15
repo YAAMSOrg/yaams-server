@@ -260,18 +260,12 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm bg-light text-center py-5 border-2 border-dashed">
-                <div class="card-body py-4">
-                    <div class="text-muted mb-3">
-                        <i class="bi bi-images fs-1 text-secondary opacity-50"></i>
-                    </div>
-                    <h5 class="fw-bold text-secondary">Aircraft Gallery</h5>
-                    <p class="text-muted mx-auto style-muted small mb-0" style="max-width: 420px;">
-                        Screenshot upload feature is coming soon. In the future, you will be able to see and share real flight simulator screenshots of this aircraft here.
-                    </p>
-                    <span class="badge bg-secondary opacity-70 mt-3 fs-7 uppercase tracking-wider">Feature coming soon</span>
-                </div>
-            </div>
+            @include('fleet._gallery', [
+                'aircraft' => $aircraft,
+                'canManage' => session('activeairline')
+                    && auth()->user()->isManagerOf(session('activeairline'))
+                    && !$aircraft->isRetired(),
+            ])
         </div>
 
         <div class="col-lg-4">

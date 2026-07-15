@@ -40,6 +40,12 @@ class AircraftResource extends JsonResource
             'retiredReason' => $this->retired_reason,
             'inServiceSince' => $this->in_service_since,
             'firstFlight' => $this->first_flight,
+
+            // Absolute URL to the primary (livery) screenshot, or null. The route
+            // itself enforces that only authorized viewers can fetch the bytes.
+            'primaryImageUrl' => $this->primaryImage
+                ? route('aircraft.images.show', [$this->id, $this->primaryImage->id])
+                : null,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at
         ];

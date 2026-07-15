@@ -101,7 +101,8 @@ RUN install-php-extensions \
         pdo_mysql \
         pcntl \
         intl \
-        opcache
+        opcache \
+        gd
 
 # Production PHP settings (opcache on, no display_errors). The base image
 # already ships fpm defaults suited for containers: foreground mode, logs to

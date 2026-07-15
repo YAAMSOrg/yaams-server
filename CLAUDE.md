@@ -62,6 +62,10 @@ Current setting keys:
 - `allow_registration` — `'1'` (default) if public self-registration is open; `'0'` if new users cannot self-register
 - `show_public_stats` — `'1'` if the totals (airlines, pilots, flights, hours) are shown on the public landing page; `'0'` if they are hidden
 - `LOG_LEVEL` — activity-log verbosity threshold: `debug` (default) records everything incl. model changes, `info` records user actions only, `warning` records security events only. Wired into `Setting::defaults()` + the admin settings page but **intentionally not** the setup wizard (see Application Logging below).
+- `aircraft_image_max_filesize_kb` — max accepted upload size for an aircraft screenshot, in KB (default `4096`).
+- `aircraft_image_max_dimension` — max accepted width **and** height for an aircraft screenshot, in px (default `4000`). Enforced as a reject rule (also guards against decompression bombs).
+- `aircraft_image_max_per_aircraft` — max number of screenshots per aircraft (default `12`).
+  These three image keys follow the `LOG_LEVEL` precedent: wired into `Setting::defaults()` + the admin settings page but **intentionally not** the setup wizard (post-install fine-tuning, see Aircraft Screenshot Gallery below).
 
 ### Application Logging (Activity Log)
 
@@ -121,6 +125,17 @@ Aircraft have a three-state lifecycle stored in the `aircraft.status` string col
 - `active` (`STATUS_ACTIVE`) — in service, the only state that can be assigned to flights.
 - `inactive` (`STATUS_INACTIVE`) — temporarily grounded; reversible via the edit form's status toggle.
 - `retired` (`STATUS_RETIRED`) — **permanent, irreversible** soft-delete. Cannot fly, cannot be reactivated or edited. The row is never hard-deleted so past flights (which FK `flights.aircraft_id`) keep their history intact.
+
+### Aircraft Screenshot Gallery
+
+Aircraft carry a gallery of flight-simulator screenshots (`aircraft_images` table, `App\Models\AircraftImage`), with exactly one flagged `is_primary` (the shot that best shows the livery). `Aircraft::images()` returns them primary-first; `Aircraft::primaryImage()` is the single primary.
+
+- **Storage is private + streamed.** Files live on the `local` (private) disk under `aircraft/{id}/{uuid}.webp` — never the `public` disk. The only way the bytes leave the server is the authorized `aircraft.images.show` route (`AircraftImageController::show`), gated by `AircraftPolicy::view` so **only members of the owning airline** (via the active-airline session) can fetch a screenshot.
+- **Upload is manager-only, via the policy — not the `edit aircraft` Spatie permission.** All gallery mutation routes (`store`/`setPrimary`/`destroy`) authorize with `AircraftPolicy::update` (per-airline Manager + ownership + not retired) in the controller. They deliberately do **not** use the `can:edit aircraft` middleware the older edit/retire routes carry: founding an airline / redeeming a Manager invite only grants the *per-airline* role, not the global Spatie `edit aircraft` permission, so that middleware would lock out real per-airline managers.
+- **Validation + re-encode = the security boundary.** `App\Support\AircraftImageProcessor` builds the settings-driven validation rules (`image`, `mimes:jpeg,jpg,png,webp`, `max:` filesize, `dimensions:max_width/height`) and re-encodes every upload through GD (Intervention Image v3) to WebP, which strips EXIF and any embedded payload. The raw upload is never stored; only the re-encoded WebP is. Over-size/over-dimension uploads are rejected (the `dimensions` rule also guards against decompression bombs). Limits are the `aircraft_image_max_*` settings above.
+- **Primary invariant.** The first upload becomes primary; setting a new primary unsets the others in a transaction; deleting the primary promotes the most-recent remaining image.
+- **UI** lives in a shared partial `resources/views/fleet/_gallery.blade.php`, included read-only on the detail view and in manage mode on the edit view. `AircraftResource` exposes `primaryImageUrl` (the `show` route for the primary image, or null).
+- **Requires the `gd` PHP extension** (added to both `Docker/Dockerfile` and `Docker/Dockerfile.prod`, and to the CI workflow's `extensions:` list). `intervention/image` is a production composer dependency.
 
 ### Location Continuity (opt-in realism mode)
 
