@@ -23,6 +23,9 @@ COPY composer.json composer.lock ./
 
 # `--no-scripts` because artisan isn't available yet (no app code copied).
 # The BuildKit cache mount keeps Composer's download cache warm across builds.
+# `--ignore-platform-req=ext-gd` because the composer image lacks gd; the
+# runtime stage installs it (see install-php-extensions below), and this stage
+# only needs the vendor files.
 RUN --mount=type=cache,target=/tmp/composer-cache \
     COMPOSER_CACHE_DIR=/tmp/composer-cache \
     composer install \
@@ -30,7 +33,8 @@ RUN --mount=type=cache,target=/tmp/composer-cache \
         --no-scripts \
         --no-interaction \
         --prefer-dist \
-        --optimize-autoloader
+        --optimize-autoloader \
+        --ignore-platform-req=ext-gd
 
 # ---------------------------------------------------------------------------
 # Stage 1b - Composer dependencies WITH dev packages (only for doc generation)
