@@ -177,6 +177,16 @@ The `/api/v1` REST API is documented with [Scribe](https://scribe.knuckles.wtf) 
   - **Production** — baked into the image at build time: `Docker/Dockerfile.prod` runs `scribe:generate` in a dedicated `docs` stage (which installs the dev deps that carry Scribe) and `COPY --from=docs`es `public/docs` into the Scribe-free runtime image. nginx serves it statically (`index index.php index.html` in `Docker/nginx.conf` resolves `/docs` → `public/docs/index.html`). No deploy step needed.
   - **Dev** — the one-shot `docs` service in `Docker/docker-compose.yml` runs `scribe:generate` into the mounted repo before `app` serves; `php artisan serve` serves the static files, and `routes/web.php` has a `Route::redirect('/docs', '/docs/index.html')` so `/docs` resolves (the built-in dev server won't auto-serve a directory index). Regenerate manually with `docker exec yaams-dev-app php artisan scribe:generate` after editing annotations.
 
+### Prometheus Metrics
+
+Instance monitoring endpoint at `/metrics` (`spatie/laravel-prometheus`), returning domain gauges in Prometheus text format with the `yaams_` namespace prefix:
+
+- **Scrape-time evaluation** — every gauge is a closure in `app/Providers/PrometheusServiceProvider.php`, executed fresh on each scrape as a cheap aggregate DB query. There is no cross-request metric storage (`config/prometheus.php` keeps `'cache' => null`), so no APCu/Redis is needed. HTTP request counters/histograms are intentionally out of scope — they would require shared FPM storage and are better harvested at the reverse-proxy layer.
+- **Gauges** — users, airlines, flights by review status (`status` label mapped from the hardcoded flight status IDs), aircraft by lifecycle status, unused invite codes, failed jobs, plus the package's `QueueSizeCollector` (queue depth via `Queue::size()`).
+- **Auth** — `App\Http\Middleware\MetricsAuth` (wired via the `middleware` key in `config/prometheus.php`) requires `Authorization: Bearer $METRICS_TOKEN`; when `METRICS_TOKEN` is unset, the endpoint always returns 403. The token is env-level ops config (`services.metrics.token` in `config/services.php`), deliberately **not** a `Setting` row — it belongs to the scraper's infrastructure, so it gets no setup-wizard/admin-settings wiring.
+- **Adding a gauge** — chain `Prometheus::addGauge('Label')->name('snake_name')->helpText(...)->value(fn () => ...)` in `PrometheusServiceProvider::register()`; labeled gauges return `[[value, [labelValue]], ...]` from the closure. Keep every closure a single cheap aggregate query.
+- Scribe API docs are unaffected (Scribe only matches `api/*` routes).
+
 ### Key Model Relationships
 
 - `Aircraft::used_by` — FK to `airlines.id` (not `airline_id`)
@@ -200,6 +210,7 @@ Key `.env` values beyond standard Laravel:
 - `FLIGHT_PAGE_LIMIT` — number of flights per page in the pilot flight list (default: 10)
 - `QUEUE_CONNECTION` — background job backend (default: `database`; set to `redis` to use Redis). Notification email is dispatched on this queue, so a worker must be running in every environment where mail should actually be sent — see below.
 - `ACTIVITYLOG_RETENTION_DAYS` — how long activity-log rows are kept before `activitylog:clean` prunes them (default: `180`). Requires the scheduler to be running — see below.
+- `METRICS_TOKEN` — bearer token required to scrape the Prometheus `/metrics` endpoint (see Prometheus Metrics). Unset (default) disables the endpoint.
 
 ### Queue / Background Jobs
 
