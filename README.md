@@ -22,6 +22,7 @@ A decentralised, open-source virtual airline management platform. Track PIREPs, 
 - [Quick Start](#quick-start-development)
 - [Running the Tests](#running-the-tests)
 - [API](#api)
+- [Monitoring](#monitoring)
 - [Production Deployment](#production-deployment)
 - [Contributing](#contributing)
 - [License](#license)
@@ -34,6 +35,7 @@ A decentralised, open-source virtual airline management platform. Track PIREPs, 
 - **Multi-airline** - belong to several airlines and switch between them
 - **Notifications** - in-app and email delivery
 - **Activity log** - audit trail with a configurable verbosity level
+- **Prometheus metrics** - live domain gauges at `/metrics` for monitoring
 - **REST API (v1)** - for custom ACARS clients and integrations
 
 ## Tech Stack
@@ -100,6 +102,21 @@ The PHPUnit suite (`tests/`) covers the core domain rules - location continuity,
 ## API
 
 YAAMS ships a JSON REST API under `/api/v1`, authenticated with Sanctum bearer tokens - built for custom ACARS clients and integrations. Interactive documentation (generated with [Scribe](https://scribe.knuckles.wtf)) is served at **`/docs`**, with an OpenAPI spec at `/docs.openapi` and a Postman collection at `/docs.postman`.
+
+## Monitoring
+
+YAAMS exposes Prometheus metrics at **`/metrics`** - domain gauges (users, airlines, flights and aircraft by status, unused invite codes, queue depth, failed jobs) computed live on each scrape, so no extra storage or services are needed.
+
+The endpoint is disabled by default. To enable it, set `METRICS_TOKEN` in `.env` and scrape with it as a bearer token:
+
+```yaml
+scrape_configs:
+  - job_name: yaams
+    scheme: https
+    bearer_token: "<METRICS_TOKEN>"
+    static_configs:
+      - targets: ["your.domain"]
+```
 
 ## Production Deployment
 

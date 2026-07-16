@@ -30,4 +30,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'metrics' => [
+        // Bearer token for the Prometheus /metrics endpoint. Unset = endpoint disabled.
+        'token' => env('METRICS_TOKEN'),
+    ],
+
 ];
