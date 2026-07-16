@@ -11,7 +11,7 @@ A decentralised, open-source virtual airline management platform. Track PIREPs, 
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)
 
-![video demo](https://raw.githubusercontent.com/YAAMSOrg/yaams-server/main/Docs/res/showcase.gif)
+![screenshot](https://github.com/user-attachments/assets/69a64cc3-d340-4f18-99ea-5ebb04804eef)
 
 </div>
 
@@ -37,6 +37,8 @@ A decentralised, open-source virtual airline management platform. Track PIREPs, 
 - **Activity log** - audit trail with a configurable verbosity level
 - **Prometheus metrics** - live domain gauges at `/metrics` for monitoring
 - **REST API (v1)** - for custom ACARS clients and integrations
+
+To see more screenshots of YAAMS in action, visit our [wiki](https://github.com/YAAMSOrg/yaams-server/wiki).
 
 ## Tech Stack
 
