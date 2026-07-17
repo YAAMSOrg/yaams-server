@@ -58,6 +58,31 @@
             </div>
         </div>
 
+        <!-- Fleet Locations Map -->
+        <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+            <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
+                <i class="bi bi-geo-alt-fill text-danger me-2"></i> Fleet Locations
+            </div>
+            @if(count($mapMarkers) === 0)
+                <div class="card-body text-center text-muted py-5">
+                    <i class="bi bi-map fs-1 d-block mb-2 opacity-50"></i>
+                    No aircraft with a known location yet.
+                </div>
+            @else
+                <x-maps-leaflet id="fleetMap"
+                    style="height: 380px; width: 100%;"
+                    :markers="$mapMarkers"
+                    :centerPoint="$mapCenter"
+                    :zoomLevel="$mapZoom"></x-maps-leaflet>
+                @if($aircraftWithoutLocation > 0)
+                    <div class="card-footer bg-light border-top text-muted small py-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        {{ $aircraftWithoutLocation }} {{ \Illuminate\Support\Str::plural('aircraft', $aircraftWithoutLocation) }} {{ $aircraftWithoutLocation === 1 ? 'has' : 'have' }} no known location and {{ $aircraftWithoutLocation === 1 ? 'is' : 'are' }} not shown.
+                    </div>
+                @endif
+            @endif
+        </div>
+
         @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
             <h4 class="alert-heading fs-6 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Error during request</h4>
