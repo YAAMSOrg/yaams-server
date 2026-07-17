@@ -58,29 +58,34 @@
             </div>
         </div>
 
-        <!-- Fleet Locations Map -->
+        <!-- Fleet Locations Map (collapsed by default to save vertical space) -->
         <div class="card border-0 shadow-sm mb-4 overflow-hidden">
-            <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
-                <i class="bi bi-geo-alt-fill text-danger me-2"></i> Fleet Locations
+            <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center justify-content-between"
+                 role="button" data-bs-toggle="collapse" data-bs-target="#fleetMapCollapse"
+                 aria-expanded="false" aria-controls="fleetMapCollapse" style="cursor: pointer;">
+                <span><i class="bi bi-geo-alt-fill text-danger me-2"></i> Fleet Locations</span>
+                <i class="bi bi-chevron-down fleet-map-chevron text-muted"></i>
             </div>
-            @if(count($mapMarkers) === 0)
-                <div class="card-body text-center text-muted py-5">
-                    <i class="bi bi-map fs-1 d-block mb-2 opacity-50"></i>
-                    No aircraft with a known location yet.
-                </div>
-            @else
-                <x-maps-leaflet id="fleetMap"
-                    style="height: 380px; width: 100%;"
-                    :markers="$mapMarkers"
-                    :centerPoint="$mapCenter"
-                    :zoomLevel="$mapZoom"></x-maps-leaflet>
-                @if($aircraftWithoutLocation > 0)
-                    <div class="card-footer bg-light border-top text-muted small py-2">
-                        <i class="bi bi-info-circle me-1"></i>
-                        {{ $aircraftWithoutLocation }} {{ \Illuminate\Support\Str::plural('aircraft', $aircraftWithoutLocation) }} {{ $aircraftWithoutLocation === 1 ? 'has' : 'have' }} no known location and {{ $aircraftWithoutLocation === 1 ? 'is' : 'are' }} not shown.
+            <div class="collapse" id="fleetMapCollapse">
+                @if(count($mapMarkers) === 0)
+                    <div class="card-body text-center text-muted py-5">
+                        <i class="bi bi-map fs-1 d-block mb-2 opacity-50"></i>
+                        No aircraft with a known location yet.
                     </div>
+                @else
+                    <x-maps-leaflet id="fleetMap"
+                        style="height: 380px; width: 100%;"
+                        :markers="$mapMarkers"
+                        :centerPoint="$mapCenter"
+                        :zoomLevel="$mapZoom"></x-maps-leaflet>
+                    @if($aircraftWithoutLocation > 0)
+                        <div class="card-footer bg-light border-top text-muted small py-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            {{ $aircraftWithoutLocation }} {{ \Illuminate\Support\Str::plural('aircraft', $aircraftWithoutLocation) }} {{ $aircraftWithoutLocation === 1 ? 'has' : 'have' }} no known location and {{ $aircraftWithoutLocation === 1 ? 'is' : 'are' }} not shown.
+                        </div>
+                    @endif
                 @endif
-            @endif
+            </div>
         </div>
 
         @if($errors->any())
@@ -282,6 +287,8 @@
     .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .max-w-md { max-width: 450px; }
     .mx-auto { margin-left: auto; margin-right: auto; }
+    .fleet-map-chevron { transition: transform 0.2s ease; }
+    [data-bs-target="#fleetMapCollapse"][aria-expanded="true"] .fleet-map-chevron { transform: rotate(180deg); }
 </style>
 
 <script>
@@ -291,6 +298,16 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         })
+
+        // The fleet map initialises inside a collapsed (hidden) container, so
+        // Leaflet lays it out at zero size. Nudge it to recalculate on expand -
+        // Leaflet auto-fixes its size on a window resize event.
+        var fleetMapCollapse = document.getElementById('fleetMapCollapse');
+        if (fleetMapCollapse) {
+            fleetMapCollapse.addEventListener('shown.bs.collapse', function () {
+                window.dispatchEvent(new Event('resize'));
+            });
+        }
     });
 </script>
 @endsection
