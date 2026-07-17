@@ -29,7 +29,7 @@
         </div>
     @endif
 
-    <form action="{{ route('editaircraft', $aircraft->id) }}" method="POST">
+    <form action="{{ route('editaircraft', $aircraft->id) }}" method="POST" id="editAircraftForm">
         @csrf
         <input type="hidden" id="used_by" name="used_by" value="{{ session('activeairline')->id }}" required>
 
@@ -224,17 +224,6 @@
                     </div>
                 </div>
 
-                <!-- Submit / Cancel Card -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4 d-grid gap-2">
-                        <button type="submit" class="btn btn-primary py-2.5 fw-semibold d-flex align-items-center justify-content-center gap-2">
-                            <i class="bi bi-check-circle-fill"></i> Save Changes
-                        </button>
-                        <a href="{{ route('fleetmanager') }}" class="btn btn-outline-secondary py-2.5 text-center">
-                            Cancel
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
     </form>
@@ -292,6 +281,17 @@
             </form>
         </div>
     </div>
+
+    {{-- Sticky action bar: pins to the viewport bottom while scrolling the form,
+         then rests above the site footer. Submit targets the form via form="editAircraftForm". --}}
+    <div class="edit-actionbar bg-body border rounded-3 shadow-lg mt-4 p-2 d-flex justify-content-end gap-2">
+        <a href="{{ route('fleetmanager') }}" class="btn btn-outline-secondary px-4">
+            Cancel
+        </a>
+        <button type="submit" form="editAircraftForm" class="btn btn-primary px-4 fw-semibold d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill"></i> Save Changes
+        </button>
+    </div>
 </div>
 
 <script>
@@ -318,5 +318,8 @@
     .fs-7 { font-size: 0.775rem !important; }
     .fs-8 { font-size: 0.7rem; }
     .tracking-wider { letter-spacing: 0.05em; }
+    /* Sticky action bar: floats just above the viewport bottom while the form is
+       scrolled, resting at its natural spot (above the site footer) at page end. */
+    .edit-actionbar { position: sticky; bottom: 1rem; z-index: 1020; }
 </style>
 @endsection
