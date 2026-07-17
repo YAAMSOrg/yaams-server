@@ -50,9 +50,9 @@
                 @if($canUpload) Upload the first one from the <strong>Upload</strong> tab. @endif
             </div>
         @else
-            <div class="row g-3 gallery-group">
+            <div class="gallery-group">
                 @foreach($approved as $img)
-                    <div class="col-6 col-md-4">
+                    <div class="gallery-cell">
                         <div class="position-relative gallery-tile">
                             <button type="button"
                                     class="gallery-thumb"
@@ -106,9 +106,9 @@
                     {{ $canModerate ? 'Awaiting review' : 'Your uploads awaiting review' }}
                     <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-1">{{ $pending->count() }}</span>
                 </h6>
-                <div class="row g-3 gallery-group">
+                <div class="gallery-group">
                     @foreach($pending as $img)
-                        <div class="col-6 col-md-4">
+                        <div class="gallery-cell">
                             <div class="position-relative gallery-tile">
                                 <button type="button"
                                         class="gallery-thumb is-pending"
@@ -189,6 +189,18 @@
 
 @once
 <style>
+    /* Thumbnail grid — sizes to the container, not the viewport, so tiles stay
+       a sensible size whether the gallery is full-width (edit) or in a column
+       (detail) instead of ballooning into 3 giant shots on wide screens. */
+    .aircraft-gallery .gallery-group {
+        display: grid;
+        /* Capped max (not 1fr) so a lone screenshot on the full-width edit page
+           stays tile-sized instead of stretching across the whole row. */
+        grid-template-columns: repeat(auto-fill, minmax(200px, 260px));
+        gap: 1rem;
+        justify-content: start;
+    }
+
     /* Thumbnails */
     .aircraft-gallery .gallery-thumb {
         display: block;
