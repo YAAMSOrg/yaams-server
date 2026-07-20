@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aircraft;
+use App\Models\Airline;
 use App\Models\Airport;
 use App\Support\ActivityLevel;
+use App\Support\MapBounds;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -97,7 +99,59 @@ class AircraftController extends Controller
             ->limit($limit)
             ->get();
 
-        return view('fleet.index', ['fleet' => $fleet, 'maxPages' => $maxPages, 'currentPage' => $page, 'showRetired' => $showRetired]);
+        // Fleet-location map data: the full active-airline fleet (retired aircraft
+        // excluded), independent of the table's search/pagination, grouped by airport.
+        [$mapMarkers, $mapView, $aircraftWithoutLocation] = $this->fleetMapData($currentActiveAirline);
+
+        return view('fleet.index', [
+            'fleet' => $fleet,
+            'maxPages' => $maxPages,
+            'currentPage' => $page,
+            'showRetired' => $showRetired,
+            'mapMarkers' => $mapMarkers,
+            'mapCenter' => $mapView['center'],
+            'mapZoom' => $mapView['zoom'],
+            'aircraftWithoutLocation' => $aircraftWithoutLocation,
+        ]);
+    }
+
+    /**
+     * Build the Fleet Location map payload for an airline: one marker per airport
+     * (aircraft grouped together, popup listing them), the framing center/zoom, and
+     * a count of aircraft whose current location could not be resolved.
+     *
+     * @return array{0: array<int, array{lat: float, long: float, info: string}>, 1: array{center: array{lat: float, long: float}, zoom: int}, 2: int}
+     */
+    private function fleetMapData(Airline $airline): array
+    {
+        $aircraft = Aircraft::with('location')
+            ->where('used_by', $airline->id)
+            ->notRetired()
+            ->get();
+
+        $markers = [];
+        $points = [];
+
+        // Skip (but count) aircraft with an unresolved/invalid current_loc, then
+        // group the rest by airport so each airport yields a single marker.
+        $located = $aircraft->filter(fn ($a) => $a->location !== null);
+        $withoutLocation = $aircraft->count() - $located->count();
+        $groups = $located->groupBy(fn ($a) => $a->location->icao_code);
+
+        foreach ($groups as $parked) {
+            $airport = $parked->first()->location;
+            $points[] = ['lat' => (float) $airport->latitude_deg, 'long' => (float) $airport->longitude_deg];
+            $markers[] = [
+                'lat' => (float) $airport->latitude_deg,
+                'long' => (float) $airport->longitude_deg,
+                'info' => view('fleet._map_popup', [
+                    'airport' => $airport,
+                    'aircraft' => $parked,
+                ])->render(),
+            ];
+        }
+
+        return [$markers, MapBounds::fit($points), $withoutLocation];
     }
 
     public function create(Request $request) {
