@@ -37,47 +37,6 @@ RUN --mount=type=cache,target=/tmp/composer-cache \
         --ignore-platform-req=ext-gd
 
 # ---------------------------------------------------------------------------
-# Stage 1b - Composer dependencies WITH dev packages (only for doc generation)
-# ---------------------------------------------------------------------------
-# Scribe (knuckleswtf/scribe) is a dev dependency, so it is deliberately absent
-# from the runtime `vendor` stage above. This throwaway stage installs it just
-# so the `docs` stage below can run `artisan scribe:generate`. `--ignore-platform-reqs`
-# because the composer image lacks the app's PHP extensions - we only need the files.
-FROM composer:2 AS vendor-dev
-WORKDIR /app
-COPY composer.json composer.lock ./
-RUN --mount=type=cache,target=/tmp/composer-cache \
-    COMPOSER_CACHE_DIR=/tmp/composer-cache \
-    composer install \
-        --no-scripts \
-        --no-interaction \
-        --prefer-dist \
-        --ignore-platform-reqs
-
-# ---------------------------------------------------------------------------
-# Stage 1c - Generate the static API docs (public/docs) with Scribe
-# ---------------------------------------------------------------------------
-# Runs `scribe:generate` (type=static) to emit public/docs/, copied into the
-# runtime image below and served by nginx. App boot here is DB-less: the live
-# ResponseCalls strategy is removed (config/scribe.php) and AppServiceProvider's
-# only boot-time DB access is wrapped in rescue(), so no database is needed.
-FROM php:8.3-cli-alpine AS docs
-COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions pdo_mysql intl
-WORKDIR /app
-COPY --from=vendor-dev /app/vendor ./vendor
-COPY . .
-# Throwaway env for this ephemeral build stage only (never shipped) - set inline on
-# the RUN so it doesn't linger as an image ENV (and doesn't trip secret-in-ENV linters).
-RUN APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
-    APP_ENV=production \
-    CACHE_STORE=array \
-    SESSION_DRIVER=array \
-    QUEUE_CONNECTION=sync \
-    MAIL_MAILER=log \
-    php artisan scribe:generate
-
-# ---------------------------------------------------------------------------
 # Stage 2 - Runtime (nginx + PHP-FPM on Alpine)
 # ---------------------------------------------------------------------------
 FROM php:8.3-fpm-alpine
@@ -116,13 +75,39 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY Docker/nginx.conf /etc/nginx/nginx.conf
 COPY Docker/supervisord.conf /etc/supervisord.conf
 
-# App source + resolved vendor from stage 1.
+# App source + resolved vendor from stage 1. Scribe is now a runtime dependency
+# (composer `require`), so it is present in the vendor stage.
 COPY . /app
 COPY --from=vendor /app/vendor /app/vendor
 
-# Static API docs (Scribe), pre-generated in the `docs` stage; served by nginx.
-# The runtime image itself has no Scribe (dev-only dependency).
-COPY --from=docs /app/public/docs /app/public/docs
+# Generate the Scribe API docs (laravel type) into the image: the Blade view at
+# resources/views/scribe/ + assets under public/vendor/scribe/, served at /docs by a
+# Laravel route. Runs as root so the baked-in output is readable by any runtime UID
+# (an unprivileged UID could not write these paths at container start).
+#
+# Making the docs base URL dynamic: the docs page heading uses the base_url config
+# verbatim ('{{ config("app.url") }}'), so it already resolves at request time. But
+# Scribe pre-renders that string when baking the copy-paste example snippets and the
+# "Try It Out" host, so those would otherwise freeze to whatever APP_URL was at build
+# time (unknown here - one image serves any instance). So generate against a sentinel
+# base URL, then replace it with the Blade expression directly in the view (raw, after
+# Scribe's HTML-escaping) - the request-time Blade render then resolves every occurrence
+# to this instance's real APP_URL. Single quotes inside config() keep it valid once
+# baked into the JS/HTML without further escaping.
+#
+# Throwaway env for this build stage only (never shipped) - set inline on the RUN so it
+# doesn't linger as an image ENV. DB-less: ResponseCalls is removed (config/scribe.php)
+# and AppServiceProvider's only boot-time DB access is rescue()-wrapped.
+RUN APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
+    APP_ENV=production \
+    APP_URL=https://scribe-base-url.invalid \
+    CACHE_STORE=array \
+    SESSION_DRIVER=array \
+    QUEUE_CONNECTION=sync \
+    MAIL_MAILER=log \
+    php artisan scribe:generate \
+ && sed -i "s#https://scribe-base-url.invalid#{{ config('app.url') }}#g" \
+        resources/views/scribe/index.blade.php
 
 # Storage + cache must be writable by the runtime user, and nginx needs its
 # lib dir writable too. Own them by the root group (GID 0) with group perms

@@ -80,9 +80,10 @@ services:
       - "yaams"
     restart: "no"
 
-  # One-shot: generates the static Scribe API docs into public/docs in the mounted
-  # repo before the app starts, so a fresh dev stack never 404s the docs page. The
-  # dev app (php artisan serve) serves them at /docs via the redirect in routes/web.php.
+  # One-shot: generates the Scribe API docs (laravel type - a Blade view at
+  # resources/views/scribe + assets under public/vendor/scribe) into the mounted repo
+  # before the app starts, so a fresh dev stack never 404s the docs page. The dev app
+  # (php artisan serve) serves them at /docs via the route Scribe registers.
   # Output is gitignored and deterministic (no DB needed), so it is safe to re-run on
   # every `up`. In production the docs are baked into the image instead (Dockerfile.prod).
   docs:

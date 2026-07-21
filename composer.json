@@ -8,6 +8,7 @@
         "php": "^8.2",
         "ext-gd": "*",
         "intervention/image": "^3.11",
+        "knuckleswtf/scribe": "^5.11",
         "laravel/fortify": "^1.37",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
@@ -19,7 +20,6 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "knuckleswtf/scribe": "^5.11",
         "laravel/pail": "^1.2",
         "laravel/pint": "^1.18",
         "laravel/sail": "^1.29",

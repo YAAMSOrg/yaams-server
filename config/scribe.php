@@ -9,16 +9,6 @@ use function Knuckles\Scribe\Config\removeStrategies;
 
 // Only the most common configs are shown. See the https://scribe.knuckles.wtf/laravel/reference/config for all.
 
-// Scribe is a dev-only dependency, absent from the production runtime image. The API
-// docs are pre-generated as static HTML at build time (see Docker/Dockerfile.prod) and
-// served directly by nginx, so the app never needs this config at runtime. Return an
-// empty config when Scribe is not installed so config:cache (php artisan optimize, run
-// on every container start) doesn't fatal on the missing Knuckles\Scribe\* classes.
-// The `use` imports above never autoload, so they are safe even when the classes are gone.
-if (! class_exists(AuthIn::class)) {
-    return [];
-}
-
 return [
     // The HTML <title> for the generated documentation.
     'title' => config('app.name').' API Documentation',
@@ -38,7 +28,9 @@ return [
 
     // The base URL displayed in the docs.
     // If you're using `laravel` type, you can set this to a dynamic string, like '{{ config("app.tenant_url") }}' to get a dynamic base URL.
-    'base_url' => config('app.url'),
+    // We use the dynamic form so the docs (a Blade view rendered at request time) show this
+    // instance's real APP_URL instead of a value baked in at build time (see Docker/Dockerfile.prod).
+    'base_url' => '{{ config("app.url") }}',
 
     // Routes to include in the docs
     'routes' => [
@@ -67,7 +59,7 @@ return [
     // - "static" will generate a static HTMl page in the /public/docs folder,
     // - "laravel" will generate the documentation as a Blade view, so you can add routing and authentication.
     // - "external_static" and "external_laravel" do the same as above, but pass the OpenAPI spec as a URL to an external UI template
-    'type' => 'static',
+    'type' => 'laravel',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
     'theme' => 'default',
@@ -79,8 +71,11 @@ return [
     ],
 
     'laravel' => [
-        // Whether to automatically create a docs route for you to view your generated docs. You can still set up routing manually.
-        'add_routes' => true,
+        // Routing is set up manually (Route::view('/docs', 'scribe.index') in routes/web.php).
+        // `add_routes` would also register `/docs.postman` and `/docs.openapi`, which we don't
+        // want since those specs are disabled (see the `postman`/`openapi` sections below) and
+        // their routes would otherwise be dead (missing files -> null body / 404).
+        'add_routes' => false,
 
         // URL path to use for the docs endpoint (if `add_routes` is true).
         // By default, `/docs` opens the HTML page, `/docs.postman` opens the Postman collection, and `/docs.openapi` the OpenAPI spec.
@@ -151,24 +146,21 @@ return [
         'php',
     ],
 
-    // Generate a Postman collection (v2.1.0) in addition to HTML docs.
-    // For 'static' docs, the collection will be generated to public/docs/collection.json.
-    // For 'laravel' docs, it will be generated to storage/app/scribe/collection.json.
-    // Setting `laravel.add_routes` to true (above) will also add a route for the collection.
+    // Postman collection + OpenAPI spec are disabled: they are served as raw static files,
+    // so the dynamic `{{ config("app.url") }}` base_url (which only Blade renders) cannot apply
+    // to them, and their 'laravel'-type output dir (storage/app/scribe) is hidden by the prod
+    // storage volume mount. The HTML docs page is the single documentation deliverable.
     'postman' => [
-        'enabled' => true,
+        'enabled' => false,
 
         'overrides' => [
             // 'info.version' => '2.0.0',
         ],
     ],
 
-    // Generate an OpenAPI spec in addition to docs webpage.
-    // For 'static' docs, the collection will be generated to public/docs/openapi.yaml.
-    // For 'laravel' docs, it will be generated to storage/app/scribe/openapi.yaml.
-    // Setting `laravel.add_routes` to true (above) will also add a route for the spec.
+    // Disabled - see the note on `postman` above.
     'openapi' => [
-        'enabled' => true,
+        'enabled' => false,
 
         // The OpenAPI spec version to generate. Supported versions: '3.0.3', '3.1.0'.
         // OpenAPI 3.1 is more compatible with JSON Schema and is becoming the dominant version.
