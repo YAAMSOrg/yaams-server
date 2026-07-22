@@ -78,6 +78,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/settings', fn () => redirect()->route('settings.profile'))->name('settings');
     Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
     Route::get('/settings/security', [SettingsController::class, 'security'])->name('settings.security');
+
+    // Two-factor management — each mutation re-checks the account password in the
+    // controller (see SettingsController), so these do not rely on Fortify's own
+    // POST/DELETE 2FA routes.
+    Route::post('/settings/security/2fa/enable', [SettingsController::class, 'enableTwoFactor'])->name('settings.2fa.enable');
+    Route::post('/settings/security/2fa/confirm', [SettingsController::class, 'confirmTwoFactor'])->name('settings.2fa.confirm');
+    Route::post('/settings/security/2fa/recovery-codes', [SettingsController::class, 'regenerateRecoveryCodes'])->name('settings.2fa.recovery.regenerate');
+    Route::post('/settings/security/2fa/recovery-codes/show', [SettingsController::class, 'revealRecoveryCodes'])->name('settings.2fa.recovery.show');
+    Route::delete('/settings/security/2fa', [SettingsController::class, 'disableTwoFactor'])->name('settings.2fa.disable');
+
     Route::post('/settings/tokens', [SettingsController::class, 'storeToken'])->name('settings.tokens.store');
     Route::delete('/settings/tokens/{tokenId}', [SettingsController::class, 'destroyToken'])->name('settings.tokens.destroy');
     Route::get('/settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');

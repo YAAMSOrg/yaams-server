@@ -149,8 +149,12 @@ return [
         Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
+        // 2FA management in the UI is handled by our own password-gated
+        // SettingsController routes. confirmPassword => true additionally guards
+        // Fortify's built-in 2FA routes (which we no longer link to) so a live
+        // session cannot hit them ungated.
         Features::twoFactorAuthentication([
-            'confirmPassword' => false,
+            'confirmPassword' => true,
         ]),
     ],
 ];

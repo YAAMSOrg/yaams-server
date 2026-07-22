@@ -128,6 +128,11 @@ class AppServiceProvider extends ServiceProvider
         // second-factor code (mirrors the login page styling).
         Fortify::twoFactorChallengeView(fn () => view('auth.two-factor-challenge'));
 
+        // Password confirmation screen. The 2FA UI confirms the password inline
+        // via SettingsController, but Fortify's built-in 2FA routes are gated by
+        // confirmPassword => true and redirect here if ever hit directly.
+        Fortify::confirmPasswordView(fn () => view('auth.confirm-password'));
+
         // Die Login-Pipeline von Fortify anpassen:
         // RedirectIfTwoFactorAuthenticatable diverts users with 2FA enabled to
         // the challenge screen before the password is accepted. The active
