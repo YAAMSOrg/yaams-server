@@ -47,22 +47,33 @@ class TwoFactorAuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->post(route('two-factor.enable'));
+        $this->actingAs($user)->post(route('settings.2fa.enable'), ['current_password' => 'password']);
 
         $user->refresh();
         $this->assertNotNull($user->two_factor_secret);
         $this->assertNull($user->two_factor_confirmed_at, '2FA must stay pending until confirmed');
     }
 
+    public function test_enabling_requires_the_current_password(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('settings.2fa.enable'), ['current_password' => 'wrong-password'])
+            ->assertSessionHasErrors('current_password');
+
+        $this->assertNull($user->fresh()->two_factor_secret);
+    }
+
     public function test_confirming_with_a_valid_code_enables_two_factor(): void
     {
         $user = User::factory()->create();
-        $this->actingAs($user)->post(route('two-factor.enable'));
+        $this->actingAs($user)->post(route('settings.2fa.enable'), ['current_password' => 'password']);
         $user->refresh();
 
         $code = $this->google2fa()->getCurrentOtp(decrypt($user->two_factor_secret));
 
-        $this->actingAs($user)->post(route('two-factor.confirm'), ['code' => $code]);
+        $this->actingAs($user)->post(route('settings.2fa.confirm'), ['code' => $code]);
 
         $this->assertNotNull($user->fresh()->two_factor_confirmed_at);
     }
@@ -149,7 +160,7 @@ class TwoFactorAuthenticationTest extends TestCase
     public function test_security_page_renders_the_qr_code_during_setup(): void
     {
         $user = User::factory()->create();
-        $this->actingAs($user)->post(route('two-factor.enable'));
+        $this->actingAs($user)->post(route('settings.2fa.enable'), ['current_password' => 'password']);
 
         $response = $this->actingAs($user)->get(route('settings.security'));
 
@@ -158,7 +169,7 @@ class TwoFactorAuthenticationTest extends TestCase
         $response->assertSee('Confirm');
     }
 
-    public function test_security_page_renders_recovery_codes_when_enabled(): void
+    public function test_recovery_codes_are_hidden_in_the_enabled_steady_state(): void
     {
         $user = User::factory()->create();
         $this->confirmTwoFactorFor($user);
@@ -167,8 +178,70 @@ class TwoFactorAuthenticationTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Recovery codes');
-        $response->assertSee('ABCDE-12345');
-        $response->assertSee('Regenerate recovery codes');
+        $response->assertSee('View recovery codes');
+        // The actual codes must NOT be rendered until re-authentication.
+        $response->assertDontSee('ABCDE-12345');
+    }
+
+    public function test_viewing_recovery_codes_requires_the_current_password(): void
+    {
+        $user = User::factory()->create();
+        $this->confirmTwoFactorFor($user);
+
+        // Wrong password: rejected, codes stay hidden.
+        $this->actingAs($user)
+            ->post(route('settings.2fa.recovery.show'), ['current_password' => 'wrong-password'])
+            ->assertSessionHasErrors('current_password');
+        $this->actingAs($user)->get(route('settings.security'))->assertDontSee('ABCDE-12345');
+
+        // Correct password: the codes are revealed once.
+        $this->actingAs($user)
+            ->followingRedirects()
+            ->post(route('settings.2fa.recovery.show'), ['current_password' => 'password'])
+            ->assertSee('ABCDE-12345');
+    }
+
+    public function test_recovery_codes_are_revealed_after_confirming(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->post(route('settings.2fa.enable'), ['current_password' => 'password']);
+        $user->refresh();
+
+        $code = $this->google2fa()->getCurrentOtp(decrypt($user->two_factor_secret));
+
+        $this->actingAs($user)
+            ->followingRedirects()
+            ->post(route('settings.2fa.confirm'), ['code' => $code])
+            ->assertSee('I have saved my recovery codes');
+    }
+
+    public function test_regenerating_recovery_codes_requires_the_current_password(): void
+    {
+        $user = User::factory()->create();
+        $this->confirmTwoFactorFor($user);
+
+        // Wrong password: rejected, existing codes unchanged.
+        $this->actingAs($user)
+            ->post(route('settings.2fa.recovery.regenerate'), ['current_password' => 'wrong-password'])
+            ->assertSessionHasErrors('current_password');
+        $this->assertContains('ABCDE-12345', $user->fresh()->recoveryCodes());
+
+        // Correct password: a new set is generated.
+        $this->actingAs($user)
+            ->post(route('settings.2fa.recovery.regenerate'), ['current_password' => 'password']);
+        $this->assertNotContains('ABCDE-12345', $user->fresh()->recoveryCodes());
+    }
+
+    public function test_disabling_requires_the_current_password(): void
+    {
+        $user = User::factory()->create();
+        $this->confirmTwoFactorFor($user);
+
+        $this->actingAs($user)
+            ->delete(route('settings.2fa.disable'), ['current_password' => 'wrong-password'])
+            ->assertSessionHasErrors('current_password');
+
+        $this->assertNotNull($user->fresh()->two_factor_secret, '2FA must remain enabled without the password');
     }
 
     public function test_disabling_clears_the_two_factor_columns(): void
@@ -176,7 +249,7 @@ class TwoFactorAuthenticationTest extends TestCase
         $user = User::factory()->create();
         $this->confirmTwoFactorFor($user);
 
-        $this->actingAs($user)->delete(route('two-factor.disable'));
+        $this->actingAs($user)->delete(route('settings.2fa.disable'), ['current_password' => 'password']);
 
         $user->refresh();
         $this->assertNull($user->two_factor_secret);

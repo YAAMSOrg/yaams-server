@@ -110,6 +110,9 @@
                     </div>
                 @endif
 
+                @error('current_password')
+                    <div class="alert alert-danger">{{ $message }}</div>
+                @enderror
                 @error('code')
                     <div class="alert alert-danger">{{ $message }}</div>
                 @enderror
@@ -119,12 +122,10 @@
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge text-bg-secondary"><i class="bi bi-shield-slash me-1"></i> Disabled</span>
                     </div>
-                    <form action="{{ route('two-factor.enable') }}" method="post" class="mt-3">
-                        @csrf
-                        <button class="btn btn-primary" type="submit">
-                            <i class="bi bi-shield-plus me-2"></i> Enable two-factor authentication
-                        </button>
-                    </form>
+                    <button class="btn btn-primary mt-3" type="button"
+                            data-bs-toggle="modal" data-bs-target="#tfaEnableModal">
+                        <i class="bi bi-shield-plus me-2"></i> Enable two-factor authentication
+                    </button>
                 @elseif (is_null($tfaUser->two_factor_confirmed_at))
                     {{-- State: pending confirmation - show QR + confirm form --}}
                     <div class="alert alert-info">
@@ -138,7 +139,7 @@
                         Can't scan? Enter this setup key manually:
                         <code>{{ decrypt($tfaUser->two_factor_secret) }}</code>
                     </p>
-                    <form action="{{ route('two-factor.confirm') }}" method="post" class="mb-3">
+                    <form action="{{ route('settings.2fa.confirm') }}" method="post" class="mb-3">
                         @csrf
                         <label for="code" class="form-label">Authenticator code</label>
                         <div class="input-group" style="max-width: 320px;">
@@ -156,12 +157,8 @@
                             </button>
                         </div>
                     </form>
-                    <form action="{{ route('two-factor.disable') }}" method="post"
-                          onsubmit="return confirm('Cancel two-factor setup?')">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-sm btn-outline-secondary" type="submit">Cancel setup</button>
-                    </form>
+                    <button class="btn btn-sm btn-outline-secondary" type="button"
+                            data-bs-toggle="modal" data-bs-target="#tfaCancelModal">Cancel setup</button>
                 @else
                     {{-- State: enabled --}}
                     <div class="d-flex align-items-center gap-2 mb-3">
@@ -169,35 +166,128 @@
                     </div>
 
                     <h6 class="fw-semibold mb-2">Recovery codes</h6>
-                    <p class="text-muted small">
-                        Store these in a safe place. Each code can be used once to sign in
-                        if you lose access to your authenticator app.
-                    </p>
-                    <div class="bg-body-secondary rounded p-3 mb-3 font-monospace small">
-                        @foreach ($tfaUser->recoveryCodes() as $recoveryCode)
-                            <div>{{ $recoveryCode }}</div>
-                        @endforeach
-                    </div>
 
-                    <div class="d-flex gap-2">
-                        <form action="{{ route('two-factor.regenerate-recovery-codes') }}" method="post">
-                            @csrf
-                            <button class="btn btn-outline-secondary btn-sm" type="submit">
+                    @if ($revealRecoveryCodes)
+                        {{-- One-time reveal: shown right after enabling/regenerating or a password-confirmed view --}}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            Save these codes now - each can be used once to sign in if you lose your
+                            authenticator. They will not be shown again without confirming your password.
+                        </div>
+                        <div id="tfaRecoveryCodes" class="bg-body-secondary rounded p-3 mb-3 font-monospace small">
+                            @foreach ($tfaUser->recoveryCodes() as $recoveryCode)
+                                <div>{{ $recoveryCode }}</div>
+                            @endforeach
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap mb-3">
+                            <button type="button" id="tfaCopyCodes" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-clipboard me-1"></i> Copy
+                            </button>
+                            <button type="button" id="tfaDownloadCodes" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-download me-1"></i> Download
+                            </button>
+                        </div>
+                        <a href="{{ route('settings.security') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-check2-circle me-1"></i> I have saved my recovery codes
+                        </a>
+                        <script>
+                            (function () {
+                                const codes = @json($tfaUser->recoveryCodes());
+                                const text = codes.join('\n');
+                                const copyBtn = document.getElementById('tfaCopyCodes');
+                                const dlBtn = document.getElementById('tfaDownloadCodes');
+                                if (copyBtn) {
+                                    copyBtn.addEventListener('click', function () {
+                                        navigator.clipboard.writeText(text);
+                                    });
+                                }
+                                if (dlBtn) {
+                                    dlBtn.addEventListener('click', function () {
+                                        const blob = new Blob([text], { type: 'text/plain' });
+                                        const a = document.createElement('a');
+                                        a.href = URL.createObjectURL(blob);
+                                        a.download = 'yaams-recovery-codes.txt';
+                                        a.click();
+                                        URL.revokeObjectURL(a.href);
+                                    });
+                                }
+                            })();
+                        </script>
+                    @else
+                        {{-- Steady state: codes are hidden --}}
+                        <p class="text-muted small">
+                            Recovery codes let you sign in if you lose access to your authenticator app.
+                            They're kept hidden for security - confirm your password to view or regenerate them.
+                        </p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline-secondary btn-sm" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#tfaViewCodesModal">
+                                <i class="bi bi-eye me-1"></i> View recovery codes
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#tfaRegenModal">
                                 <i class="bi bi-arrow-repeat me-1"></i> Regenerate recovery codes
                             </button>
-                        </form>
-                        <form action="{{ route('two-factor.disable') }}" method="post"
-                              onsubmit="return confirm('Disable two-factor authentication? Your account will only be protected by your password.')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-outline-danger btn-sm" type="submit">
+                            <button class="btn btn-outline-danger btn-sm" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#tfaDisableModal">
                                 <i class="bi bi-shield-x me-1"></i> Disable
                             </button>
-                        </form>
-                    </div>
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>
+
+        {{-- Password-confirmation modals for sensitive 2FA actions --}}
+        @if (! $tfaUser->two_factor_secret)
+            @include('settings._password_confirm_modal', [
+                'id' => 'tfaEnableModal',
+                'action' => route('settings.2fa.enable'),
+                'method' => 'POST',
+                'title' => 'Enable two-factor authentication',
+                'body' => 'Confirm your password to begin setting up two-factor authentication.',
+                'submitLabel' => 'Continue',
+                'submitClass' => 'btn-primary',
+            ])
+        @elseif (is_null($tfaUser->two_factor_confirmed_at))
+            @include('settings._password_confirm_modal', [
+                'id' => 'tfaCancelModal',
+                'action' => route('settings.2fa.disable'),
+                'method' => 'DELETE',
+                'title' => 'Cancel two-factor setup',
+                'body' => 'Confirm your password to cancel two-factor setup.',
+                'submitLabel' => 'Cancel setup',
+                'submitClass' => 'btn-danger',
+            ])
+        @elseif (! $revealRecoveryCodes)
+            @include('settings._password_confirm_modal', [
+                'id' => 'tfaViewCodesModal',
+                'action' => route('settings.2fa.recovery.show'),
+                'method' => 'POST',
+                'title' => 'View recovery codes',
+                'body' => 'Confirm your password to reveal your recovery codes.',
+                'submitLabel' => 'View codes',
+                'submitClass' => 'btn-primary',
+            ])
+            @include('settings._password_confirm_modal', [
+                'id' => 'tfaRegenModal',
+                'action' => route('settings.2fa.recovery.regenerate'),
+                'method' => 'POST',
+                'title' => 'Regenerate recovery codes',
+                'body' => 'Confirm your password to generate a new set of recovery codes. Your existing codes will stop working.',
+                'submitLabel' => 'Regenerate',
+                'submitClass' => 'btn-primary',
+            ])
+            @include('settings._password_confirm_modal', [
+                'id' => 'tfaDisableModal',
+                'action' => route('settings.2fa.disable'),
+                'method' => 'DELETE',
+                'title' => 'Disable two-factor authentication',
+                'body' => 'Confirm your password to disable two-factor authentication. Your account will only be protected by your password.',
+                'submitLabel' => 'Disable',
+                'submitClass' => 'btn-danger',
+            ])
+        @endif
 
         {{-- API tokens --}}
         <div class="card mt-4">
