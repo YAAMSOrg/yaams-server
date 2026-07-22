@@ -199,14 +199,14 @@ class FlightController extends Controller
                 ]);
             }
 
-            // Physical sanity: block-on after block-off, and within the max duration
-            $durationError = FlightSanity::durationError(
+            // Physical sanity: ordering, not-in-future, and within the max duration
+            $timingError = FlightSanity::timingError(
                 $request->post("blockoff"),
                 $request->post("blockon"),
             );
-            if ($durationError !== null) {
+            if ($timingError !== null) {
                 throw ValidationException::withMessages([
-                    "blockon" => $durationError,
+                    "blockon" => $timingError,
                 ]);
             }
 
@@ -219,6 +219,17 @@ class FlightController extends Controller
             if (is_null($aircraft)) {
                 throw ValidationException::withMessages([
                     "aircraft_id" => "This aircraft is not available or not owned by your current airline.",
+                ]);
+            }
+
+            // Physical sanity: cruise altitude must not exceed the airframe's service ceiling
+            $altitudeError = FlightSanity::altitudeError(
+                (int) $validated["crzalt"],
+                $aircraft->service_ceiling !== null ? (int) $aircraft->service_ceiling : null,
+            );
+            if ($altitudeError !== null) {
+                throw ValidationException::withMessages([
+                    "crzalt" => $altitudeError,
                 ]);
             }
 

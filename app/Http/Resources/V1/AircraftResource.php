@@ -29,6 +29,7 @@ class AircraftResource extends JsonResource
             'mtow' => $this->mtow,
             'mzfw' => $this->mzfw,
             'mlw' => $this->mlw,
+            'service_ceiling' => $this->service_ceiling,
             'remarks' => $this->remarks,
 
             // We don't have to return this, since this can only be accessed through a route, which already specifies the airline.

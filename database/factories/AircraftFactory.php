@@ -25,7 +25,16 @@ class AircraftFactory extends Factory
             'current_loc' => fn () => Airport::factory()->create()->icao_code,
             'used_by' => Airline::factory(),
             'status' => Aircraft::STATUS_ACTIVE,
+            'service_ceiling' => 41000,
         ];
+    }
+
+    /**
+     * Pin the service ceiling (feet).
+     */
+    public function serviceCeiling(int $ft): static
+    {
+        return $this->state(fn () => ['service_ceiling' => $ft]);
     }
 
     /**

@@ -105,6 +105,33 @@ class FlightSanityWebTest extends TestCase
         $this->assertDatabaseCount('flights', 0);
     }
 
+    public function test_a_flight_in_the_future_is_rejected(): void
+    {
+        [$airline, $aircraft, $pilot] = $this->airlineWithAircraft();
+
+        $off = now('UTC')->addDays(2);
+        $on = $off->copy()->addMinutes(90);
+
+        $this->file($pilot, $airline, $this->payload($aircraft, [
+            'blockoff' => $off->format('Y-m-d H:i:s'),
+            'blockon' => $on->format('Y-m-d H:i:s'),
+        ]))->assertSessionHasErrors('blockon');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
+    public function test_cruise_altitude_above_the_service_ceiling_is_rejected(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->serviceCeiling(41000)->create(['used_by' => $airline->id]);
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        $this->file($pilot, $airline, $this->payload($aircraft, ['crzalt' => 45000]))
+            ->assertSessionHasErrors('crzalt');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
     public function test_a_valid_flight_is_still_accepted(): void
     {
         [$airline, $aircraft, $pilot] = $this->airlineWithAircraft();

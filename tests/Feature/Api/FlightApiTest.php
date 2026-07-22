@@ -144,6 +144,45 @@ class FlightApiTest extends TestCase
         $this->assertDatabaseCount('flights', 0);
     }
 
+    public function test_a_flight_in_the_future_is_rejected(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        Sanctum::actingAs($pilot);
+
+        $off = now('UTC')->addDays(2);
+        $on = $off->copy()->addMinutes(90);
+
+        $this->postJson(route('api.v1.airlines.flights.store', $airline), [
+            'blockoff' => $off->format('Y-m-d H:i:s'),
+            'blockon' => $on->format('Y-m-d H:i:s'),
+        ] + $this->payload($aircraft))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('blockon');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
+    public function test_cruise_altitude_above_the_service_ceiling_is_rejected(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->serviceCeiling(41000)->create(['used_by' => $airline->id]);
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        Sanctum::actingAs($pilot);
+
+        $this->postJson(
+            route('api.v1.airlines.flights.store', $airline),
+            ['crzalt' => 45000] + $this->payload($aircraft),
+        )
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('crzalt');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
     public function test_location_continuity_is_enforced_on_the_api(): void
     {
         $airline = Airline::factory()->locationContinuity()->create();

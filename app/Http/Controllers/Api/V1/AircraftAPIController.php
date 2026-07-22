@@ -140,6 +140,7 @@ class AircraftAPIController extends Controller
      * @bodyParam mtow integer Max take-off weight (kg), 0-1000000. Example: 78000
      * @bodyParam mzfw integer Max zero-fuel weight (kg), 0-1000000. Example: 62500
      * @bodyParam mlw integer Max landing weight (kg), 0-1000000. Example: 66000
+     * @bodyParam service_ceiling integer Service ceiling (ft), 1000-60000; PIREPs with a higher cruise altitude are rejected. Example: 41000
      * @bodyParam remarks string Free-text remarks, max 1000 chars. Example: Delivered new.
      *
      * @response 201 {

@@ -24,6 +24,7 @@ class Aircraft extends Model
         'mtow',
         'mzfw',
         'mlw',
+        'service_ceiling',
         'remarks',
         'current_loc',
         'used_by',

@@ -72,13 +72,13 @@ class StoreFlightRequest extends FormRequest
                     return;
                 }
 
-                // Physical sanity: block-on after block-off, and within the max duration
-                $durationError = FlightSanity::durationError(
+                // Physical sanity: ordering, not-in-future, and within the max duration
+                $timingError = FlightSanity::timingError(
                     $this->input('blockoff'),
                     $this->input('blockon'),
                 );
-                if ($durationError !== null) {
-                    $validator->errors()->add('blockon', $durationError);
+                if ($timingError !== null) {
+                    $validator->errors()->add('blockon', $timingError);
                 }
 
                 $aircraft = $this->aircraft();
@@ -86,6 +86,15 @@ class StoreFlightRequest extends FormRequest
                     $validator->errors()->add('aircraft_id', 'This aircraft is not available or not owned by your airline.');
 
                     return;
+                }
+
+                // Physical sanity: cruise altitude must not exceed the airframe's service ceiling
+                $altitudeError = FlightSanity::altitudeError(
+                    (int) $this->input('crzalt'),
+                    $aircraft->service_ceiling !== null ? (int) $aircraft->service_ceiling : null,
+                );
+                if ($altitudeError !== null) {
+                    $validator->errors()->add('crzalt', $altitudeError);
                 }
 
                 // Location continuity: the flight must depart from where the airframe currently is

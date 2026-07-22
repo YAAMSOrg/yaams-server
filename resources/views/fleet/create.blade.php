@@ -155,6 +155,16 @@
                                 <div class="form-text fs-7">Maximum Landing Weight</div>
                             </div>
                         </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label for="service_ceiling" class="form-label fw-semibold">Service Ceiling <span class="text-muted">(Optional)</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="service_ceiling" name="service_ceiling" value="{{ old('service_ceiling') }}" min="1000" max="60000" placeholder="e.g. 41000">
+                                    <span class="input-group-text bg-light text-muted">ft</span>
+                                </div>
+                                <div class="form-text fs-7">Max cruise altitude; PIREPs above it are rejected</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
