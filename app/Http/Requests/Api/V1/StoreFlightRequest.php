@@ -4,6 +4,8 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Models\Aircraft;
 use App\Models\Airline;
+use App\Models\Flight;
+use App\Support\FlightSanity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -40,7 +42,7 @@ class StoreFlightRequest extends FormRequest
             'crzalt' => 'numeric|max:50000|digits_between:1,5|required',
             'blockoff' => 'required|date_format:Y-m-d H:i:s',
             'blockon' => 'required|date_format:Y-m-d H:i:s',
-            'burned_fuel' => 'numeric|required',
+            'burned_fuel' => 'required|integer|min:' . Flight::MIN_BURNED_FUEL . '|max:' . Flight::MAX_BURNED_FUEL,
             'route' => 'required',
             'online_network_id' => 'required|exists:online_networks,id',
             'remarks' => 'nullable|regex:/^[\pL\s\d\.\,\-]+$/u',
@@ -68,6 +70,15 @@ class StoreFlightRequest extends FormRequest
             function (Validator $validator) {
                 if ($validator->errors()->isNotEmpty()) {
                     return;
+                }
+
+                // Physical sanity: block-on after block-off, and within the max duration
+                $durationError = FlightSanity::durationError(
+                    $this->input('blockoff'),
+                    $this->input('blockon'),
+                );
+                if ($durationError !== null) {
+                    $validator->errors()->add('blockon', $durationError);
                 }
 
                 $aircraft = $this->aircraft();

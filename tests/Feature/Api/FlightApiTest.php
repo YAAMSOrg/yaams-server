@@ -71,6 +71,79 @@ class FlightApiTest extends TestCase
         ]);
     }
 
+    public function test_non_positive_fuel_is_rejected(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        Sanctum::actingAs($pilot);
+
+        $this->postJson(
+            route('api.v1.airlines.flights.store', $airline),
+            ['burned_fuel' => 0] + $this->payload($aircraft),
+        )
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('burned_fuel');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
+    public function test_absurd_fuel_is_rejected(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        Sanctum::actingAs($pilot);
+
+        $this->postJson(
+            route('api.v1.airlines.flights.store', $airline),
+            ['burned_fuel' => 9_000_000] + $this->payload($aircraft),
+        )
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('burned_fuel');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
+    public function test_block_on_before_block_off_is_rejected(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        Sanctum::actingAs($pilot);
+
+        $this->postJson(route('api.v1.airlines.flights.store', $airline), [
+            'blockoff' => '2026-07-11 11:30:00',
+            'blockon' => '2026-07-11 10:00:00',
+        ] + $this->payload($aircraft))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('blockon');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
+    public function test_flight_longer_than_the_max_duration_is_rejected(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        Sanctum::actingAs($pilot);
+
+        // 27 hours, above the 26-hour cap.
+        $this->postJson(route('api.v1.airlines.flights.store', $airline), [
+            'blockoff' => '2026-07-11 10:00:00',
+            'blockon' => '2026-07-12 13:00:00',
+        ] + $this->payload($aircraft))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('blockon');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
     public function test_location_continuity_is_enforced_on_the_api(): void
     {
         $airline = Airline::factory()->locationContinuity()->create();

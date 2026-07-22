@@ -15,6 +15,7 @@ use App\Notifications\PirepAccepted;
 use App\Notifications\PirepRejected;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 use App\Support\ActivityLevel;
+use App\Support\FlightSanity;
 
 class FlightController extends Controller
 {
@@ -174,7 +175,7 @@ class FlightController extends Controller
                 "crzalt" => "numeric|max:50000|digits_between:1,5|required",
                 "blockoff" => "required",
                 "blockon" => "required",
-                "burned_fuel" => "numeric|required",
+                "burned_fuel" => "required|integer|min:" . Flight::MIN_BURNED_FUEL . "|max:" . Flight::MAX_BURNED_FUEL,
                 "route" => "required",
                 "online_network_id" => "required",
                 "remarks" => [
@@ -195,6 +196,17 @@ class FlightController extends Controller
                 throw ValidationException::withMessages([
                     "arrival_icao" =>
                         "This airport could not be found in the database.",
+                ]);
+            }
+
+            // Physical sanity: block-on after block-off, and within the max duration
+            $durationError = FlightSanity::durationError(
+                $request->post("blockoff"),
+                $request->post("blockon"),
+            );
+            if ($durationError !== null) {
+                throw ValidationException::withMessages([
+                    "blockon" => $durationError,
                 ]);
             }
 

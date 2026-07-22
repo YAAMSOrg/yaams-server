@@ -141,7 +141,7 @@
                         <div class="col-md-4">
                             @php $isLbs = session('activeairline')->unit_is_lbs; @endphp
                             <label for="burned_fuel" class="form-label">Burned Fuel ({{ $isLbs ? 'LBS' : 'KG' }})</label>
-                            <input type="number" class="form-control font-monospace" min="0" placeholder="{{ $isLbs ? '36000' : '5900' }}" required name="burned_fuel" id="burned_fuel" value="{{ old('burned_fuel') }}">
+                            <input type="number" class="form-control font-monospace" min="1" placeholder="{{ $isLbs ? '36000' : '5900' }}" required name="burned_fuel" id="burned_fuel" value="{{ old('burned_fuel') }}">
                         </div>
                     </div>
                 </div>

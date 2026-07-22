@@ -100,8 +100,8 @@ class FlightAPIController extends Controller
      * @bodyParam callsign string required Radio callsign, 1-4 digits optionally followed by up to 2 letters. Example: 421
      * @bodyParam crzalt integer required Cruise altitude in feet, max 50000. Example: 36000
      * @bodyParam blockoff string required Block-off time (UTC), format Y-m-d H:i:s. Example: 2026-07-11 10:00:00
-     * @bodyParam blockon string required Block-on time (UTC), format Y-m-d H:i:s. Example: 2026-07-11 11:30:00
-     * @bodyParam burned_fuel number required Fuel burned. Example: 4200
+     * @bodyParam blockon string required Block-on time (UTC), format Y-m-d H:i:s. Must be after blockoff; flight duration may not exceed 26 hours. Example: 2026-07-11 11:30:00
+     * @bodyParam burned_fuel integer required Fuel burned, in the airline's unit (min 1, max 600000). Example: 4200
      * @bodyParam route string required Filed route string. Example: SOVAT UL610 KONAN
      * @bodyParam online_network_id integer required Online network ID (must exist in online_networks). Example: 1
      * @bodyParam remarks string Optional remarks (letters, digits, spaces, . , -). Example: Smooth flight.
