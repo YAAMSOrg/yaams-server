@@ -32,6 +32,7 @@ class StoreAircraftRequest extends FormRequest
             'mtow' => 'nullable|integer|min:0|max:1000000',
             'mzfw' => 'nullable|integer|min:0|max:1000000',
             'mlw' => 'nullable|integer|min:0|max:1000000',
+            'service_ceiling' => 'nullable|integer|min:1000|max:60000',
             'remarks' => 'nullable|string|max:1000',
             'current_loc' => 'required|max:4|exists:airports,icao_code',
         ];

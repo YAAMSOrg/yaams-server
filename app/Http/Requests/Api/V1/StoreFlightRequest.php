@@ -4,6 +4,8 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Models\Aircraft;
 use App\Models\Airline;
+use App\Models\Flight;
+use App\Support\FlightSanity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -40,7 +42,7 @@ class StoreFlightRequest extends FormRequest
             'crzalt' => 'numeric|max:50000|digits_between:1,5|required',
             'blockoff' => 'required|date_format:Y-m-d H:i:s',
             'blockon' => 'required|date_format:Y-m-d H:i:s',
-            'burned_fuel' => 'numeric|required',
+            'burned_fuel' => 'required|integer|min:' . Flight::MIN_BURNED_FUEL . '|max:' . Flight::MAX_BURNED_FUEL,
             'route' => 'required',
             'online_network_id' => 'required|exists:online_networks,id',
             'remarks' => 'nullable|regex:/^[\pL\s\d\.\,\-]+$/u',
@@ -70,11 +72,29 @@ class StoreFlightRequest extends FormRequest
                     return;
                 }
 
+                // Physical sanity: ordering, not-in-future, and within the max duration
+                $timingError = FlightSanity::timingError(
+                    $this->input('blockoff'),
+                    $this->input('blockon'),
+                );
+                if ($timingError !== null) {
+                    $validator->errors()->add('blockon', $timingError);
+                }
+
                 $aircraft = $this->aircraft();
                 if ($aircraft === null) {
                     $validator->errors()->add('aircraft_id', 'This aircraft is not available or not owned by your airline.');
 
                     return;
+                }
+
+                // Physical sanity: cruise altitude must not exceed the airframe's service ceiling
+                $altitudeError = FlightSanity::altitudeError(
+                    (int) $this->input('crzalt'),
+                    $aircraft->service_ceiling !== null ? (int) $aircraft->service_ceiling : null,
+                );
+                if ($altitudeError !== null) {
+                    $validator->errors()->add('crzalt', $altitudeError);
                 }
 
                 // Location continuity: the flight must depart from where the airframe currently is

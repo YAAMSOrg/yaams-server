@@ -15,6 +15,7 @@ use App\Notifications\PirepAccepted;
 use App\Notifications\PirepRejected;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 use App\Support\ActivityLevel;
+use App\Support\FlightSanity;
 
 class FlightController extends Controller
 {
@@ -174,7 +175,7 @@ class FlightController extends Controller
                 "crzalt" => "numeric|max:50000|digits_between:1,5|required",
                 "blockoff" => "required",
                 "blockon" => "required",
-                "burned_fuel" => "numeric|required",
+                "burned_fuel" => "required|integer|min:" . Flight::MIN_BURNED_FUEL . "|max:" . Flight::MAX_BURNED_FUEL,
                 "route" => "required",
                 "online_network_id" => "required",
                 "remarks" => [
@@ -198,6 +199,17 @@ class FlightController extends Controller
                 ]);
             }
 
+            // Physical sanity: ordering, not-in-future, and within the max duration
+            $timingError = FlightSanity::timingError(
+                $request->post("blockoff"),
+                $request->post("blockon"),
+            );
+            if ($timingError !== null) {
+                throw ValidationException::withMessages([
+                    "blockon" => $timingError,
+                ]);
+            }
+
             // Check if the aircraft is indeed part of the active airline AND is active
             $aircraft = Aircraft::query()
                 ->where("id", "=", $request->post("aircraft_id"))
@@ -207,6 +219,17 @@ class FlightController extends Controller
             if (is_null($aircraft)) {
                 throw ValidationException::withMessages([
                     "aircraft_id" => "This aircraft is not available or not owned by your current airline.",
+                ]);
+            }
+
+            // Physical sanity: cruise altitude must not exceed the airframe's service ceiling
+            $altitudeError = FlightSanity::altitudeError(
+                (int) $validated["crzalt"],
+                $aircraft->service_ceiling !== null ? (int) $aircraft->service_ceiling : null,
+            );
+            if ($altitudeError !== null) {
+                throw ValidationException::withMessages([
+                    "crzalt" => $altitudeError,
                 ]);
             }
 

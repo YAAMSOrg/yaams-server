@@ -204,6 +204,12 @@
                                         {{ $aircraft->mlw ? number_format($aircraft->mlw) . ' kg' : 'N/A' }}
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td class="text-muted ps-4 py-2.5">Service Ceiling</td>
+                                    <td class="fw-semibold text-dark py-2.5" colspan="5">
+                                        {{ $aircraft->service_ceiling ? number_format($aircraft->service_ceiling) . ' ft' : 'N/A' }}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

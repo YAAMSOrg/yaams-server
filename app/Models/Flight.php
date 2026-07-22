@@ -14,6 +14,24 @@ class Flight extends Model
 {
     use HasFactory, LogsModelActivity;
 
+    /**
+     * Physical sanity bounds enforced when a PIREP is filed. These are universal
+     * aviation limits, not per-instance policy, so they live as constants.
+     *
+     * The longest airliner flight on record is the Boeing 777-200LR ferry (2005,
+     * ~22h42m airborne); ~23h airborne + taxi, rounded up with a safety net.
+     */
+    public const MAX_DURATION_MINUTES = 26 * 60;
+
+    /** Fuel must be positive; 0/negative is nonsense. */
+    public const MIN_BURNED_FUEL = 1;
+
+    /**
+     * Generous upper ceiling to catch typos in either unit: an A380 holds
+     * ~256 t (~564,000 lb) of fuel, so this clears every real airframe.
+     */
+    public const MAX_BURNED_FUEL = 600000;
+
     protected $fillable = [
         'airline_id',
         'callsign',

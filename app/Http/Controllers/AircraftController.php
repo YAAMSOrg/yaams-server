@@ -175,6 +175,7 @@ class AircraftController extends Controller
                 'mtow' => 'nullable|integer|min:0|max:1000000',
                 'mzfw' => 'nullable|integer|min:0|max:1000000',
                 'mlw' => 'nullable|integer|min:0|max:1000000',
+                'service_ceiling' => 'nullable|integer|min:1000|max:60000',
                 'remarks' => 'nullable|string|max:1000',
                 'current_loc' => 'required|max:4',
             ]);
@@ -243,6 +244,7 @@ class AircraftController extends Controller
                 'mtow' => 'nullable|integer|min:0|max:1000000',
                 'mzfw' => 'nullable|integer|min:0|max:1000000',
                 'mlw' => 'nullable|integer|min:0|max:1000000',
+                'service_ceiling' => 'nullable|integer|min:1000|max:60000',
                 'remarks' => 'nullable|string|max:1000',
             ]);
 
@@ -269,6 +271,7 @@ class AircraftController extends Controller
             $targetAircraft->mtow = $request->post('mtow');
             $targetAircraft->mzfw = $request->post('mzfw');
             $targetAircraft->mlw = $request->post('mlw');
+            $targetAircraft->service_ceiling = $request->post('service_ceiling');
             $targetAircraft->status = $finalStatus;
             $targetAircraft->remarks = $request->post('remarks');
 
