@@ -103,14 +103,19 @@ class User extends Authenticatable implements MustVerifyEmail
             ->exists();
     }
 
+    public function isOwnerOf(Airline $airline): bool
+    {
+        return $airline->owner_user_id === $this->id;
+    }
+
     public function isManagerOf(Airline $airline): bool
     {
-        return $this->hasAirlineRole($airline, 'Manager');
+        return $this->isOwnerOf($airline) || $this->hasAirlineRole($airline, 'Manager');
     }
 
     public function canReviewFlightsFor(Airline $airline): bool
     {
-        return $this->hasAirlineRole($airline, ['Dispatcher', 'Manager']);
+        return $this->isOwnerOf($airline) || $this->hasAirlineRole($airline, ['Dispatcher', 'Manager']);
     }
 
     public function countNewNotifications() {

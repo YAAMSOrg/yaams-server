@@ -118,6 +118,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/airline/members', [MemberController::class, 'index'])->name('members.index');
         Route::put('/airline/members/{member}', [MemberController::class, 'update'])->name('members.update');
         Route::delete('/airline/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
+        Route::put('/airline/members/{member}/transfer-ownership', [MemberController::class, 'transferOwnership'])->name('members.transfer');
 
         // Announcements / NOTAMs (manager check enforced in controller)
         Route::get('/airline/announcements', [NotamController::class, 'index'])->name('notams.index');

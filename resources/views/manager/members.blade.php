@@ -4,6 +4,10 @@
 
 @section('content')
 
+@php
+    $viewerIsOwner = auth()->user()->isOwnerOf($airline);
+@endphp
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h3 mb-1"><i class="bi bi-speedometer2 me-2"></i> Airline Management</h1>
@@ -46,35 +50,69 @@
                     </thead>
                     <tbody>
                         @forelse($members as $member)
+                            @php
+                                $rowIsOwner = $airline->owner_user_id === $member->id;
+                                $rowIsManager = $member->pivot->role === 'Manager';
+                            @endphp
                             <tr>
                                 <td>
                                     <span class="fw-semibold">{{ $member->name }}</span>
                                     @if($member->id === auth()->id())
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1">You</span>
                                     @endif
+                                    @if($rowIsOwner)
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle ms-1"><i class="bi bi-star-fill me-1"></i>Owner</span>
+                                    @endif
                                 </td>
                                 <td>
-                                    <form action="{{ route('members.update', $member) }}" method="POST" class="d-flex gap-2 align-items-center">
-                                        @csrf
-                                        @method('PUT')
-                                        <select name="role" class="form-select form-select-sm" style="width:auto"
-                                                onchange="this.form.querySelector('button').classList.remove('d-none')">
-                                            <option value="Pilot" @selected($member->pivot->role === 'Pilot')>Pilot</option>
-                                            <option value="Dispatcher" @selected($member->pivot->role === 'Dispatcher')>Dispatcher</option>
-                                            <option value="Manager" @selected($member->pivot->role === 'Manager')>Manager</option>
-                                        </select>
-                                        <button type="submit" class="btn btn-sm btn-primary d-none">Save</button>
-                                    </form>
+                                    @if($rowIsOwner)
+                                        <span class="text-muted">Owner</span>
+                                    @else
+                                        @if($rowIsManager && ! $viewerIsOwner)
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Manager</span>
+                                        @else
+                                            <form action="{{ route('members.update', $member) }}" method="POST" class="d-flex gap-2 align-items-center">
+                                                @csrf
+                                                @method('PUT')
+                                                <select name="role" class="form-select form-select-sm" style="width:auto"
+                                                        onchange="this.form.querySelector('button').classList.remove('d-none')">
+                                                    <option value="Pilot" @selected($member->pivot->role === 'Pilot')>Pilot</option>
+                                                    <option value="Dispatcher" @selected($member->pivot->role === 'Dispatcher')>Dispatcher</option>
+                                                    @if($viewerIsOwner)
+                                                        <option value="Manager" @selected($member->pivot->role === 'Manager')>Manager</option>
+                                                    @endif
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary d-none">Save</button>
+                                            </form>
+                                        @endif
+                                    @endif
                                 </td>
                                 <td class="text-end">
-                                    <form action="{{ route('members.destroy', $member) }}" method="POST"
-                                          onsubmit="return confirm('Remove {{ $member->name }} from the airline?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-person-x"></i> Remove
-                                        </button>
-                                    </form>
+                                    @if(! $rowIsOwner)
+                                        <div class="d-flex justify-content-end gap-2">
+                                            @if($viewerIsOwner)
+                                                <form action="{{ route('members.transfer', $member) }}" method="POST"
+                                                      onsubmit="return confirm('Are you sure you want to transfer ownership of this airline to {{ $member->name }}? You will step down to a Manager.')">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning">
+                                                        <i class="bi bi-gift-fill me-1"></i> Make Owner
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            @if($viewerIsOwner || ! $rowIsManager)
+                                                <form action="{{ route('members.destroy', $member) }}" method="POST"
+                                                      onsubmit="return confirm('Remove {{ $member->name }} from the airline?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="bi bi-person-x"></i> Remove
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

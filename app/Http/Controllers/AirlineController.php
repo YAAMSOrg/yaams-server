@@ -57,6 +57,7 @@ class AirlineController extends Controller
             'unit_is_lbs'          => $request->boolean('unit_is_lbs'),
             'active'               => true,
             'require_pirep_review' => true,
+            'owner_user_id'        => auth()->id(),
         ]);
 
         $airline->users()->attach(auth()->id(), ['role' => 'Manager']);

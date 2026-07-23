@@ -68,4 +68,18 @@ trait SeedsDomain
 
         return $user;
     }
+
+    /**
+     * Create a user, attach them to the airline as a Manager, and set them
+     * as the owner of the airline.
+     */
+    protected function ownerOf(Airline $airline): User
+    {
+        $user = User::factory()->create();
+        $user->airlines()->attach($airline->id, ['role' => 'Manager']);
+        $airline->owner_user_id = $user->id;
+        $airline->save();
+
+        return $user;
+    }
 }

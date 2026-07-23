@@ -44,5 +44,30 @@ class AirlineMembershipSeeder extends Seeder
                 }
             }
         }
+
+        // Set owners for all airlines
+        $airlines = DB::table('airlines')->get();
+        foreach ($airlines as $airline) {
+            $ownerUserId = DB::table('airline_memberships')
+                ->where('airline_id', $airline->id)
+                ->where('role', 'Manager')
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->value('user_id');
+
+            if (!$ownerUserId) {
+                $ownerUserId = DB::table('airline_memberships')
+                    ->where('airline_id', $airline->id)
+                    ->orderBy('created_at')
+                    ->orderBy('id')
+                    ->value('user_id');
+            }
+
+            if ($ownerUserId) {
+                DB::table('airlines')
+                    ->where('id', $airline->id)
+                    ->update(['owner_user_id' => $ownerUserId]);
+            }
+        }
     }
 }
