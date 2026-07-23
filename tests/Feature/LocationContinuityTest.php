@@ -7,6 +7,7 @@ use App\Models\Airline;
 use App\Models\Flight;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\Concerns\SeedsDomain;
 use Tests\TestCase;
 
@@ -123,5 +124,55 @@ class LocationContinuityTest extends TestCase
             ->post(route('flightreviewreject', $legOne));
 
         $this->assertSame('KJFK', $aircraft->fresh()->current_loc);
+    }
+
+    /**
+     * A manager may edit an aircraft (needs the per-airline Manager role for the
+     * policy and the Spatie `edit aircraft` permission for the route middleware).
+     */
+    private function managerOf(Airline $airline): User
+    {
+        $manager = $this->memberOf($airline, 'Manager');
+        $manager->givePermissionTo(Permission::findOrCreate('edit aircraft', 'web'));
+
+        return $manager;
+    }
+
+    private function editPayload(Aircraft $aircraft, string $currentLoc): array
+    {
+        return [
+            'registration' => $aircraft->registration,
+            'manufacturer' => 'Airbus',
+            'model' => 'A320',
+            'engine_type' => 'CFM56',
+            'current_loc' => $currentLoc,
+            'active' => 1,
+        ];
+    }
+
+    public function test_manager_can_override_aircraft_location_while_continuity_is_active(): void
+    {
+        [$airline, $aircraft] = $this->airlineWithAircraftAt('EDDF');
+        $manager = $this->managerOf($airline);
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->post(route('editaircraft', $aircraft), $this->editPayload($aircraft, 'KLAX'))
+            ->assertRedirect(route('fleetmanager'));
+
+        $this->assertSame('KLAX', $aircraft->fresh()->current_loc);
+    }
+
+    public function test_overriding_the_location_with_an_unknown_airport_is_rejected(): void
+    {
+        [$airline, $aircraft] = $this->airlineWithAircraftAt('EDDF');
+        $manager = $this->managerOf($airline);
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->post(route('editaircraft', $aircraft), $this->editPayload($aircraft, 'ZZZZ'))
+            ->assertSessionHasErrors('current_loc');
+
+        $this->assertSame('EDDF', $aircraft->fresh()->current_loc);
     }
 }

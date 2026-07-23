@@ -190,34 +190,27 @@
                     </div>
                 </div>
 
-                <!-- Card 5: Current Location (Read-Only) -->
+                <!-- Card 5: Current Location (manager override) -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
                         <i class="bi bi-geo-alt-fill text-muted me-2"></i> Current Location
                     </div>
                     <div class="card-body p-4">
-                        <div class="p-3 bg-light rounded-3 border d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-geo-alt-fill text-danger fs-4 me-3"></i>
-                                <div>
-                                    @if(is_null($aircraft->current_loc))
-                                        <span class="badge bg-warning text-dark fs-6 px-2 py-1 mb-1">
-                                            No Location
-                                        </span>
-                                        <small class="d-block text-muted">Awaiting first flight log</small>
-                                    @else
-                                        <span class="badge bg-dark font-monospace fs-6 px-2 py-1 mb-1" title="{{ $aircraft->location->name }}">
-                                            {{ $aircraft->location->icao_code }}
-                                        </span>
-                                        <small class="d-block text-muted">{{ $aircraft->location->name }}</small>
-                                    @endif
-                                </div>
-                            </div>
-                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fs-8 uppercase tracking-wider px-2 py-1">
-                                <i class="bi bi-lock-fill me-1"></i> Admin Only
-                            </span>
+                        <label for="current_loc" class="form-label fw-semibold">Location <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-geo-alt-fill"></i></span>
+                            <input type="text" class="form-control text-uppercase font-monospace @error('current_loc') is-invalid @enderror"
+                                   id="current_loc" name="current_loc"
+                                   value="{{ old('current_loc', $aircraft->current_loc) }}"
+                                   minlength="4" maxlength="4" placeholder="e.g. EDDL" required>
+                            @error('current_loc')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="form-text mt-2 fs-7 text-muted">Current location updates dynamically via pilots' flight logs.</div>
+                        <div class="form-text mt-2 fs-7 text-muted">
+                            4-letter ICAO code. Normally set automatically from pilots' flight logs -
+                            edit this to manually relocate a stranded or mis-parked aircraft.
+                        </div>
                     </div>
                 </div>
 
