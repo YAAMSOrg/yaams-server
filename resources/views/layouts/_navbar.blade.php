@@ -58,7 +58,7 @@
                     @endphp
                     @if($canReviewFlights || $isAirlineManager)
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle {{ request()->routeIs('flightreviewindex', 'airline.settings', 'invitecodes.index', 'notams.index') ? 'active' : '' }}" href="#" id="navbarDropdownManagement" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle {{ request()->routeIs('flightreviewindex', 'airline.settings', 'members.index', 'invitecodes.index', 'notams.index') ? 'active' : '' }}" href="#" id="navbarDropdownManagement" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-briefcase"></i> Management
                             </a>
                             <ul class="dropdown-menu shadow-sm border-0" aria-labelledby="navbarDropdownManagement">
@@ -70,6 +70,7 @@
                                 @endif
                                 @if($isAirlineManager)
                                     <li><a class="dropdown-item {{ request()->routeIs('airline.settings') ? 'active' : '' }}" href="{{ route('airline.settings') }}"><i class="bi bi-sliders me-2 text-secondary"></i> Operations</a></li>
+                                    <li><a class="dropdown-item {{ request()->routeIs('members.index') ? 'active' : '' }}" href="{{ route('members.index') }}"><i class="bi bi-people me-2 text-secondary"></i> Members</a></li>
                                     <li><a class="dropdown-item {{ request()->routeIs('invitecodes.index') ? 'active' : '' }}" href="{{ route('invitecodes.index') }}"><i class="bi bi-ticket-perforated me-2 text-secondary"></i> Invite codes</a></li>
                                     <li><a class="dropdown-item {{ request()->routeIs('notams.index') ? 'active' : '' }}" href="{{ route('notams.index') }}"><i class="bi bi-megaphone me-2 text-secondary"></i> Announcements</a></li>
                                 @endif
