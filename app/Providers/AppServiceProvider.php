@@ -148,7 +148,21 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::before(function ($user, $ability) {
-            return $user->hasRole('Super-Admin') ? true : null;
+            $activeAirline = session('activeairline');
+            if ($activeAirline) {
+                if ($ability === 'add aircraft' || $ability === 'edit aircraft') {
+                    return $user->isManagerOf($activeAirline);
+                }
+                if ($ability === 'review flight') {
+                    return $user->canReviewFlightsFor($activeAirline);
+                }
+            }
+
+            if ($user->hasRole('Super-Admin')) {
+                return true;
+            }
+
+            return null;
         });
     }
 }

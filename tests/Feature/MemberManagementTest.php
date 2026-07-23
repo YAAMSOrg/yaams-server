@@ -259,4 +259,40 @@ class MemberManagementTest extends TestCase
 
         $this->assertFalse($airline->isMember($pilot->fresh()));
     }
+
+    public function test_ownership_transfer_preserves_add_aircraft_permission_for_both(): void
+    {
+        $airline = Airline::factory()->create();
+        $owner = $this->ownerOf($airline);
+        $member = $this->memberOf($airline, 'Pilot');
+
+        // Transfer ownership
+        $this->actingAs($owner)
+            ->withSession(['activeairline' => $airline])
+            ->put(route('members.transfer', $member))
+            ->assertRedirect();
+
+        // New owner (was Pilot) can add aircraft
+        $this->actingAs($member->fresh())
+            ->withSession(['activeairline' => $airline])
+            ->get(route('createaircraft'))
+            ->assertOk();
+
+        // Old owner (now Manager) can also still add aircraft
+        $this->actingAs($owner->fresh())
+            ->withSession(['activeairline' => $airline])
+            ->get(route('createaircraft'))
+            ->assertOk();
+    }
+
+    public function test_pilot_does_not_have_add_aircraft_permission_on_active_airline(): void
+    {
+        $airline = Airline::factory()->create();
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        $this->actingAs($pilot)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('createaircraft'))
+            ->assertForbidden();
+    }
 }
