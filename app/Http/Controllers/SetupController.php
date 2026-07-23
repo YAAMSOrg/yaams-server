@@ -121,6 +121,8 @@ class SetupController extends Controller
 
             $user->assignRole($superAdminRole);
             $airline->users()->attach($user, ['role' => 'Manager']);
+            $airline->owner_user_id = $user->id;
+            $airline->save();
 
             auth()->login($user);
             session(['activeairline' => $airline]);

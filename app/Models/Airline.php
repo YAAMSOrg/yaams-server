@@ -27,6 +27,7 @@ class Airline extends Model
         'active',
         'require_pirep_review',
         'location_continuity',
+        'owner_user_id',
     ];
 
     protected $casts = [
@@ -81,6 +82,16 @@ class Airline extends Model
     public function notams(): HasMany
     {
         return $this->hasMany(Notam::class);
+    }
+
+    public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_user_id');
+    }
+
+    public function isOwnedBy(User $u): bool
+    {
+        return $this->owner_user_id !== null && $this->owner_user_id === $u->id;
     }
 
 }
