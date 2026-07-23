@@ -246,7 +246,14 @@ class AircraftController extends Controller
                 'mlw' => 'nullable|integer|min:0|max:1000000',
                 'service_ceiling' => 'nullable|integer|min:1000|max:60000',
                 'remarks' => 'nullable|string|max:1000',
+                'current_loc' => 'required|max:4',
             ]);
+
+            // Managers can override the aircraft's location at any time (the escape
+            // hatch for Location Continuity - relocate a stranded/mis-parked airframe).
+            if (!Airport::find($request->post('current_loc'))) {
+                throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
+            }
 
             // Convert to boolean and format strings. The toggle only moves between the two
             // reversible states - retiring an aircraft is a separate, dedicated action.
@@ -274,6 +281,7 @@ class AircraftController extends Controller
             $targetAircraft->service_ceiling = $request->post('service_ceiling');
             $targetAircraft->status = $finalStatus;
             $targetAircraft->remarks = $request->post('remarks');
+            $targetAircraft->current_loc = strtoupper($request->post('current_loc'));
 
             // If we notice that the registration has changed or active status, we need to check if there is another active aircraft with same tail number
             if ($targetAircraft->isDirty('registration') || $targetAircraft->isDirty('status')) {
