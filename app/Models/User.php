@@ -12,6 +12,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Concerns\LogsModelActivity;
+use App\Notifications\ResetPassword;
+use App\Notifications\VerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -57,6 +59,16 @@ class User extends Authenticatable implements MustVerifyEmail
     //protected $appends = [
 //
     //];
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmail);
+    }
+
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetPassword($token));
+    }
 
     public function logged_hours(Airline $airline) {
         $flights = Flight::query()

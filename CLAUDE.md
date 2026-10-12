@@ -158,6 +158,7 @@ Notifications use Laravel's native notification system so delivery channels are 
 - **`database`** is Laravel's built-in channel. It persists to the standard `notifications` table (uuid PK, polymorphic `notifiable`, JSON `data`, `read_at`) via `Illuminate\Notifications\DatabaseNotification`. A notification opts in by returning `'database'` from `via()` and implementing `toArray($notifiable): array` (`title`, `message`, optional `url`) — the payload is stored in `data`. The bell/list UI reads unread rows through the `Notifiable` trait's `unreadNotifications` relation; `User::countNewNotifications()` wraps `unreadNotifications()->count()`. Dismissing a notification calls `$notification->markAsRead()`.
 - **`mail`** is Laravel's built-in channel; `toMail()` returns a `MailMessage`.
 - Notification classes implement `ShouldQueue`, and use the `App\Notifications\Concerns\QueuesMailChannel` trait. The trait's `viaConnections()` pins the `database` channel to the `sync` connection (so the in-app/bell notification is written immediately, with no worker needed) while the `mail` channel falls through to the default queue connection (`QUEUE_CONNECTION`, `database` by default). A slow or failing SMTP server therefore never blocks or fails the triggering PIREP request — the email is delivered by the background worker. Any new PIREP notification should `use QueuesMailChannel` for the same guarantee.
+- Fortify's auth mails are queued too: `User::sendEmailVerificationNotification()` / `sendPasswordResetNotification()` send `App\Notifications\VerifyEmail` / `ResetPassword`, `ShouldQueue` subclasses of Laravel's built-ins, so a broken SMTP server never fails registration, an email change or a reset request.
 
 **To add a channel** (e.g. webhook): add a channel class + `Notification::extend('webhook', ...)`, add `'webhook'` to `via()`, and add a `toWebhook()` renderer. No event/listener changes. `via()` receives `$notifiable`, so per-user channel preferences live there — the `mail` channel is already gated on the recipient's `email_notifications` preference.
 
@@ -210,6 +211,7 @@ Key `.env` values beyond standard Laravel:
 - `FLIGHT_PAGE_LIMIT` — number of flights per page in the pilot flight list (default: 10)
 - `QUEUE_CONNECTION` — background job backend (default: `database`; set to `redis` to use Redis). Notification email is dispatched on this queue, so a worker must be running in every environment where mail should actually be sent — see below.
 - `ACTIVITYLOG_RETENTION_DAYS` — how long activity-log rows are kept before `activitylog:clean` prunes them (default: `180`). Requires the scheduler to be running — see below.
+- `MAIL_SCHEME` / `MAIL_VERIFY_PEER` — SMTP transport options in `config/mail.php` (`MAIL_ENCRYPTION` is not read by Laravel anymore). STARTTLS is used automatically when offered; `MAIL_VERIFY_PEER=false` accepts a relay with a self-signed certificate.
 - `METRICS_TOKEN` — bearer token required to scrape the Prometheus `/metrics` endpoint (see Prometheus Metrics). Unset (default) disables the endpoint.
 
 ### Queue / Background Jobs
