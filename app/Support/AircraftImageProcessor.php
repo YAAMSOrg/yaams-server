@@ -6,6 +6,8 @@ use App\Models\Setting;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver as GdDriver;
+use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\ImageManager;
 use Throwable;
 
@@ -55,11 +57,11 @@ class AircraftImageProcessor
         $maxDim = (int) Setting::get('aircraft_image_max_dimension');
 
         try {
-            $image = ImageManager::gd()->read($file->getRealPath());
+            $image = ImageManager::usingDriver(GdDriver::class)->decodePath($file->getRealPath());
             // Scale down (never up) so the longest side fits within the limit,
             // preserving aspect ratio.
             $image->scaleDown($maxDim, $maxDim);
-            $encoded = (string) $image->toWebp(82);
+            $encoded = (string) $image->encode(new WebpEncoder(quality: 82));
         } catch (Throwable $e) {
             throw new \RuntimeException('The uploaded file could not be processed as an image.', 0, $e);
         }

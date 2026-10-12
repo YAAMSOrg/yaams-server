@@ -15,8 +15,8 @@
 	  pkgs.mkShell
 	    {
 		buildInputs = [
-			pkgs.php83
-			pkgs.php83Packages.composer
+			pkgs.php85
+			pkgs.php85Packages.composer
 		];
 		
 		shellHook = ''

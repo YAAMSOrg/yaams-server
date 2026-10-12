@@ -4,7 +4,7 @@ This file provides guidance to coding agents when working with code in this repo
 
 ## Project Overview
 
-YAAMS (Yet Another Airline Management System) is a Laravel 12.x application providing a virtual airline management system with two parallel interfaces:
+YAAMS (Yet Another Airline Management System) is a Laravel 13.x application providing a virtual airline management system with two parallel interfaces:
 - **Web UI** — Blade templates + Bootstrap 5.3.3, served via session auth (Fortify)
 - **REST API v1** — JSON responses at `/api/v1/`, authenticated via Laravel Sanctum tokens
 
