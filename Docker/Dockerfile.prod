@@ -7,8 +7,8 @@
 #                  terminated by an external reverse proxy (see
 #                  docker-compose.prod.yml).
 #
-# Frontend assets (public/css, public/js, public/vendor) are committed to the
-# repo (Laravel Mix output), so no Node/npm build step is required here.
+# Frontend assets (public/css, public/vendor) are plain static files committed
+# to the repo, so no Node/npm build step is required here.
 
 # ---------------------------------------------------------------------------
 # Stage 1 - Composer dependencies
