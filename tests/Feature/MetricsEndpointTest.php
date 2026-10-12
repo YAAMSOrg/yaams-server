@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Aircraft;
+use App\Models\AircraftImage;
 use App\Models\Airline;
 use App\Models\Flight;
+use App\Models\Notam;
 use App\Models\User;
+use App\Support\ActivityLevel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\SeedsDomain;
 use Tests\TestCase;
@@ -87,5 +90,59 @@ class MetricsEndpointTest extends TestCase
         $this->assertStringContainsString('yaams_aircraft_total{status="active"} 1', $body);
         $this->assertStringContainsString('yaams_aircraft_total{status="retired"} 0', $body);
         $this->assertStringContainsString('yaams_queue_failed_jobs_total 0', $body);
+    }
+
+    public function test_feature_gauges_report_current_counts(): void
+    {
+        $this->seedReferenceData();
+        $airline = Airline::factory()->create();
+        $manager = $this->memberOf($airline, 'Manager');
+        $pilot = $this->memberOf($airline, 'Pilot');
+        $this->memberOf($airline, 'Pilot');
+
+        // last_online_at defaults to the creation time; age everyone out first.
+        User::query()->update(['last_online_at' => now()->subYear()]);
+        $pilot->forceFill(['two_factor_confirmed_at' => now(), 'last_online_at' => now()->subMinutes(5)])->save();
+        $manager->forceFill(['last_online_at' => now()->subDays(3)])->save();
+
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        AircraftImage::factory()->for($aircraft)->create();
+        AircraftImage::factory()->for($aircraft)->pending()->count(2)->create();
+
+        // 90 minutes block time each (FlightFactory default); only accepted ones count.
+        Flight::factory()->count(2)->create([
+            'airline_id' => $airline->id,
+            'aircraft_id' => $aircraft->id,
+            'pilot_id' => $pilot->id,
+            'status_id' => 2,
+        ]);
+        Flight::factory()->create([
+            'airline_id' => $airline->id,
+            'aircraft_id' => $aircraft->id,
+            'pilot_id' => $pilot->id,
+            'status_id' => 1,
+        ]);
+
+        Notam::create(['airline_id' => $airline->id, 'created_by' => $manager->id, 'title' => 'Open', 'body' => 'x']);
+        Notam::create(['airline_id' => $airline->id, 'created_by' => $manager->id, 'title' => 'Expired', 'body' => 'x', 'expires_at' => now()->subDay()]);
+
+        activity()->withProperties(['level' => ActivityLevel::WARNING])->event('login_failed')->log('Failed login attempt');
+
+        $body = $this->withToken(self::TOKEN)->get('/metrics')->assertOk()->getContent();
+
+        $this->assertStringContainsString('yaams_app_info{version="' . config('app.version') . '"} 1', $body);
+        $this->assertStringContainsString('yaams_users_active{window="15m"} 1', $body);
+        $this->assertStringContainsString('yaams_users_active{window="7d"} 2', $body);
+        $this->assertStringContainsString('yaams_users_two_factor_enabled_total 1', $body);
+        $this->assertStringContainsString('yaams_airline_memberships_total{role="Pilot"} 2', $body);
+        $this->assertStringContainsString('yaams_airline_memberships_total{role="Manager"} 1', $body);
+        $this->assertStringContainsString('yaams_airline_memberships_total{role="Dispatcher"} 0', $body);
+        $this->assertStringContainsString('yaams_flight_block_time_accepted_seconds 10800', $body);
+        $this->assertStringContainsString('yaams_aircraft_images_total{status="pending"} 2', $body);
+        $this->assertStringContainsString('yaams_aircraft_images_total{status="approved"} 1', $body);
+        $this->assertStringContainsString('yaams_notams_active_total 1', $body);
+        $this->assertStringContainsString('yaams_activity_log_entries_total{level="warning"} 1', $body);
+        $this->assertStringContainsString('yaams_login_failures_24h 1', $body);
+        $this->assertStringContainsString('yaams_queue_oldest_pending_job_age', $body);
     }
 }

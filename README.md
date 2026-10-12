@@ -107,7 +107,27 @@ YAAMS ships a JSON REST API under `/api/v1`, authenticated with Sanctum bearer t
 
 ## Monitoring
 
-YAAMS exposes Prometheus metrics at **`/metrics`** - domain gauges (users, airlines, flights and aircraft by status, unused invite codes, queue depth, failed jobs) computed live on each scrape, so no extra storage or services are needed.
+YAAMS exposes Prometheus metrics at **`/metrics`** - gauges computed live on each scrape, so no extra storage or services are needed:
+
+| Metric | Labels | Description |
+| --- | --- | --- |
+| `yaams_app_info` | `version` | Always `1`, carries the running release |
+| `yaams_users_total` | | Registered users |
+| `yaams_users_active` | `window` (`15m`, `24h`, `7d`, `30d`) | Users seen within the window |
+| `yaams_users_two_factor_enabled_total` | | Users with confirmed 2FA |
+| `yaams_airlines_total` | | Airlines |
+| `yaams_airline_memberships_total` | `role` | Memberships by per-airline role |
+| `yaams_flights_total` | `status` | PIREPs by review status |
+| `yaams_flight_block_time_accepted_seconds` | | Total block time of accepted flights |
+| `yaams_aircraft_total` | `status` | Aircraft by lifecycle status |
+| `yaams_aircraft_images_total` | `status` | Aircraft screenshots by moderation status |
+| `yaams_notams_active_total` | | Non-expired NOTAMs |
+| `yaams_invite_codes_unused_total` | | Unredeemed invite codes |
+| `yaams_login_failures_24h` | | Failed logins in the last 24 hours |
+| `yaams_activity_log_entries_total` | `level` | Activity log rows by level |
+| `yaams_queue_size` | `connection`, `queue` | Jobs waiting in the queue |
+| `yaams_queue_oldest_pending_job_age` | `connection`, `queue` | Age of the oldest pending job (seconds) |
+| `yaams_queue_failed_jobs_total` | | Rows in `failed_jobs` |
 
 The endpoint is disabled by default. To enable it, set `METRICS_TOKEN` in `.env` and scrape with it as a bearer token:
 
@@ -119,6 +139,10 @@ scrape_configs:
     static_configs:
       - targets: ["your.domain"]
 ```
+
+### Grafana dashboard
+
+A ready-made dashboard ships in [`monitoring/grafana/yaams-dashboard.json`](monitoring/grafana/yaams-dashboard.json) (Grafana 10.4+). Import it via *Dashboards > New > Import* and pick your Prometheus data source, or drop the file into a provisioned dashboards folder. It covers flight operations, review backlogs, community and fleet, plus queue health and failed logins; the `job`/`instance` selectors switch between multiple YAAMS instances.
 
 ## Production Deployment
 
