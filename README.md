@@ -8,8 +8,8 @@ A decentralised, open-source virtual airline management platform. Track PIREPs, 
 
 [![Tests](https://github.com/YAAMSOrg/yaams-server/actions/workflows/tests.yml/badge.svg)](https://github.com/YAAMSOrg/yaams-server/actions/workflows/tests.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)
+![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php&logoColor=white)
 
 ![screenshot](https://github.com/user-attachments/assets/69a64cc3-d340-4f18-99ea-5ebb04804eef)
 
@@ -44,7 +44,7 @@ To see more screenshots of YAAMS in action, visit our [wiki](https://github.com/
 
 | Layer | Technology |
 | --- | --- |
-| Framework | Laravel 12.x (PHP 8.3) |
+| Framework | Laravel 13.x (PHP 8.5) |
 | Frontend | Bootstrap 5.3.3 / Blade / Vanilla CSS |
 | Auth | Laravel Sanctum (API) & Fortify (web) |
 | Permissions | Spatie Laravel Permission |
