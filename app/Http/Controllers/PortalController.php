@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InviteCode;
+use App\Notifications\InviteCodeRedeemed;
 use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
 
@@ -49,6 +50,10 @@ class PortalController extends Controller
             ->withProperties(['level' => ActivityLevel::INFO, 'role' => $code->role])
             ->event('invite_redeemed')
             ->log('Redeemed invite code to join ' . $code->airline->name);
+
+        if ($code->creator && $code->creator->isNot(auth()->user())) {
+            $code->creator->notify(new InviteCodeRedeemed($code));
+        }
 
         if (!session('activeairline')) {
             $request->session()->put('activeairline', $code->airline);
