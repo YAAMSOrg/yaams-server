@@ -31,3 +31,4 @@ yarn-error.log
 /resources/views/scribe
 /public/vendor/scribe
 /storage/app/scribe
+/.serena
