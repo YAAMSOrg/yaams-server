@@ -114,8 +114,7 @@ RUN APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
 # mirroring the owner, so the app works both when it runs as root (the
 # default) and as an arbitrary unprivileged UID under rootless
 # Podman/OpenShift - such a UID runs with GID 0 and can then write here even
-# on paths baked into the image (e.g. bootstrap/cache). See
-# docker-compose.prod.yml for the matching `user:` / `userns_mode:` settings.
+# on paths baked into the image (e.g. bootstrap/cache).
 RUN chown -R www-data:0 /app/storage /app/bootstrap/cache /var/lib/nginx /var/log/nginx \
     && chmod -R g=u /app/storage /app/bootstrap/cache /var/lib/nginx /var/log/nginx
 

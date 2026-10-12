@@ -27,6 +27,17 @@ if [ "$(id -u)" = "0" ]; then
 fi
 chmod -R 775 storage 2>/dev/null || true
 
+# Without an APP_KEY every request fails with a 500. If .env leaves it empty,
+# generate one on first boot and persist it in the storage volume, so it
+# survives restarts/upgrades and all services share the same key. noclobber
+# makes the write atomic, so concurrently starting services cannot race.
+if [ -z "$APP_KEY" ]; then
+    (set -C; php -r 'echo "base64:".base64_encode(random_bytes(32));' > storage/app/.app_key) 2>/dev/null || true
+    chmod 600 storage/app/.app_key
+    APP_KEY="$(cat storage/app/.app_key)"
+    export APP_KEY
+fi
+
 # Public symlink for user-uploaded storage (idempotent).
 php artisan storage:link --quiet || true
 
