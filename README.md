@@ -127,12 +127,12 @@ Production runs from a prebuilt multi-arch (amd64 + arm64) image. The image bund
 ### Deploying on a server
 
 1. Copy `docker-compose.prod.yml` and `.env.production.example` to the server.
-2. Create the environment file and generate an app key:
+2. Create the environment file:
    ```bash
    cp .env.production.example .env
-   docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show
-   # paste the key into APP_KEY, then set DB_PASSWORD, APP_URL, mail + domain settings
+   # set DB_PASSWORD, APP_URL, mail + domain settings
    ```
+   Leave `APP_KEY` empty - a key is generated on first start and stored in `storage-data/app/.app_key`. Back it up together with the database: without it, encrypted data and existing sessions cannot be read.
 3. Start the stack (bundled MariaDB, migrations, app, queue worker, scheduler):
    ```bash
    docker compose -f docker-compose.prod.yml up -d
@@ -158,7 +158,7 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-The one-shot `migrate` service applies new migrations on each `up`; the `db` data and uploaded files persist in named volumes.
+The one-shot `migrate` service applies new migrations on each `up`; the database and uploaded files persist in the `db-data/` and `storage-data/` directories next to the compose file.
 
 ## Contributing
 
