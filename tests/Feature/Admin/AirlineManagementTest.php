@@ -504,6 +504,8 @@ class AirlineManagementTest extends TestCase
 
         $this->actingAs($this->admin)
             ->get(route('admin.airlines.create'))
-            ->assertSee('name="owner_id"', false);
+            ->assertSee('name="owner_id"', false)
+            ->assertSee('placeholder="DLH"', false)
+            ->assertSee('value="'.now()->toDateString().'"', false); // Founded defaults to today (UTC instance)
     }
 }
