@@ -220,19 +220,18 @@
                 <form method="POST" action="{{ route('admin.airlines.members.store', $airline) }}" class="row g-2 align-items-start">
                     @csrf
                     <div class="col-12 col-md-6">
-                        <input type="email" name="email" required maxlength="255" placeholder="User e-mail address" aria-label="User e-mail address"
-                               class="form-control form-control-sm @error('email', 'addMember') is-invalid @enderror" value="{{ old('email') }}">
-                        @error('email', 'addMember')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <x-admin.user-picker name="user_id" :airline="$airline->id" bag="addMember"
+                                             placeholder="Find a user to add" />
                     </div>
                     <div class="col-6 col-md-3">
-                        <select name="role" class="form-select form-select-sm" aria-label="Role">
+                        <select name="role" class="form-select" aria-label="Role">
                             @foreach ($roles as $role)
                                 <option value="{{ $role }}" @selected(old('role', 'Pilot') === $role)>{{ $role }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-6 col-md-3">
-                        <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-person-plus me-1"></i> Add member</button>
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-person-plus me-1"></i> Add member</button>
                     </div>
                 </form>
             </div>

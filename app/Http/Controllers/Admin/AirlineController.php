@@ -8,6 +8,8 @@ use App\Models\Aircraft;
 use App\Models\AircraftImage;
 use App\Models\Airline;
 use App\Models\User;
+use App\Notifications\AddedToAirline;
+use App\Notifications\RemovedFromAirline;
 use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -86,12 +88,12 @@ class AirlineController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate($this->profileRules() + [
-            'owner_email' => ['required', 'email', 'exists:users,email'],
+            'owner_id' => ['required', 'integer', 'exists:users,id'],
         ], [
-            'owner_email.exists' => 'No user with this e-mail address exists.',
+            'owner_id.required' => 'Choose the user who will own the airline.',
         ]);
 
-        $owner = User::where('email', $validated['owner_email'])->firstOrFail();
+        $owner = User::findOrFail($validated['owner_id']);
 
         $airline = DB::transaction(function () use ($request, $validated, $owner) {
             $airline = Airline::create($this->profileAttributes($request, $validated) + [
@@ -106,6 +108,8 @@ class AirlineController extends Controller
         $this->log($request, $airline, ActivityLevel::INFO, 'airline_created_by_admin', 'Created airline', [
             'owner' => $owner->name,
         ]);
+
+        $this->notifyMember($request, $owner, new AddedToAirline($airline->name, $airline->icao_callsign, 'Manager', asOwner: true));
 
         return $this->back($airline, $airline->name.' has been founded with '.$owner->name.' as owner.');
     }
@@ -229,22 +233,24 @@ class AirlineController extends Controller
     public function storeMember(Request $request, Airline $airline)
     {
         $validated = $request->validateWithBag('addMember', [
-            'email' => ['required', 'email', 'exists:users,email'],
-            'role'  => ['required', Rule::in(self::ROLES)],
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'role'    => ['required', Rule::in(self::ROLES)],
         ], [
-            'email.exists' => 'No user with this e-mail address exists.',
+            'user_id.required' => 'Search for a user and pick one from the list.',
         ]);
 
-        $user = User::where('email', $validated['email'])->firstOrFail();
+        $user = User::findOrFail($validated['user_id']);
 
         if ($airline->isMember($user)) {
-            throw ValidationException::withMessages(['email' => $user->name.' is already a member.'])->errorBag('addMember');
+            throw ValidationException::withMessages(['user_id' => $user->name.' is already a member.'])->errorBag('addMember');
         }
 
         $airline->users()->attach($user->id, ['role' => $validated['role']]);
 
         $this->log($request, $airline, ActivityLevel::INFO, 'airline_member_added_by_admin',
             $user->name.' was added to '.$airline->name.' as '.$validated['role'], ['user' => $user->name, 'role' => $validated['role']]);
+
+        $this->notifyMember($request, $user, new AddedToAirline($airline->name, $airline->icao_callsign, $validated['role']));
 
         return $this->back($airline, $user->name.' added as '.$validated['role'].'.');
     }
@@ -283,6 +289,8 @@ class AirlineController extends Controller
 
         $this->log($request, $airline, ActivityLevel::INFO, 'airline_member_removed_by_admin',
             $user->name.' was removed from '.$airline->name, ['user' => $user->name]);
+
+        $this->notifyMember($request, $user, new RemovedFromAirline($airline->name, $airline->icao_callsign));
 
         return $this->back($airline, $user->name.' has been removed from the airline.');
     }
@@ -393,6 +401,17 @@ class AirlineController extends Controller
 
         if (! $airline->managers()->whereKeyNot($user->id)->exists()) {
             throw ValidationException::withMessages(['action' => $message]);
+        }
+    }
+
+    /**
+     * Membership changes are announced to the affected user, unless the admin
+     * changed their own membership.
+     */
+    private function notifyMember(Request $request, User $user, AddedToAirline|RemovedFromAirline $notification): void
+    {
+        if ($request->user()->isNot($user)) {
+            $user->notify($notification);
         }
     }
 

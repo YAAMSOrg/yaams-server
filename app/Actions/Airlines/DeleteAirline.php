@@ -5,8 +5,10 @@ namespace App\Actions\Airlines;
 use App\Models\AircraftImage;
 use App\Models\Airline;
 use App\Models\User;
+use App\Notifications\RemovedFromAirline;
 use App\Support\ActivityLevel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -19,6 +21,7 @@ class DeleteAirline
     {
         $aircraftIds = $airline->aircraft()->pluck('id');
         $imagePaths = AircraftImage::whereIn('aircraft_id', $aircraftIds)->pluck('path');
+        $members = $airline->users()->get();
 
         // Record the deletion before the airline row disappears; capture identity
         // in the properties so the audit entry stays meaningful.
@@ -47,5 +50,10 @@ class DeleteAirline
 
         // Files go last, once the rows are gone for sure.
         Storage::disk('local')->delete($imagePaths->all());
+
+        Notification::send(
+            $members->reject(fn (User $member) => $member->is($causer)),
+            new RemovedFromAirline($airline->name, $airline->icao_callsign, airlineDeleted: true),
+        );
     }
 }

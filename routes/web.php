@@ -76,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
 
         // User management — browse, inspect and act on every account
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/lookup', [AdminUserController::class, 'lookup'])->name('users.lookup');
         Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');

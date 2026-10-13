@@ -460,3 +460,33 @@
     font-weight: 500;
 }
 
+
+/* Admin user picker (<x-admin.user-picker>): results dropdown under the search
+   field and the chosen-user chip that replaces it. */
+.yaams-user-picker__menu {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    max-height: 18rem;
+    overflow-y: auto;
+}
+
+.yaams-user-picker__menu .list-group-item-action.active .yaams-user-picker__email {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.yaams-user-picker__menu .yaams-user-picker__email {
+    color: var(--bs-secondary-color);
+}
+
+.yaams-user-picker__selected {
+    /* Not the d-flex utility: its !important would beat the [hidden] toggle */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: calc(1.5em + 0.75rem + 2px);
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+}

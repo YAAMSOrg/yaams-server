@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -59,6 +60,40 @@ class UserController extends Controller
                 'suspended'  => User::whereNotNull('suspended_at')->count(),
                 'unverified' => User::whereNull('email_verified_at')->count(),
             ],
+        ]);
+    }
+
+    /**
+     * JSON lookup backing the admin user picker (<x-admin.user-picker>).
+     * Matches name or e-mail; with `airline` set, members of that airline are
+     * left out so only addable users are offered.
+     */
+    public function lookup(Request $request)
+    {
+        $term = trim((string) $request->query('q'));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json(['data' => []]);
+        }
+
+        $users = User::query()
+            ->search($term)
+            ->when($request->filled('airline'), fn ($q) => $q->whereDoesntHave(
+                'airlines',
+                fn ($q) => $q->where('airline_id', $request->integer('airline')),
+            ))
+            ->orderBy('name')
+            ->take(8)
+            ->get(['id', 'name', 'email', 'suspended_at']);
+
+        return response()->json([
+            'data' => $users->map(fn (User $user) => [
+                'id'        => $user->id,
+                'name'      => $user->name,
+                'email'     => $user->email,
+                'suspended' => $user->isSuspended(),
+                'avatar'    => Blade::render('<x-pilot-avatar :name="$name" size="32" />', ['name' => $user->name]),
+            ]),
         ]);
     }
 

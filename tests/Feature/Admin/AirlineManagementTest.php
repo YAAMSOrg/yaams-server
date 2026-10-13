@@ -8,7 +8,10 @@ use App\Models\Airline;
 use App\Models\Flight;
 use App\Models\InviteCode;
 use App\Models\User;
+use App\Notifications\AddedToAirline;
+use App\Notifications\RemovedFromAirline;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Activitylog\Models\Activity;
@@ -174,7 +177,7 @@ class AirlineManagementTest extends TestCase
             ->post(route('admin.airlines.store'), $this->profile($template, [
                 'name' => 'New Air',
                 'require_pirep_review' => '1',
-                'owner_email' => $owner->email,
+                'owner_id' => $owner->id,
             ]))
             ->assertRedirect();
 
@@ -265,7 +268,7 @@ class AirlineManagementTest extends TestCase
         $newcomer = User::factory()->create();
 
         $this->actingAs($this->admin)
-            ->post(route('admin.airlines.members.store', $airline), ['email' => $newcomer->email, 'role' => 'Dispatcher']);
+            ->post(route('admin.airlines.members.store', $airline), ['user_id' => $newcomer->id, 'role' => 'Dispatcher']);
         $this->assertTrue($newcomer->hasAirlineRole($airline, 'Dispatcher'));
 
         $this->actingAs($this->admin)
@@ -388,5 +391,119 @@ class AirlineManagementTest extends TestCase
             ->withSession(['activeairline' => $airline])
             ->get(route('flightlist'))
             ->assertRedirect(route('portal'));
+    }
+
+    public function test_user_lookup_finds_users_and_skips_existing_members(): void
+    {
+        $airline = Airline::factory()->create();
+        $member = User::factory()->create(['name' => 'Jane Member']);
+        $airline->users()->attach($member->id, ['role' => 'Pilot']);
+        $candidate = User::factory()->create(['name' => 'Jane Candidate', 'email' => 'jc@example.com']);
+
+        $this->actingAs($this->admin)
+            ->getJson(route('admin.users.lookup', ['q' => 'jane', 'airline' => $airline->id]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $candidate->id)
+            ->assertJsonPath('data.0.email', 'jc@example.com');
+
+        $this->actingAs($this->admin)
+            ->getJson(route('admin.users.lookup', ['q' => 'jane']))
+            ->assertJsonCount(2, 'data');
+
+        // Too short a term returns nothing instead of listing every account
+        $this->actingAs($this->admin)
+            ->getJson(route('admin.users.lookup', ['q' => 'j']))
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_user_lookup_is_admin_only(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->getJson(route('admin.users.lookup', ['q' => 'test']))
+            ->assertForbidden();
+    }
+
+    public function test_members_are_notified_when_added_or_removed_by_an_admin(): void
+    {
+        Notification::fake();
+
+        $airline = Airline::factory()->create(['name' => 'Alpha Air', 'icao_callsign' => 'ALP']);
+        $this->ownerOf($airline);
+        $user = User::factory()->create();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.airlines.members.store', $airline), ['user_id' => $user->id, 'role' => 'Dispatcher']);
+
+        Notification::assertSentTo($user, AddedToAirline::class, fn (AddedToAirline $n, array $channels) =>
+            $n->airlineName === 'Alpha Air' && $n->role === 'Dispatcher' && in_array('mail', $channels, true));
+
+        $this->actingAs($this->admin)
+            ->delete(route('admin.airlines.members.destroy', [$airline, $user]));
+
+        Notification::assertSentTo($user, RemovedFromAirline::class, fn (RemovedFromAirline $n) =>
+            $n->airlineIcao === 'ALP' && ! $n->airlineDeleted);
+    }
+
+    public function test_owner_is_notified_when_an_airline_is_founded_for_them(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.airlines.store'), $this->profile(Airline::factory()->make(['icao_callsign' => 'NEW']), [
+                'name' => 'New Air',
+                'owner_id' => $owner->id,
+            ]));
+
+        Notification::assertSentTo($owner, AddedToAirline::class, fn (AddedToAirline $n) => $n->asOwner);
+    }
+
+    public function test_admin_is_not_notified_about_their_own_membership_changes(): void
+    {
+        Notification::fake();
+
+        $airline = Airline::factory()->create();
+        $this->ownerOf($airline);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.airlines.members.store', $airline), ['user_id' => $this->admin->id, 'role' => 'Pilot']);
+
+        $this->assertTrue($airline->isMember($this->admin));
+        Notification::assertNothingSentTo($this->admin);
+    }
+
+    public function test_members_are_notified_when_their_airline_is_deleted(): void
+    {
+        Notification::fake();
+
+        $airline = Airline::factory()->create(['icao_callsign' => 'DEL']);
+        $owner = $this->ownerOf($airline);
+        $pilot = $this->memberOf($airline, 'Pilot');
+
+        $this->actingAs($this->admin)
+            ->delete(route('admin.airlines.destroy', $airline), ['confirm_icao' => 'DEL']);
+
+        foreach ([$owner, $pilot] as $member) {
+            Notification::assertSentTo($member, RemovedFromAirline::class, fn (RemovedFromAirline $n) =>
+                $n->airlineDeleted && $n->airlineIcao === 'DEL');
+        }
+    }
+
+    public function test_create_and_add_member_forms_render_the_user_picker(): void
+    {
+        $airline = Airline::factory()->create();
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.airlines.show', $airline))
+            ->assertSee('data-user-picker', false)
+            ->assertSee(route('admin.users.lookup', ['airline' => $airline->id]), false);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.airlines.create'))
+            ->assertSee('name="owner_id"', false);
     }
 }

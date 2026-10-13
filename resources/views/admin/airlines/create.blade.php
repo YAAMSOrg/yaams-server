@@ -19,11 +19,9 @@
             @csrf
             <div class="card-body">
                 <div class="mb-4">
-                    <label for="owner_email" class="form-label">Owner e-mail address</label>
-                    <input type="email" name="owner_email" id="owner_email" required maxlength="255"
-                           class="form-control @error('owner_email') is-invalid @enderror" value="{{ old('owner_email') }}">
-                    @error('owner_email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    <div class="form-text">Must be an existing account. Ownership can be transferred later.</div>
+                    <label class="form-label">Owner</label>
+                    <x-admin.user-picker name="owner_id" placeholder="Search by name or e-mail" />
+                    <div class="form-text">Becomes owner and Manager of the new airline. Ownership can be transferred later.</div>
                 </div>
 
                 @include('admin.airlines._form', ['airline' => null, 'bag' => 'default'])
