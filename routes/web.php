@@ -19,6 +19,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 // Setup wizard — only accessible before any user exists
 Route::get('/setup', [SetupController::class, 'show'])->name('setup.index');
@@ -71,6 +72,18 @@ Route::middleware(['auth'])->group(function () {
 
         // Activity log — browse the instance-wide audit trail
         Route::get('/activity', [ActivityLogController::class, 'index'])->name('activity.index');
+
+        // User management — browse, inspect and act on every account
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+        Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+        Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('users.role');
+        Route::post('/users/{user}/suspension', [AdminUserController::class, 'suspend'])->name('users.suspend');
+        Route::delete('/users/{user}/suspension', [AdminUserController::class, 'reactivate'])->name('users.reactivate');
+        Route::delete('/users/{user}/two-factor', [AdminUserController::class, 'resetTwoFactor'])->name('users.2fa.reset');
+        Route::post('/users/{user}/password-reset', [AdminUserController::class, 'sendPasswordReset'])->name('users.password-reset');
+        Route::delete('/users/{user}/tokens', [AdminUserController::class, 'revokeTokens'])->name('users.tokens.revoke');
     });
 
     // -------------------------------------------------------------------------
