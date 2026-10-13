@@ -322,3 +322,95 @@
         align-items: flex-start !important;
     }
 }
+
+/*
+ * Page backdrop (layouts/_backdrop.blade.php, included by every layout).
+ * A faint navigation-chart graticule over a pale sky wash, plus a dashed
+ * flight route that ends at the Bootstrap Icons airplane (bi-airplane-fill)
+ * in the top-right corner. Fixed behind all content via z-index -1.
+ *
+ * The SVG stretches to any window shape (preserveAspectRatio=none) while the
+ * plane is pinned at the same percentages as the route's end point (88, 18).
+ * The route ends flying level, and a horizontal tangent stays horizontal under
+ * any stretch, so the plane (rotated to face right) always lines up with it.
+ * Dashes use non-scaling-stroke so they stay even. Route and plane are hidden
+ * on phones, where the content fills the width.
+ */
+.yaams-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(0deg, rgba(40, 46, 58, 0.045) 0 1px, transparent 1px 72px),
+        repeating-linear-gradient(90deg, rgba(40, 46, 58, 0.045) 0 1px, transparent 1px 72px),
+        radial-gradient(ellipse at 85% 15%, rgba(232, 165, 63, 0.14), transparent 55%),
+        linear-gradient(180deg, #eef2f6 0%, #f6f4f0 100%);
+}
+
+.yaams-backdrop svg {
+    width: 100%;
+    height: 100%;
+}
+
+.yaams-backdrop .route {
+    fill: none;
+    stroke: #865F31;
+    stroke-opacity: 0.45;
+    stroke-width: 2;
+    stroke-dasharray: 10 12;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+}
+
+/* Mask path; fully revealed unless the backdrop is animated. */
+.yaams-backdrop .route-reveal {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 10;
+}
+
+.yaams-backdrop .plane {
+    position: absolute;
+    left: 88%; /* Must match the route's end point (88, 18). */
+    top: 18%;
+    font-size: 64px;
+    line-height: 1;
+    color: #282E3A;
+    transform: translate(-50%, -50%) rotate(90deg); /* Glyph points north. */
+}
+
+.yaams-backdrop .plane::before {
+    display: block;
+    vertical-align: 0;
+}
+
+/* Animated variant (auth pages): the route draws once, then the plane fades in. */
+.yaams-backdrop--animated .route-reveal {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: yaams-route-draw 1.8s cubic-bezier(0.45, 0, 0.2, 1) 0.2s forwards;
+}
+
+.yaams-backdrop--animated .plane {
+    opacity: 0;
+    animation: yaams-plane-in 0.6s ease-out 1.7s forwards;
+}
+
+@keyframes yaams-route-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes yaams-plane-in {
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .yaams-backdrop--animated .route-reveal { animation: none; stroke-dashoffset: 0; }
+    .yaams-backdrop--animated .plane { animation: none; opacity: 1; }
+}
+
+@media (max-width: 575.98px) {
+    .yaams-backdrop svg,
+    .yaams-backdrop .plane { display: none; }
+}

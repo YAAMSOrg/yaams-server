@@ -35,6 +35,10 @@ Every web page uses the single title scheme `{Page Title} - {Instance Name}`:
 - `$instanceName` is `View::share`d in `AppServiceProvider` (the `app_name` setting, falling back to `config('app.name')`), so the configured instance name appears in every title
 - The public landing page (`home/index.blade.php`) sets no title section on purpose - it shows just the instance name
 
+### Page Backdrop
+
+All four layouts `@include('layouts._backdrop')` right after `<body>`: a fixed (`z-index: -1`) chart-grid background with a dashed flight route ending at the `bi-airplane-fill` icon. Styles live in `public/css/yaams-theme.css` (`.yaams-backdrop`). Only `loginlayout` passes `['animated' => true]` (route draws once on load, reduced motion respected); everywhere else it is static. The route's end point and the plane's `left`/`top` percentages must stay in sync.
+
 ### Authentication & Authorization
 
 Two auth systems coexist:
