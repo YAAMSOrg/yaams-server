@@ -414,3 +414,49 @@
     .yaams-backdrop svg,
     .yaams-backdrop .plane { display: none; }
 }
+
+/* Admin airline detail header: ICAO "tail" tile in the navbar colors plus a
+   strip of labelled facts. */
+.yaams-airline-header {
+    border-top: 3px solid var(--yaams-accent);
+}
+
+.yaams-airline-header__tile {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 0.75rem;
+    background-color: #20242E;
+    color: var(--yaams-accent);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.yaams-airline-header__facts {
+    border-top: 1px solid var(--bs-border-color);
+    background-color: var(--bs-tertiary-bg);
+    border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);
+}
+
+.yaams-airline-header__facts > .col {
+    padding: 0.65rem 1rem;
+    min-width: 0;
+}
+
+.yaams-airline-header__facts dt {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-secondary-color);
+}
+
+.yaams-airline-header__facts dd {
+    margin-bottom: 0;
+    font-weight: 500;
+}
+

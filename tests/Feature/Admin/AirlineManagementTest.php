@@ -49,7 +49,7 @@ class AirlineManagementTest extends TestCase
             'name'                 => $airline->name,
             'prefix'               => $airline->prefix,
             'icao_callsign'        => $airline->icao_callsign,
-            'atc_callsign'         => $airline->atc_callsign,
+            'atc_callsign'         => 'SPEEDBIRD', // the factory's random word may break min/max
             'hub'                  => 'EDDF',
             'country'              => $airline->country,
             'description'          => $airline->description,

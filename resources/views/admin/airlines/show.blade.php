@@ -2,33 +2,74 @@
 @section('title', $airline->name)
 
 @section('content')
-<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
-    <div>
-        <a href="{{ route('admin.airlines.index') }}" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> All airlines</a>
-        <h1 class="h3 mb-1 mt-1">
-            <span class="badge bg-dark font-monospace me-1">{{ $airline->icao_callsign }}</span>
-            {{ $airline->name }}
-        </h1>
-        <p class="text-muted mb-1">
-            {{ $airline->atc_callsign }} &middot; {{ $airline->prefix }} &middot; Hub {{ $airline->hub ?? '-' }} &middot; {{ $airline->country }}
-            &middot; Owner:
-            @if ($airline->owner)
-                <a href="{{ route('admin.users.show', $airline->owner) }}" class="text-decoration-none">{{ $airline->owner->name }}</a>
-            @else
-                none
-            @endif
-        </p>
-        <div class="d-flex flex-wrap gap-1">
-            @include('admin.airlines._badges')
-        </div>
-    </div>
-</div>
-
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}
     @include('admin._sidebar', ['active' => 'airlines'])
 
     <div class="col-12 col-lg-9">
+        <div class="card yaams-airline-header mb-4">
+            <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
+                <div class="yaams-airline-header__tile" aria-hidden="true">
+                    <span class="font-monospace">{{ $airline->icao_callsign }}</span>
+                </div>
+                <div class="flex-grow-1 min-w-0">
+                    <a href="{{ route('admin.airlines.index') }}" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> All airlines</a>
+                    <h1 class="h3 mb-1 text-break">{{ $airline->name }}</h1>
+                    <div class="d-flex flex-wrap gap-1">
+                        @include('admin.airlines._badges')
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('admin.activity.index', ['airline' => $airline->id]) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-journal-text me-1"></i> Activity
+                    </a>
+                    @if ($airline->isSuspended())
+                        <form method="POST" action="{{ route('admin.airlines.reactivate', $airline) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-play-circle me-1"></i> Reactivate</button>
+                        </form>
+                    @else
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#suspendModal">
+                            <i class="bi bi-snow2 me-1"></i> Suspend
+                        </button>
+                    @endif
+                </div>
+            </div>
+            <dl class="yaams-airline-header__facts row row-cols-2 row-cols-md-3 row-cols-xl-6 g-0 mb-0">
+                <div class="col">
+                    <dt>ATC callsign</dt>
+                    <dd>{{ $airline->atc_callsign }}</dd>
+                </div>
+                <div class="col">
+                    <dt>IATA prefix</dt>
+                    <dd class="font-monospace">{{ $airline->prefix }}</dd>
+                </div>
+                <div class="col">
+                    <dt>Hub</dt>
+                    <dd class="font-monospace">{{ $airline->hub ?? '-' }}</dd>
+                </div>
+                <div class="col">
+                    <dt>Country</dt>
+                    <dd>{{ $airline->country }}</dd>
+                </div>
+                <div class="col">
+                    <dt>Founded</dt>
+                    <dd>{{ $airline->founded_at?->toDateString() ?? '-' }}</dd>
+                </div>
+                <div class="col">
+                    <dt>Owner</dt>
+                    <dd class="text-truncate">
+                        @if ($airline->owner)
+                            <a href="{{ route('admin.users.show', $airline->owner) }}" class="text-decoration-none">{{ $airline->owner->name }}</a>
+                        @else
+                            <span class="text-warning-emphasis">None</span>
+                        @endif
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
         @if (session('status'))
             <div class="alert alert-success d-flex align-items-center">
                 <i class="bi bi-check-circle-fill me-2"></i> {{ session('status') }}
@@ -240,27 +281,6 @@
                 <i class="bi bi-exclamation-triangle me-2"></i> Danger zone
             </div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                    <div>
-                        <div class="fw-semibold">Suspension</div>
-                        <div class="small text-muted">
-                            {{ $airline->isSuspended()
-                                ? 'The airline is read-only and hidden from the landing page.'
-                                : 'Freezes the airline: members can still view it, but no PIREPs, reviews or management changes are accepted.' }}
-                        </div>
-                    </div>
-                    @if ($airline->isSuspended())
-                        <form method="POST" action="{{ route('admin.airlines.reactivate', $airline) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-success text-nowrap"><i class="bi bi-play-circle me-1"></i> Reactivate</button>
-                        </form>
-                    @else
-                        <button type="button" class="btn btn-sm btn-outline-danger text-nowrap" data-bs-toggle="modal" data-bs-target="#suspendModal">
-                            <i class="bi bi-snow2 me-1"></i> Suspend
-                        </button>
-                    @endif
-                </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
                     <div>
                         <div class="fw-semibold">Delete airline</div>
