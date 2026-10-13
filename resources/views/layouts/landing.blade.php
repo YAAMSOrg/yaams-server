@@ -41,6 +41,8 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+    @include('layouts._backdrop')
+
     <main class="container my-5 flex-grow-1 d-flex flex-column">
         @yield('content')
     </main>

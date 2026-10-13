@@ -35,6 +35,7 @@
             padding: 1.5rem;
             margin: auto;
         }
+
         .form-control:focus {
             box-shadow: 0 0 0 0.25rem rgba(134, 95, 49, 0.15); /* Softer focus ring */
         }
@@ -49,6 +50,8 @@
 </head>
 
 <body>
+    @include('layouts._backdrop', ['animated' => true])
+
     <main class="form-signin">
         @yield('content')
     </main>

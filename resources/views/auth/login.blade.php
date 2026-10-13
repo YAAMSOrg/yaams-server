@@ -2,6 +2,10 @@
 @section('title', 'Login')
 @section('content')
 
+<a href="{{ route('home') }}" class="d-inline-flex align-items-center mb-3 text-decoration-none text-secondary small">
+    <i class="bi bi-arrow-left me-1"></i> Back to homepage
+</a>
+
 <div class="card shadow-sm">
     <div class="card-body p-4">
         <div class="text-center mb-4">

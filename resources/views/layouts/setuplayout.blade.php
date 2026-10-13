@@ -74,6 +74,8 @@
 </head>
 
 <body>
+    @include('layouts._backdrop')
+
     <div class="setup-container">
         @yield('content')
         <div class="text-center mt-4">
