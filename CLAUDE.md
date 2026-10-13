@@ -30,14 +30,23 @@ PHPUnit suite under `tests/` (Unit + Feature, incl. `tests/Feature/Api`). Tests 
 
 Every web page uses the single title scheme `{Page Title} - {Instance Name}`:
 
-- All four layouts (`app`, `landing`, `loginlayout`, `setuplayout` in `resources/views/layouts/`) render the tag themselves: `<title>@hasSection('title')@yield('title') - {{ $instanceName }}@else{{ $instanceName }}@endif</title>`
+- All five layouts (`app`, `landing`, `loginlayout`, `setuplayout`, `error` in `resources/views/layouts/`) render the tag themselves: `<title>@hasSection('title')@yield('title') - {{ $instanceName }}@else{{ $instanceName }}@endif</title>`
 - Views declare only the bare page name, e.g. `@section('title', 'Fleet Overview')` - never hardcode the app name, "YAAMS", or a separator in a view
 - `$instanceName` is `View::share`d in `AppServiceProvider` (the `app_name` setting, falling back to `config('app.name')`), so the configured instance name appears in every title
 - The public landing page (`home/index.blade.php`) sets no title section on purpose - it shows just the instance name
 
 ### Page Backdrop
 
-All four layouts `@include('layouts._backdrop')` right after `<body>`: a fixed (`z-index: -1`) chart-grid background with a dashed flight route ending at the `bi-airplane-fill` icon. Styles live in `public/css/yaams-theme.css` (`.yaams-backdrop`). Only `loginlayout` passes `['animated' => true]` (route draws once on load, reduced motion respected); everywhere else it is static. The route's end point and the plane's `left`/`top` percentages must stay in sync.
+All five layouts `@include('layouts._backdrop')` right after `<body>`: a fixed (`z-index: -1`) chart-grid background with a dashed flight route ending at the `bi-airplane-fill` icon. Styles live in `public/css/yaams-theme.css` (`.yaams-backdrop`). Only `loginlayout` passes `['animated' => true]` (route draws once on load, reduced motion respected); everywhere else it is static. The route's end point and the plane's `left`/`top` percentages must stay in sync.
+
+### Error Pages
+
+Branded HTTP error pages live in `resources/views/errors/` and are picked up by Laravel automatically (no handler changes). JSON/API requests still get JSON errors; with `APP_DEBUG=true` a 500 still shows the debug page.
+
+- Each view `@extends('layouts.error')`, sets `@section('title', ...)` and renders the `<x-error-page>` component (`resources/views/components/error-page.blade.php`: logo, big status code, icon, heading, message, optional `actions` slot replacing the default "Go back" / "Back to homepage" buttons, optional `support-email` mailto)
+- Explicit views exist for every code Laravel ships a stock view for (`401`, `402`, `403`, `404`, `419`, `429`, `500`, `503`) - those stock views take priority over the `4xx`/`5xx` fallbacks, so a new code with a framework default needs its own view. `4xx`/`5xx` cover everything else
+- **Never depend on session, auth, CSRF, the navbar or a DB query** in `layouts/error` or the error views: a 404 for an unmatched route renders outside the `web` middleware group, and a 500 may be caused by the DB itself. Settings are read through `rescue(fn () => Setting::get(...), null, false)` (see `500`/`503`/`5xx`), and the layout uses `$instanceName ?? config('app.name')`
+- `403` shows the `abort()` / policy message when one is set; `404` and `5xx` never echo the exception message
 
 ### Authentication & Authorization
 
