@@ -184,6 +184,16 @@ docker compose -f docker-compose.prod.yml up -d
 
 The one-shot `migrate` service applies new migrations on each `up`; the database and uploaded files persist in the `db-data/` and `storage-data/` directories next to the compose file.
 
+### Resetting a user's 2FA
+
+If a user lost both their authenticator and their recovery codes, remove two-factor authentication from their account so they can sign in with their password only:
+
+```bash
+docker compose -f docker-compose.prod.yml exec app php artisan yaams:reset-2fa user@example.com
+```
+
+The command asks for confirmation (`--force` skips it), records the reset in the activity log and informs the user by e-mail (requires the queue worker).
+
 ## Contributing
 
 Contributions are welcome. Please open an issue to discuss larger changes first, and make sure the test suite passes (`php artisan test`) before opening a pull request - CI runs it automatically on every PR to `main`.
