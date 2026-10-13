@@ -58,10 +58,25 @@ Two role systems coexist — do not confuse them:
 - **Spatie roles** (global): `Pilot`, `Manager` (`add aircraft`, `edit aircraft`, `review flight`), `Super-Admin` (bypasses all checks via `Gate::before` in `AppServiceProvider`). The `AircraftPolicy` handles model-level aircraft authorization.
 - **Per-airline role** in `airline_memberships.role` (enum: `Pilot`, `Dispatcher`, `Manager`): checked via `User::isManagerOf()`, `hasAirlineRole()`, `canReviewFlightsFor()`. This is what controls invite code generation and flight review access.
 
-**Admin 2FA reset (account recovery)** — `php artisan yaams:reset-2fa {email} [--force]` (`App\Console\Commands\ResetTwoFactorCommand`) removes 2FA from a user who lost their authenticator and recovery codes:
+**Admin 2FA reset (account recovery)** — `php artisan yaams:reset-2fa {email} [--force]` (`App\Console\Commands\ResetTwoFactorCommand`) or the "Reset 2FA" button on the admin user page, both via the shared `App\Actions\Users\ResetTwoFactor` action, removes 2FA from a user who lost their authenticator and recovery codes:
 - Clears the three `two_factor_*` columns directly instead of using Fortify's `DisableTwoFactorAuthentication` - its `TwoFactorAuthenticationDisabled` event would be logged by `AuthEventSubscriber` as caused by the user themselves
-- Writes an explicit `two_factor_reset` activity (`warning`, subject = user, no causer, `via: console`)
+- Writes an explicit `two_factor_reset` activity (`warning`, subject = user, causer = the admin or none on the console, `via: console|admin`)
 - Notifies the user via `App\Notifications\TwoFactorReset` - a security notice, so `mail` is sent regardless of the `email_notifications` preference
+
+### Admin User Management
+
+Super-Admins manage every account at `/admin/users` (`Admin\UserController`, views in `resources/views/admin/users/`, routes in the `admin.` group, aliased `AdminUserController` in `routes/web.php`):
+
+- **List** — search (name/e-mail via `User::scopeSearch()`), filters (status `active|suspended|unverified`, Super-Admin role, 2FA), sort, airline/flight counts
+- **Detail** — profile form (name, e-mail, verified toggle), airline memberships with owner badge, flight stats, API tokens, recent activity (link to `/admin/activity?user={id}`, which filters by causer or subject)
+- **Actions** — suspend/reactivate, grant/revoke Super-Admin, reset 2FA, send password reset link, revoke all API tokens, delete (type the e-mail to confirm)
+- **Suspension** — `users.suspended_at` + `suspension_reason` (not fillable, set via `forceFill`; replaced the unused legacy `isactive` column). Enforced in three places, all using `App\Support\Suspension::message()`:
+  - login: `Fortify::authenticateUsing` in `AppServiceProvider` refuses suspended accounts (covers the 2FA path too, `RedirectIfTwoFactorAuthenticatable` uses the same callback) and logs `login_suspended` (`warning`)
+  - live web sessions: `EnsureUserIsNotSuspended` in the `web` group logs the user out on the next request
+  - API: `Sanctum::authenticateAccessTokensUsing` makes tokens of suspended users fail (401); tokens are kept so reactivation restores access
+- **Deletion** — shared `App\Actions\Users\DeleteUser` (also used by self-deletion in `SettingsController::destroy()`); `blockingAirlines()` refuses while the user owns or is the sole Manager of an airline
+- **Safeguards** — no self-suspend/-demote/-delete from the admin UI, and never remove the last non-suspended Super-Admin
+- **Audit** — every action logs causer = admin, subject = user: `user_suspended`, `user_reactivated`, `super_admin_granted`, `super_admin_revoked`, `api_tokens_revoked`, `user_deleted_by_admin`, `two_factor_reset` (`warning`); `user_updated_by_admin`, `password_reset_sent` (`info`)
 
 ### Instance Settings
 

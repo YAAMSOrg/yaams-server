@@ -10,7 +10,9 @@ use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Concerns\LogsModelActivity;
 use App\Notifications\ResetPassword;
 use App\Notifications\VerifyEmail;
@@ -54,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_online_at' => 'datetime',
         'email_notifications' => 'boolean',
         'two_factor_confirmed_at' => 'datetime',
+        'suspended_at' => 'datetime',
     ];
 
     //protected $appends = [
@@ -100,6 +103,38 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Airline::class, 'airline_memberships', 'user_id', 'airline_id')
                     ->withPivot('role');
+    }
+
+    public function flights(): HasMany
+    {
+        return $this->hasMany(Flight::class, 'pilot_id');
+    }
+
+    public function ownedAirlines(): HasMany
+    {
+        return $this->hasMany(Airline::class, 'owner_user_id');
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_confirmed_at !== null;
+    }
+
+    /**
+     * Case-insensitive match on name or e-mail address.
+     */
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        $term = trim((string) $term);
+
+        return $query->when($term !== '', fn ($q) => $q->where(fn ($q) => $q
+            ->where('name', 'LIKE', "%{$term}%")
+            ->orWhere('email', 'LIKE', "%{$term}%")));
     }
 
     public function isMemberOf(Airline $airline): bool

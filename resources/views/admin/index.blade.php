@@ -21,7 +21,7 @@
                     <div class="card-body text-center">
                         <i class="bi bi-people fs-2 text-primary"></i>
                         <div class="fs-3 fw-bold mt-2">{{ $stats['users'] }}</div>
-                        <div class="text-muted small">Users</div>
+                        <a href="{{ route('admin.users.index') }}" class="text-muted small stretched-link text-decoration-none">Users</a>
                     </div>
                 </div>
             </div>
@@ -123,7 +123,7 @@
                             <tbody>
                                 @forelse ($recentUsers as $user)
                                     <tr>
-                                        <td>{{ $user->name }}</td>
+                                        <td><a href="{{ route('admin.users.show', $user) }}" class="text-decoration-none">{{ $user->name }}</a></td>
                                         <td>{{ $user->email }}</td>
                                         <td>
                                             <span class="text-muted small">{{ $user->created_at->diffForHumans() }}</span>

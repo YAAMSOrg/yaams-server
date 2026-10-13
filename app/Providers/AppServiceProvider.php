@@ -18,6 +18,10 @@ use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Models\Setting;
 use App\Support\ActivityLevel;
+use App\Support\Suspension;
+use Laravel\Sanctum\Sanctum;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -146,6 +150,41 @@ class AppServiceProvider extends ServiceProvider
                 PrepareAuthenticatedSession::class,
             ]);
         });
+
+        // Credential check for both the password and the two-factor login path
+        // (RedirectIfTwoFactorAuthenticatable uses this callback too). Mirrors
+        // the default guard attempt, but refuses suspended accounts with an
+        // explicit message instead of a generic "credentials do not match".
+        Fortify::authenticateUsing(function (Request $request) {
+            $provider = Auth::guard()->getProvider();
+            $credentials = ['password' => $request->input('password')];
+
+            $user = $provider->retrieveByCredentials([Fortify::username() => $request->input(Fortify::username())]);
+
+            if (! $user || ! $provider->validateCredentials($user, $credentials)) {
+                return null;
+            }
+
+            if ($user->isSuspended()) {
+                activity()
+                    ->performedOn($user)
+                    ->withProperties(['level' => ActivityLevel::WARNING])
+                    ->event('login_suspended')
+                    ->log('Login attempt on a suspended account');
+
+                throw ValidationException::withMessages([Fortify::username() => Suspension::message()]);
+            }
+
+            $provider->rehashPasswordIfRequired($user, $credentials);
+
+            return $user;
+        });
+
+        // API tokens of a suspended user stop authenticating (401) until the
+        // account is reactivated; the tokens themselves are kept.
+        Sanctum::authenticateAccessTokensUsing(
+            fn ($accessToken, bool $isValid) => $isValid && ! $accessToken->tokenable?->isSuspended()
+        );
 
         Gate::before(function ($user, $ability) {
             $activeAirline = session('activeairline');

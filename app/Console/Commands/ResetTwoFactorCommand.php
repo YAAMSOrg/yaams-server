@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\Users\ResetTwoFactor;
 use App\Models\User;
-use App\Notifications\TwoFactorReset;
-use App\Support\ActivityLevel;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 
@@ -46,7 +45,7 @@ class ResetTwoFactorCommand extends Command implements PromptsForMissingInput
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(ResetTwoFactor $reset): int
     {
         $email = $this->argument('email');
         $user = User::where('email', $email)->first();
@@ -57,9 +56,7 @@ class ResetTwoFactorCommand extends Command implements PromptsForMissingInput
             return self::FAILURE;
         }
 
-        if (is_null($user->two_factor_secret)
-            && is_null($user->two_factor_recovery_codes)
-            && is_null($user->two_factor_confirmed_at)) {
+        if (! $reset->hasTwoFactor($user)) {
             $this->info("{$user->name} ({$user->email}) has no two-factor authentication set up. Nothing to do.");
 
             return self::SUCCESS;
@@ -76,22 +73,7 @@ class ResetTwoFactorCommand extends Command implements PromptsForMissingInput
             return self::FAILURE;
         }
 
-        // Cleared directly instead of via Fortify's DisableTwoFactorAuthentication:
-        // its TwoFactorAuthenticationDisabled event is logged by AuthEventSubscriber
-        // as caused by the user themselves, which would misrepresent who did this.
-        $user->forceFill([
-            'two_factor_secret' => null,
-            'two_factor_recovery_codes' => null,
-            'two_factor_confirmed_at' => null,
-        ])->save();
-
-        activity()
-            ->performedOn($user)
-            ->withProperties(['level' => ActivityLevel::WARNING, 'via' => 'console'])
-            ->event('two_factor_reset')
-            ->log('Two-factor authentication reset by an instance admin');
-
-        $user->notify(new TwoFactorReset);
+        $reset($user, null, 'console');
 
         $this->info('Two-factor authentication removed. The user can now sign in with their password only.');
         $this->info('The notification e-mail is queued and is sent by the queue worker.');

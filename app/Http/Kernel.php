@@ -37,6 +37,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\PreventRequestForgery::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\EnsureUserIsNotSuspended::class,
             \App\Http\Middleware\LastSeenUserActivity::class,
             \App\Http\Middleware\EnsureSetupComplete::class,
         ],
