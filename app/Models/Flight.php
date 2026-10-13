@@ -96,16 +96,13 @@ class Flight extends Model
     }
 
     public function getFlightDurationAttribute() {
-        $blockofftime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockoff);
-        $blockontime = DateTime::createFromFormat('Y-m-d H:i:s', $this->blockon);
+        $minutes = $this->flight_duration_minutes;
 
-        if ($blockofftime === false || $blockontime === false) {
-            return "Error while parsing flight duration time.";
+        if (!is_int($minutes)) {
+            return $minutes;
         }
 
-        $duration = $blockofftime->diff($blockontime);
-
-        return $duration->format('%H:%I h');
+        return sprintf('%02d:%02d h', intdiv($minutes, 60), $minutes % 60);
     }
 
     public function getFlightDurationMinutesAttribute() {
@@ -118,11 +115,8 @@ class Flight extends Model
 
         $duration = $blockofftime->diff($blockontime);
 
-        // Die Dauer in Minuten berechnen
-        $hoursInMinutes = $duration->h * 60;
-        $totalMinutes = $hoursInMinutes + $duration->i;
-
-        return $totalMinutes;
+        // Include whole days, so block times over 24h are not truncated
+        return $duration->days * 1440 + $duration->h * 60 + $duration->i;
     }
 
     public function getFlightDateAttribute() {
