@@ -382,7 +382,7 @@ class FlightController extends Controller
             ->map(function ($member) use ($currentActiveAirline) {
                 return [
                     'user' => $member,
-                    'role' => $member->pivot->role ?? 'Pilot',
+                    'role' => $currentActiveAirline->isOwnedBy($member) ? 'Owner' : ($member->pivot->role ?? 'Pilot'),
                     'flights' => $member->logged_flights($currentActiveAirline),
                     'hours' => $member->logged_hours($currentActiveAirline),
                 ];

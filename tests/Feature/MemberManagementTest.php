@@ -295,4 +295,22 @@ class MemberManagementTest extends TestCase
             ->get(route('createaircraft'))
             ->assertForbidden();
     }
+
+    public function test_portal_shows_owner_role_for_airline_owner(): void
+    {
+        $airline = Airline::factory()->create();
+        $owner = $this->ownerOf($airline);
+        $manager = $this->memberOf($airline, 'Manager');
+
+        $this->actingAs($owner)
+            ->get(route('portal'))
+            ->assertOk()
+            ->assertSee('Owner');
+
+        $this->actingAs($manager)
+            ->get(route('portal'))
+            ->assertOk()
+            ->assertSee('Manager')
+            ->assertDontSee('Owner');
+    }
 }
