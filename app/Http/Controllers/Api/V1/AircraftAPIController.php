@@ -171,6 +171,7 @@ class AircraftAPIController extends Controller
      *   }
      * }
      * @response 403 {"message": "This action is unauthorized."}
+     * @response status=403 scenario="airline suspended" {"message": "Lufthansa Virtual has been suspended by the instance administrator and is read-only."}
      * @response 422 {"message": "The registration field is required.", "errors": {"registration": ["The registration field is required."]}}
      */
     public function store(StoreAircraftRequest $request, Airline $airline)

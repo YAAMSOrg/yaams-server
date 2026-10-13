@@ -21,7 +21,6 @@ class AirlineFactory extends Factory
             'atc_callsign' => strtoupper($this->faker->word()),
             'country' => $this->faker->countryCode(),
             'unit_is_lbs' => false,
-            'active' => true,
             // Matches the founding/setup default: review is on, continuity is off.
             'require_pirep_review' => true,
             'location_continuity' => false,

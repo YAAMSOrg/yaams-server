@@ -19,6 +19,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\AirlineController as AdminAirlineController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 // Setup wizard — only accessible before any user exists
@@ -84,6 +85,20 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/users/{user}/two-factor', [AdminUserController::class, 'resetTwoFactor'])->name('users.2fa.reset');
         Route::post('/users/{user}/password-reset', [AdminUserController::class, 'sendPasswordReset'])->name('users.password-reset');
         Route::delete('/users/{user}/tokens', [AdminUserController::class, 'revokeTokens'])->name('users.tokens.revoke');
+
+        // Airline management - browse, inspect, moderate and fix every airline
+        Route::get('/airlines', [AdminAirlineController::class, 'index'])->name('airlines.index');
+        Route::get('/airlines/create', [AdminAirlineController::class, 'create'])->name('airlines.create');
+        Route::post('/airlines', [AdminAirlineController::class, 'store'])->name('airlines.store');
+        Route::get('/airlines/{airline}', [AdminAirlineController::class, 'show'])->name('airlines.show');
+        Route::put('/airlines/{airline}', [AdminAirlineController::class, 'update'])->name('airlines.update');
+        Route::delete('/airlines/{airline}', [AdminAirlineController::class, 'destroy'])->name('airlines.destroy');
+        Route::post('/airlines/{airline}/suspension', [AdminAirlineController::class, 'suspend'])->name('airlines.suspend');
+        Route::delete('/airlines/{airline}/suspension', [AdminAirlineController::class, 'reactivate'])->name('airlines.reactivate');
+        Route::post('/airlines/{airline}/members', [AdminAirlineController::class, 'storeMember'])->name('airlines.members.store');
+        Route::put('/airlines/{airline}/members/{user}', [AdminAirlineController::class, 'updateMember'])->name('airlines.members.update');
+        Route::delete('/airlines/{airline}/members/{user}', [AdminAirlineController::class, 'destroyMember'])->name('airlines.members.destroy');
+        Route::put('/airlines/{airline}/owner', [AdminAirlineController::class, 'transferOwnership'])->name('airlines.owner');
     });
 
     // -------------------------------------------------------------------------
@@ -116,7 +131,9 @@ Route::middleware(['auth'])->group(function () {
     // Routes that require an active airline session
     // -------------------------------------------------------------------------
 
-    Route::middleware(['verified', 'airline'])->group(function () {
+    // `airline.writable` refuses every non-GET request while the airline is
+    // suspended by an instance admin (read-only freeze).
+    Route::middleware(['verified', 'airline', 'airline.writable'])->group(function () {
 
         // Invite code management (manager check enforced in controller)
         Route::get('/airline/invitecodes', [InviteCodeController::class, 'index'])->name('invitecodes.index');
@@ -152,11 +169,18 @@ Route::middleware(['auth'])->group(function () {
 
         // Notifications
         Route::get("/user/notifications", [NotificationsController::class, "viewNotifications"])->name("usernotifications");
-        Route::post("/user/notifications/{notification}/acknowledge", [NotificationsController::class, "acknowledge"])->name("notificationsacknowledge");
-        Route::post("/user/notifications/acknowledge-all", [NotificationsController::class, "acknowledgeAll"])->name("notificationsacknowledgeall");
+        // Notifications are per-user, so they stay usable in a suspended airline
+        Route::post("/user/notifications/{notification}/acknowledge", [NotificationsController::class, "acknowledge"])
+            ->name("notificationsacknowledge")
+            ->withoutMiddleware('airline.writable');
+        Route::post("/user/notifications/acknowledge-all", [NotificationsController::class, "acknowledgeAll"])
+            ->name("notificationsacknowledgeall")
+            ->withoutMiddleware('airline.writable');
 
         // Fleet Management
-        Route::match(["GET", "POST"], "/airline/fleetmanager", [AircraftController::class, "index"])->name("fleetmanager");
+        Route::match(["GET", "POST"], "/airline/fleetmanager", [AircraftController::class, "index"])
+            ->name("fleetmanager")
+            ->withoutMiddleware('airline.writable');
         Route::match(["GET", "POST"], "/airline/fleetmanager/create", [AircraftController::class, "create"])
             ->name("createaircraft")
             ->middleware(["can:add aircraft"]);

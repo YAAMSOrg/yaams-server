@@ -109,7 +109,7 @@
                         <span class="badge bg-dark text-white font-monospace fs-6 px-3 py-2 me-2">
                             {{ $airline->icao_callsign }}
                         </span>
-                        @if($airline->active)
+                        @if(! $airline->isSuspended())
                             <span class="badge bg-success-subtle text-success border border-success-subtle">
                                 <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem; vertical-align: middle;"></i>Active
                             </span>

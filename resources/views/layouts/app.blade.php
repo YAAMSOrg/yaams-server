@@ -57,6 +57,7 @@
     @include('layouts._navbar')
 
     <main class="container my-5 flex-grow-1">
+        @include('layouts._airline_suspended')
         @yield('content')
     </main>
 

@@ -78,6 +78,11 @@
                                 <span class="text-muted ms-1 small">/ {{ $airline->icao_callsign }}</span>
                             </div>
                             <div class="d-flex align-items-center gap-2">
+                                @if($airline->isSuspended())
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="Suspended by the instance administrator - read-only">
+                                        <i class="bi bi-snow2 me-1"></i>Suspended
+                                    </span>
+                                @endif
                                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
                                     {{ $airline->isOwnedBy(auth()->user()) ? 'Owner' : ($airline->pivot->role ?? 'Pilot') }}
                                 </span>

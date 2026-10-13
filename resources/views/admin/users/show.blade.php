@@ -220,7 +220,7 @@
                                 @forelse ($airlines as $airline)
                                     <tr>
                                         <td>
-                                            {{ $airline->name }}
+                                            <a href="{{ route('admin.airlines.show', $airline) }}" class="text-decoration-none">{{ $airline->name }}</a>
                                             <span class="text-muted small">{{ $airline->icao_callsign }}</span>
                                         </td>
                                         <td>
@@ -334,7 +334,8 @@
                     <p class="small text-muted mb-2">Delete your own account from your <a href="{{ route('settings.danger') }}">account settings</a>.</p>
                 @elseif ($blockingAirlines->isNotEmpty())
                     <p class="small text-danger mb-2">
-                        Owns or is the only manager of {{ $blockingAirlines->pluck('name')->join(', ') }}.
+                        Owns or is the only manager of
+                        @foreach ($blockingAirlines as $blocking)<a href="{{ route('admin.airlines.show', $blocking) }}">{{ $blocking->name }}</a>{{ $loop->last ? '' : ', ' }}@endforeach.
                         Ownership must be transferred or another manager appointed first.
                     </p>
                 @endif

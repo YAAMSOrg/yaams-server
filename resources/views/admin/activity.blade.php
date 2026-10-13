@@ -36,7 +36,14 @@
                 <input type="hidden" name="user" value="{{ $user->id }}">
                 <span class="badge bg-primary-subtle text-primary d-inline-flex align-items-center gap-1">
                     <i class="bi bi-person"></i> {{ $user->name }}
-                    <a href="{{ route('admin.activity.index', array_filter(['level' => $level])) }}" class="text-primary" aria-label="Remove user filter"><i class="bi bi-x-lg"></i></a>
+                    <a href="{{ route('admin.activity.index', array_filter(['level' => $level, 'airline' => $airline?->id])) }}" class="text-primary" aria-label="Remove user filter"><i class="bi bi-x-lg"></i></a>
+                </span>
+            @endif
+            @if ($airline)
+                <input type="hidden" name="airline" value="{{ $airline->id }}">
+                <span class="badge bg-primary-subtle text-primary d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-buildings"></i> {{ $airline->name }}
+                    <a href="{{ route('admin.activity.index', array_filter(['level' => $level, 'user' => $user?->id])) }}" class="text-primary" aria-label="Remove airline filter"><i class="bi bi-x-lg"></i></a>
                 </span>
             @endif
         </form>

@@ -130,6 +130,7 @@ class FlightAPIController extends Controller
      *   }
      * }
      * @response 403 {"message": "This action is unauthorized."}
+     * @response status=403 scenario="airline suspended" {"message": "Lufthansa Virtual has been suspended by the instance administrator and is read-only."}
      * @response 422 {"message": "The departure icao field is required.", "errors": {"departure_icao": ["The departure icao field is required."]}}
      */
     public function store(StoreFlightRequest $request, Airline $airline)
@@ -240,6 +241,7 @@ class FlightAPIController extends Controller
      *   }
      * }
      * @response 403 {"message": "This action is unauthorized."}
+     * @response status=403 scenario="airline suspended" {"message": "Lufthansa Virtual has been suspended by the instance administrator and is read-only."}
      */
     public function accept(Request $request, Flight $flight)
     {
@@ -285,6 +287,7 @@ class FlightAPIController extends Controller
      *   }
      * }
      * @response 403 {"message": "This action is unauthorized."}
+     * @response status=403 scenario="airline suspended" {"message": "Lufthansa Virtual has been suspended by the instance administrator and is read-only."}
      */
     public function reject(Request $request, Flight $flight)
     {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,7 +25,6 @@ class Airline extends Model
         'description',
         'website',
         'founded_at',
-        'active',
         'require_pirep_review',
         'location_continuity',
         'owner_user_id',
@@ -33,7 +33,7 @@ class Airline extends Model
     protected $casts = [
         'founded_at'           => 'date',
         'unit_is_lbs'          => 'boolean',
-        'active'               => 'boolean',
+        'suspended_at'         => 'datetime',
         'require_pirep_review' => 'boolean',
         'location_continuity'  => 'boolean',
     ];
@@ -84,6 +84,11 @@ class Airline extends Model
         return $this->hasMany(Notam::class);
     }
 
+    public function inviteCodes(): HasMany
+    {
+        return $this->hasMany(InviteCode::class);
+    }
+
     public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_user_id');
@@ -94,4 +99,34 @@ class Airline extends Model
         return $this->owner_user_id !== null && $this->owner_user_id === $u->id;
     }
 
+    public function managers(): BelongsToMany
+    {
+        return $this->users()->wherePivot('role', 'Manager');
+    }
+
+    /**
+     * A suspended airline is frozen by an instance admin: members can still
+     * view it, but every write (PIREPs, reviews, fleet, NOTAMs, invites) is
+     * refused - see EnsureAirlineNotSuspended. Not fillable, set via forceFill.
+     */
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
+    public function suspensionMessage(): string
+    {
+        return $this->name.' has been suspended by the instance administrator and is read-only.'
+            .($this->suspension_reason ? ' Reason: '.$this->suspension_reason : '');
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereNull('suspended_at');
+    }
+
+    public function scopeSuspended(Builder $query): Builder
+    {
+        return $query->whereNotNull('suspended_at');
+    }
 }

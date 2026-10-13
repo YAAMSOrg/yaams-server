@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Aircraft;
+use App\Models\Airline;
+use App\Models\Flight;
+use App\Models\InviteCode;
 use App\Models\User;
 use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
@@ -23,6 +26,10 @@ class ActivityLogController extends Controller
         // Optional per-user filter: everything the user did or that was done to them.
         $user = $request->filled('user') ? User::find($request->integer('user')) : null;
 
+        // Optional per-airline filter: entries about the airline itself or about
+        // its flights, aircraft and invite codes.
+        $airline = $request->filled('airline') ? Airline::find($request->integer('airline')) : null;
+
         $activities = Activity::with([
                 'causer',
                 // Constrain the polymorphic subject load so aircraft rows can render
@@ -33,6 +40,10 @@ class ActivityLogController extends Controller
             ->when($user, fn ($q) => $q->where(fn ($q) => $q
                 ->where(fn ($q) => $q->where('causer_type', $user->getMorphClass())->where('causer_id', $user->id))
                 ->orWhere(fn ($q) => $q->where('subject_type', $user->getMorphClass())->where('subject_id', $user->id))))
+            ->when($airline, fn ($q) => $q->where(fn ($q) => $q
+                ->where(fn ($q) => $q->where('subject_type', $airline->getMorphClass())->where('subject_id', $airline->id))
+                ->orWhereHasMorph('subject', [Flight::class, InviteCode::class], fn ($q) => $q->where('airline_id', $airline->id))
+                ->orWhereHasMorph('subject', [Aircraft::class], fn ($q) => $q->where('used_by', $airline->id))))
             ->latest()
             ->paginate(30)
             ->withQueryString();
@@ -42,6 +53,7 @@ class ActivityLogController extends Controller
             'levels'     => array_keys(ActivityLevel::LEVELS),
             'level'      => $level,
             'user'       => $user,
+            'airline'    => $airline,
         ]);
     }
 }

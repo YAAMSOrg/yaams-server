@@ -78,6 +78,21 @@ Super-Admins manage every account at `/admin/users` (`Admin\UserController`, vie
 - **Safeguards** — no self-suspend/-demote/-delete from the admin UI, and never remove the last non-suspended Super-Admin
 - **Audit** — every action logs causer = admin, subject = user: `user_suspended`, `user_reactivated`, `super_admin_granted`, `super_admin_revoked`, `api_tokens_revoked`, `user_deleted_by_admin`, `two_factor_reset` (`warning`); `user_updated_by_admin`, `password_reset_sent` (`info`)
 
+### Admin Airline Management
+
+Super-Admins manage every airline at `/admin/airlines` (`Admin\AirlineController`, views in `resources/views/admin/airlines/`, routes in the `admin.` group, aliased `AdminAirlineController` in `routes/web.php`):
+
+- **List** - search (name / ICAO / prefix / ATC callsign), filters (status `active|suspended|orphaned`, PIREP review on/off), sort, member/fleet/flight/pending counts
+- **Create** - founds an airline on behalf of an existing user (owner e-mail), who becomes owner + Manager
+- **Detail** - profile + settings form (same rules as founding, plus `require_pirep_review`/`location_continuity`; review cannot be switched off while flights are pending), members (change role, remove, add an existing user directly without invite), ownership transfer (also fixes orphaned airlines whose owner was deleted), stats, recent activity (link to `/admin/activity?airline={id}`, which covers the airline and its flights, aircraft and invite codes)
+- **Suspension (freeze)** - `airlines.suspended_at` + `suspension_reason` (not fillable, set via `forceFill`; replaced the old `active` flag). A suspended airline stays viewable for its members but is read-only:
+  - `EnsureAirlineNotSuspended` (`airline.writable` alias) refuses every non-GET request: applied to the whole web `airline` group (notification acks and the fleet search are exempt via `withoutMiddleware`) and to the API write routes (403). It resolves the airline from the `{airline}` / `{flight}` route parameter or the session
+  - invite codes of a suspended airline cannot be redeemed (`PortalController::redeem()`), it is hidden from the landing page (`Airline::scopeActive()`), and `layouts/_airline_suspended` shows a banner; `AirlineResource` exposes `isSuspended`
+- **Deletion** - shared `App\Actions\Airlines\DeleteAirline` (type the ICAO to confirm): deletes flights, aircraft, screenshots (rows + files), memberships and the airline (invite codes, NOTAMs cascade)
+- **Safeguards** - the owner can be neither demoted nor removed (transfer first), and the last Manager can be neither demoted nor removed
+- **Session freshness** - `RequiresActiveAirline` reloads the session airline on every request, so admin edits apply immediately and members of a deleted airline (or removed members) are sent back to `/portal`
+- **Audit** - causer = admin, subject = airline: `airline_suspended`, `airline_reactivated`, `airline_ownership_transferred_by_admin`, `airline_deleted_by_admin` (`warning`); `airline_created_by_admin`, `airline_updated_by_admin`, `airline_member_added_by_admin`, `airline_member_role_changed_by_admin`, `airline_member_removed_by_admin` (`info`)
+
 ### Instance Settings
 
 Instance-wide configuration is stored as key/value rows in the `settings` table (`key` is the string PK). Read values via `Setting::get('key', $default)` (`app/Models/Setting.php`); write via `Setting::set('key', $value)`. Every known key and its fallback value lives in `Setting::defaults()` — `get()` falls back to that when a row is missing, so callers never hardcode defaults. Boolean settings are stored as the strings `'1'`/`'0'`.

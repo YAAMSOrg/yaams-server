@@ -30,7 +30,7 @@
                     <div class="card-body text-center">
                         <i class="bi bi-buildings fs-2 text-success"></i>
                         <div class="fs-3 fw-bold mt-2">{{ $stats['airlines'] }}</div>
-                        <div class="text-muted small">Airlines</div>
+                        <a href="{{ route('admin.airlines.index') }}" class="text-muted small stretched-link text-decoration-none">Airlines</a>
                     </div>
                 </div>
             </div>
@@ -158,7 +158,7 @@
                             <tbody>
                                 @forelse ($recentAirlines as $airline)
                                     <tr>
-                                        <td>{{ $airline->name }}</td>
+                                        <td><a href="{{ route('admin.airlines.show', $airline) }}" class="text-decoration-none">{{ $airline->name }}</a></td>
                                         <td>{{ $airline->icao_callsign }}</td>
                                         <td>
                                             <span class="text-muted small">{{ $airline->created_at->diffForHumans() }}</span>

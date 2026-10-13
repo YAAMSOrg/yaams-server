@@ -33,6 +33,10 @@ class PortalController extends Controller
             return back()->withErrors(['code' => 'This invite code is invalid or has already been used.']);
         }
 
+        if ($code->airline->isSuspended()) {
+            return back()->withErrors(['code' => $code->airline->suspensionMessage()]);
+        }
+
         if (auth()->user()->airlines()->where('airline_id', $code->airline_id)->exists()) {
             return back()->withErrors(['code' => 'You are already a member of this airline.']);
         }
