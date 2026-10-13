@@ -2,12 +2,8 @@
 @section('title', 'Administration')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1"><i class="bi bi-shield-lock me-2"></i> Instance Administration</h1>
-        <p class="text-muted mb-0">Manage everything across this YAAMS instance.</p>
-    </div>
-</div>
+<x-admin.page-header icon="shield-lock" title="Instance Administration"
+                     subtitle="Manage everything across this YAAMS instance." />
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}

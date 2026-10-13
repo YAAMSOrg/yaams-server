@@ -63,6 +63,14 @@ Two role systems coexist — do not confuse them:
 - Writes an explicit `two_factor_reset` activity (`warning`, subject = user, causer = the admin or none on the console, `via: console|admin`)
 - Notifies the user via `App\Notifications\TwoFactorReset` - a security notice, so `mail` is sent regardless of the `email_notifications` preference
 
+### Admin Area Layout
+
+Every page under `/admin` follows one structure - keep new admin pages on it:
+
+- `<x-admin.page-header>` (`resources/views/components/admin/page-header.blade.php`) above the `row g-4`: breadcrumb row ("Administration" / `crumbs` / current page, rendered on every page so the layout lines up), icon + **generic** title (`User details`, `Airline details` - never the name of the record), subtitle (prop or default slot) and an optional `actions` slot. The `<title>` section uses the same generic name
+- Left `admin._sidebar` (pass `$active`), main content in `col-12 col-lg-9`
+- Detail pages open the main column with `<x-admin.entity-header>`: tile (code tile `.yaams-entity-header__code` or `<x-pilot-avatar>`), record name + subtitle, `badges`, quick `actions` (activity link, suspend/reactivate) and a `facts` row of `<x-admin.fact label="...">` items. Styles are `.yaams-entity-header*` in `public/css/yaams-theme.css`
+
 ### Admin User Management
 
 Super-Admins manage every account at `/admin/users` (`Admin\UserController`, views in `resources/views/admin/users/`, routes in the `admin.` group, aliased `AdminUserController` in `routes/web.php`):

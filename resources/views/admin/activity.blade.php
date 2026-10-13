@@ -10,12 +10,8 @@
 @endphp
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1"><i class="bi bi-journal-text me-2"></i> Activity Log</h1>
-        <p class="text-muted mb-0">Instance-wide audit trail of user actions and model changes.</p>
-    </div>
-</div>
+<x-admin.page-header icon="journal-text" title="Activity Log"
+                     subtitle="Instance-wide audit trail of user actions and model changes." />
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}

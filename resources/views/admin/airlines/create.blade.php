@@ -2,13 +2,9 @@
 @section('title', 'Create Airline')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
-    <div>
-        <a href="{{ route('admin.airlines.index') }}" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> All airlines</a>
-        <h1 class="h3 mb-1 mt-1"><i class="bi bi-building-add me-2"></i> Create airline</h1>
-        <p class="text-muted mb-0">Found an airline on behalf of a user, who becomes its owner and Manager.</p>
-    </div>
-</div>
+<x-admin.page-header icon="building-add" title="Create airline"
+                     subtitle="Found an airline on behalf of a user, who becomes its owner and Manager."
+                     :crumbs="['Airlines' => route('admin.airlines.index')]" />
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}

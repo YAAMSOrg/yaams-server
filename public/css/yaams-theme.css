@@ -415,39 +415,50 @@
     .yaams-backdrop .plane { display: none; }
 }
 
-/* Admin airline detail header: ICAO "tail" tile in the navbar colors plus a
-   strip of labelled facts. */
-.yaams-airline-header {
+/* Admin detail pages (<x-admin.entity-header>): identity card of the edited
+   record - code tile or avatar, name, badges, quick actions - plus a strip of
+   labelled facts. */
+.yaams-entity-header {
     border-top: 3px solid var(--yaams-accent);
 }
 
-.yaams-airline-header__tile {
+.yaams-entity-header__tile {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 4.5rem;
     height: 4.5rem;
+}
+
+/* Code tile (e.g. an airline's ICAO code) in the navbar colors */
+.yaams-entity-header__code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     border-radius: 0.75rem;
     background-color: #20242E;
     color: var(--yaams-accent);
+    font-family: var(--bs-font-monospace);
     font-size: 1.35rem;
     font-weight: 700;
     letter-spacing: 0.05em;
 }
 
-.yaams-airline-header__facts {
+.yaams-entity-header__facts {
     border-top: 1px solid var(--bs-border-color);
     background-color: var(--bs-tertiary-bg);
     border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);
 }
 
-.yaams-airline-header__facts > .col {
+.yaams-entity-header__facts > .col {
     padding: 0.65rem 1rem;
     min-width: 0;
 }
 
-.yaams-airline-header__facts dt {
+.yaams-entity-header__facts dt {
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -455,11 +466,10 @@
     color: var(--bs-secondary-color);
 }
 
-.yaams-airline-header__facts dd {
+.yaams-entity-header__facts dd {
     margin-bottom: 0;
     font-weight: 500;
 }
-
 
 /* Admin user picker (<x-admin.user-picker>): results dropdown under the search
    field and the chosen-user chip that replaces it. */

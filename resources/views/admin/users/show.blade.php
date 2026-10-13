@@ -1,23 +1,50 @@
 @extends('layouts.app')
-@section('title', $user->name)
+@section('title', 'User Details')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
-    <div>
-        <a href="{{ route('admin.users.index') }}" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> All users</a>
-        <h1 class="h3 mb-1 mt-1"><i class="bi bi-person-circle me-2"></i> {{ $user->name }}</h1>
-        <p class="text-muted mb-1">{{ $user->email }}</p>
-        <div class="d-flex flex-wrap gap-1">
-            @include('admin.users._badges')
-        </div>
-    </div>
-</div>
+<x-admin.page-header icon="person-circle" title="User details"
+                     subtitle="Profile, access, memberships and activity of an account."
+                     :crumbs="['Users' => route('admin.users.index')]" />
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}
     @include('admin._sidebar', ['active' => 'users'])
 
     <div class="col-12 col-lg-9">
+        <x-admin.entity-header :name="$user->name" :subtitle="$user->email">
+            <x-slot:tile>
+                <x-pilot-avatar :name="$user->name" size="72" />
+            </x-slot:tile>
+            <x-slot:badges>
+                @include('admin.users._badges')
+            </x-slot:badges>
+            <x-slot:actions>
+                <a href="{{ route('admin.activity.index', ['user' => $user->id]) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-journal-text me-1"></i> Activity
+                </a>
+                @if ($user->isSuspended())
+                    <form method="POST" action="{{ route('admin.users.reactivate', $user) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-play-circle me-1"></i> Reactivate</button>
+                    </form>
+                @else
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#suspendModal"
+                            @disabled($isSelf) @if ($isSelf) title="You cannot suspend yourself" @endif>
+                        <i class="bi bi-slash-circle me-1"></i> Suspend
+                    </button>
+                @endif
+            </x-slot:actions>
+            <x-slot:facts>
+                <x-admin.fact label="Registered">{{ $user->created_at?->toDateString() ?? '-' }}</x-admin.fact>
+                <x-admin.fact label="Last online">{{ $user->last_online_at?->diffForHumans() ?? '-' }}</x-admin.fact>
+                <x-admin.fact label="E-mail">{{ $user->email_verified_at ? 'Verified' : 'Unverified' }}</x-admin.fact>
+                <x-admin.fact label="Two-factor">{{ $user->hasTwoFactorEnabled() ? 'Enabled' : 'Off' }}</x-admin.fact>
+                <x-admin.fact label="Notifications">{{ $user->email_notifications ? 'In-app + e-mail' : 'In-app only' }}</x-admin.fact>
+                <x-admin.fact label="API tokens">{{ $user->tokens->count() }}</x-admin.fact>
+            </x-slot:facts>
+        </x-admin.entity-header>
+
         @if (session('status'))
             <div class="alert alert-success d-flex align-items-center">
                 <i class="bi bi-check-circle-fill me-2"></i> {{ session('status') }}
@@ -105,20 +132,6 @@
                             <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i> Save profile</button>
                         </form>
                     </div>
-                    <ul class="list-group list-group-flush small">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="text-muted">Registered</span>
-                            <span>{{ $user->created_at?->toDateTimeString() ?? '-' }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="text-muted">Last online</span>
-                            <span>{{ $user->last_online_at?->diffForHumans() ?? '-' }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="text-muted">E-mail notifications</span>
-                            <span>{{ $user->email_notifications ? 'On' : 'Off' }}</span>
-                        </li>
-                    </ul>
                 </div>
             </div>
 
@@ -127,25 +140,6 @@
                 <div class="card h-100">
                     <div class="card-header"><i class="bi bi-sliders me-2"></i> Account actions</div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                            <div>
-                                <div class="fw-semibold">Access</div>
-                                <div class="small text-muted">
-                                    {{ $user->isSuspended() ? 'Login and API access are blocked.' : 'Suspending blocks login and API access immediately.' }}
-                                </div>
-                            </div>
-                            @if ($user->isSuspended())
-                                <form method="POST" action="{{ route('admin.users.reactivate', $user) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-success text-nowrap"><i class="bi bi-play-circle me-1"></i> Reactivate</button>
-                                </form>
-                            @else
-                                <button type="button" class="btn btn-sm btn-outline-danger text-nowrap" data-bs-toggle="modal" data-bs-target="#suspendModal" @disabled($isSelf)>
-                                    <i class="bi bi-slash-circle me-1"></i> Suspend
-                                </button>
-                            @endif
-                        </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
                             <div>
                                 <div class="fw-semibold">Super-Admin</div>

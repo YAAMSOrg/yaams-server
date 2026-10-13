@@ -2,19 +2,16 @@
 @section('title', 'Airlines')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h1 class="h3 mb-1"><i class="bi bi-buildings me-2"></i> Airlines</h1>
-        <p class="text-muted mb-0">
-            {{ $counts['total'] }} {{ Str::plural('airline', $counts['total']) }}
-            &middot; {{ $counts['suspended'] }} suspended
-            &middot; {{ $counts['orphaned'] }} without owner
-        </p>
-    </div>
-    <a href="{{ route('admin.airlines.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i> Create airline
-    </a>
-</div>
+<x-admin.page-header icon="buildings" title="Airlines">
+    {{ $counts['total'] }} {{ Str::plural('airline', $counts['total']) }}
+    &middot; {{ $counts['suspended'] }} suspended
+    &middot; {{ $counts['orphaned'] }} without owner
+    <x-slot:actions>
+        <a href="{{ route('admin.airlines.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Create airline
+        </a>
+    </x-slot:actions>
+</x-admin.page-header>
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}

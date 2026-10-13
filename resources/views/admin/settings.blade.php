@@ -2,12 +2,8 @@
 @section('title', 'Instance Settings')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1"><i class="bi bi-gear me-2"></i> Instance Settings</h1>
-        <p class="text-muted mb-0">Configure instance-wide options for this YAAMS install.</p>
-    </div>
-</div>
+<x-admin.page-header icon="gear" title="Instance Settings"
+                     subtitle="Configure instance-wide options for this YAAMS install." />
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}
