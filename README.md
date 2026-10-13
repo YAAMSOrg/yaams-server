@@ -11,7 +11,7 @@ A decentralised, open-source virtual airline management platform. Track PIREPs, 
 ![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php&logoColor=white)
 
-![screenshot](https://github.com/user-attachments/assets/69a64cc3-d340-4f18-99ea-5ebb04804eef)
+![screenshot](https://github.com/user-attachments/assets/f22b1dfd-d399-4b15-acff-b7a07be49758)
 
 </div>
 
