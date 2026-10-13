@@ -58,6 +58,11 @@ Two role systems coexist — do not confuse them:
 - **Spatie roles** (global): `Pilot`, `Manager` (`add aircraft`, `edit aircraft`, `review flight`), `Super-Admin` (bypasses all checks via `Gate::before` in `AppServiceProvider`). The `AircraftPolicy` handles model-level aircraft authorization.
 - **Per-airline role** in `airline_memberships.role` (enum: `Pilot`, `Dispatcher`, `Manager`): checked via `User::isManagerOf()`, `hasAirlineRole()`, `canReviewFlightsFor()`. This is what controls invite code generation and flight review access.
 
+**Admin 2FA reset (account recovery)** — `php artisan yaams:reset-2fa {email} [--force]` (`App\Console\Commands\ResetTwoFactorCommand`) removes 2FA from a user who lost their authenticator and recovery codes:
+- Clears the three `two_factor_*` columns directly instead of using Fortify's `DisableTwoFactorAuthentication` - its `TwoFactorAuthenticationDisabled` event would be logged by `AuthEventSubscriber` as caused by the user themselves
+- Writes an explicit `two_factor_reset` activity (`warning`, subject = user, no causer, `via: console`)
+- Notifies the user via `App\Notifications\TwoFactorReset` - a security notice, so `mail` is sent regardless of the `email_notifications` preference
+
 ### Instance Settings
 
 Instance-wide configuration is stored as key/value rows in the `settings` table (`key` is the string PK). Read values via `Setting::get('key', $default)` (`app/Models/Setting.php`); write via `Setting::set('key', $value)`. Every known key and its fallback value lives in `Setting::defaults()` — `get()` falls back to that when a row is missing, so callers never hardcode defaults. Boolean settings are stored as the strings `'1'`/`'0'`.
