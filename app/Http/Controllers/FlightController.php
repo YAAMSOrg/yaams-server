@@ -185,14 +185,19 @@ class FlightController extends Controller
                 ],
             ]);
 
+            // Store ICAO codes uppercase like the API does: MySQL matches them case-insensitively,
+            // but Eloquent pairs eager-loaded airports case-sensitively (a lowercase code loads null).
+            $validated["departure_icao"] = strtoupper($validated["departure_icao"]);
+            $validated["arrival_icao"] = strtoupper($validated["arrival_icao"]);
+
             // Check if user given airport exists, if not throw an exception. We need to do this on the two fields, to display the error.
-            if (!Airport::find($request->post("departure_icao"))) {
+            if (!Airport::find($validated["departure_icao"])) {
                 throw ValidationException::withMessages([
                     "departure_icao" =>
                         "This airport could not be found in the database.",
                 ]);
             }
-            if (!Airport::find($request->post("arrival_icao"))) {
+            if (!Airport::find($validated["arrival_icao"])) {
                 throw ValidationException::withMessages([
                     "arrival_icao" =>
                         "This airport could not be found in the database.",

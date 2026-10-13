@@ -189,8 +189,9 @@ class AircraftController extends Controller
             if (isset($validated['hex_code'])) {
                 $validated['hex_code'] = strtoupper($validated['hex_code']);
             }
+            $validated['current_loc'] = strtoupper($validated['current_loc']);
 
-            if (!Airport::find($request->post('current_loc'))) {
+            if (!Airport::find($validated['current_loc'])) {
                 throw ValidationException::withMessages(['current_loc' => 'This airport could not be found in the database.']);
             }
 
@@ -319,8 +320,8 @@ class AircraftController extends Controller
         $currentActiveAirline = session()->get('activeairline');
 
         // Get lat and lon for position view
-        $curLat = $aircraft->location->latitude_deg;
-        $curLon = $aircraft->location->longitude_deg;
+        $curLat = $aircraft->location?->latitude_deg;
+        $curLon = $aircraft->location?->longitude_deg;
 
         // Screenshot gallery: approved shots (primary first) plus the pending
         // review queue (with uploader for display/authorization).

@@ -44,7 +44,7 @@
                         <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded small">
                             <span class="font-monospace fw-bold">{{ $flights->first()->full_icao_callsign }}</span>
                             <span>
-                                <span class="fw-semibold">{{ $flights->first()->departure_airport->icao_code }}</span> 
+                                <span class="fw-semibold">{{ $flights->first()->departure_icao }}</span> 
                                 <i class="bi bi-arrow-right text-muted mx-1"></i> 
                                 <span class="fw-semibold">{{ $flights->first()->arrival_icao }}</span>
                             </span>
@@ -151,9 +151,9 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <abbr title="{{ $flight->departure_airport->name }}" class="text-decoration-none fw-bold text-dark font-monospace">{{ $flight->departure_airport->icao_code }}</abbr>
+                                            <abbr title="{{ $flight->departure_airport?->name ?? $flight->departure_icao }}" class="text-decoration-none fw-bold text-dark font-monospace">{{ $flight->departure_icao }}</abbr>
                                             <i class="bi bi-arrow-right text-muted small"></i>
-                                            <abbr title="{{ $flight->arrival_airport->name }}" class="text-decoration-none fw-bold text-dark font-monospace">{{ $flight->arrival_icao }}</abbr>
+                                            <abbr title="{{ $flight->arrival_airport?->name ?? $flight->arrival_icao }}" class="text-decoration-none fw-bold text-dark font-monospace">{{ $flight->arrival_icao }}</abbr>
                                         </div>
                                     </td>
                                     <td>

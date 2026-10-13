@@ -187,9 +187,9 @@
                                 
                                 <td>
                                     <div class="d-flex align-items-center gap-2 font-monospace fs-6">
-                                        <abbr title="{{ $flight->departure_airport->name }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-1 rounded border">{{ $flight->departure_airport->icao_code }}</abbr>
+                                        <abbr title="{{ $flight->departure_airport?->name ?? $flight->departure_icao }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-1 rounded border">{{ $flight->departure_icao }}</abbr>
                                         <i class="bi bi-arrow-right text-muted small"></i>
-                                        <abbr title="{{ $flight->arrival_airport->name }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-1 rounded border">{{ $flight->arrival_icao }}</abbr>
+                                        <abbr title="{{ $flight->arrival_airport?->name ?? $flight->arrival_icao }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-1 rounded border">{{ $flight->arrival_icao }}</abbr>
                                     </div>
                                 </td>
                                 

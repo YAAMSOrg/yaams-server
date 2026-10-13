@@ -257,9 +257,9 @@
                                                 {{ $flight->pilot_name }}
                                             </td>
                                             <td class="font-monospace">
-                                                <abbr title="{{ $flight->departure_airport->name }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->departure_icao }}</abbr>
+                                                <abbr title="{{ $flight->departure_airport?->name ?? $flight->departure_icao }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->departure_icao }}</abbr>
                                                 <i class="bi bi-arrow-right text-muted mx-1"></i>
-                                                <abbr title="{{ $flight->arrival_airport->name }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->arrival_icao }}</abbr>
+                                                <abbr title="{{ $flight->arrival_airport?->name ?? $flight->arrival_icao }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->arrival_icao }}</abbr>
                                             </td>
                                             <td class="text-muted">
                                                 {{ $flight->flight_duration }}
@@ -283,13 +283,15 @@
                     <i class="bi bi-geo-alt-fill text-danger me-2"></i> Current Location Tracking
                 </div>
                 <div class="position-relative">
-                    <x-maps-leaflet style="height: 320px; width: 100%;" :zoomLevel="11" :markers="[['lat' => $lat, 'long' => $lon]]" :centerPoint="['lat' => $lat, 'long' => $lon]"></x-maps-leaflet>
+                    @if ($lat !== null && $lon !== null)
+                        <x-maps-leaflet style="height: 320px; width: 100%;" :zoomLevel="11" :markers="[['lat' => $lat, 'long' => $lon]]" :centerPoint="['lat' => $lat, 'long' => $lon]"></x-maps-leaflet>
+                    @endif
                 </div>
                 <div class="card-body bg-light border-top text-center py-3">
                     <div class="small text-muted uppercase fw-bold tracking-wide mb-1">Status</div>
                     <p class="mb-0 fw-medium text-dark">
                         <i class="bi bi-building me-1"></i> On the ground at 
-                        <span class="badge bg-dark font-monospace fs-6 px-2 py-1 ms-1">{{ $aircraft->location->icao_code }}</span>
+                        <span class="badge bg-dark font-monospace fs-6 px-2 py-1 ms-1">{{ $aircraft->current_loc }}</span>
                     </p>
                 </div>
             </div>

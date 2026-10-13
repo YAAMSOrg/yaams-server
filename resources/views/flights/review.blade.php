@@ -79,9 +79,9 @@
                             <td><span class="badge bg-light text-dark border font-monospace">{{ $flight->full_flight_number }}</span></td>
                             <td class="font-monospace fw-semibold text-secondary">{{ $flight->full_icao_callsign }}</td>
                             <td>
-                                <span class="fw-bold" title="{{ $flight->departure_airport->name }}">{{ $flight->departure_airport->icao_code }}</span>
+                                <span class="fw-bold" title="{{ $flight->departure_airport?->name ?? $flight->departure_icao }}">{{ $flight->departure_icao }}</span>
                                 <i class="bi bi-arrow-right mx-1 text-muted"></i>
-                                <span class="fw-bold" title="{{ $flight->arrival_airport->name }}">{{ $flight->arrival_icao }}</span>
+                                <span class="fw-bold" title="{{ $flight->arrival_airport?->name ?? $flight->arrival_icao }}">{{ $flight->arrival_icao }}</span>
                             </td>
                             <td><i class="bi bi-clock me-1 text-muted"></i>{{ $flight->flight_duration }}</td>
                             <td>
