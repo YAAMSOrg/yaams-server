@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'airline' => \App\Http\Middleware\RequiresActiveAirline::class,
+        'airline.writable' => \App\Http\Middleware\EnsureAirlineNotSuspended::class,
     ];
 }

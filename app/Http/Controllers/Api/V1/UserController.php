@@ -34,6 +34,7 @@ class UserController extends Controller
      *         "unitIsLbs": false,
      *         "requirePirepReview": true,
      *         "locationContinuity": false,
+     *         "isSuspended": false,
      *         "createdAt": "2026-01-01T00:00:00.000000Z",
      *         "updatedAt": "2026-01-01T00:00:00.000000Z"
      *       }

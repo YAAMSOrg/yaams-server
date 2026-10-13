@@ -55,7 +55,6 @@ class AirlineController extends Controller
             'website'              => $validated['airline_website'] ?? null,
             'founded_at'           => $validated['airline_founded'] ?? now()->toDateString(),
             'unit_is_lbs'          => $request->boolean('unit_is_lbs'),
-            'active'               => true,
             'require_pirep_review' => true,
             'owner_user_id'        => auth()->id(),
         ]);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Airline;
 use App\Models\User;
+use App\Notifications\RemovedFromAirline;
 use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -101,6 +102,8 @@ class MemberController extends Controller
             ->withProperties(['level' => ActivityLevel::INFO])
             ->event('airline_member_removed')
             ->log($member->name . ' was removed from ' . $airline->name);
+
+        $member->notify(new RemovedFromAirline($airline->name, $airline->icao_callsign));
 
         return back()->with('success', $member->name . ' has been removed from the airline.');
     }

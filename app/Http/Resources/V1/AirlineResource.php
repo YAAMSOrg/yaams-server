@@ -23,6 +23,7 @@ class AirlineResource extends JsonResource
             'unitIsLbs' => $this->unit_is_lbs,
             'requirePirepReview' => $this->require_pirep_review,
             'locationContinuity' => $this->location_continuity,
+            'isSuspended' => $this->isSuspended(),
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at
         ];

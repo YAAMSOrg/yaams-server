@@ -107,7 +107,6 @@ class SetupController extends Controller
                 'description'          => $request->airline_desc,
                 'website'              => $request->airline_website,
                 'founded_at'           => $request->airline_founded ?? now()->toDateString(),
-                'active'               => true,
                 'require_pirep_review' => true,
             ]);
 

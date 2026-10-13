@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Airline;
 use App\Models\User;
+use App\Notifications\RemovedFromAirline;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\Concerns\SeedsDomain;
 use Tests\TestCase;
 
@@ -247,6 +249,8 @@ class MemberManagementTest extends TestCase
 
     public function test_manager_can_remove_pilot(): void
     {
+        Notification::fake();
+
         $airline = Airline::factory()->create();
         $owner = $this->ownerOf($airline);
         $manager = $this->memberOf($airline, 'Manager');
@@ -258,6 +262,8 @@ class MemberManagementTest extends TestCase
             ->assertRedirect();
 
         $this->assertFalse($airline->isMember($pilot->fresh()));
+        Notification::assertSentTo($pilot, RemovedFromAirline::class, fn (RemovedFromAirline $n) =>
+            $n->airlineName === $airline->name);
     }
 
     public function test_ownership_transfer_preserves_add_aircraft_permission_for_both(): void

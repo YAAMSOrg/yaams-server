@@ -2,12 +2,8 @@
 @section('title', 'Administration')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1"><i class="bi bi-shield-lock me-2"></i> Instance Administration</h1>
-        <p class="text-muted mb-0">Manage everything across this YAAMS instance.</p>
-    </div>
-</div>
+<x-admin.page-header icon="shield-lock" title="Instance Administration"
+                     subtitle="Manage everything across this YAAMS instance." />
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}
@@ -30,7 +26,7 @@
                     <div class="card-body text-center">
                         <i class="bi bi-buildings fs-2 text-success"></i>
                         <div class="fs-3 fw-bold mt-2">{{ $stats['airlines'] }}</div>
-                        <div class="text-muted small">Airlines</div>
+                        <a href="{{ route('admin.airlines.index') }}" class="text-muted small stretched-link text-decoration-none">Airlines</a>
                     </div>
                 </div>
             </div>
@@ -158,7 +154,7 @@
                             <tbody>
                                 @forelse ($recentAirlines as $airline)
                                     <tr>
-                                        <td>{{ $airline->name }}</td>
+                                        <td><a href="{{ route('admin.airlines.show', $airline) }}" class="text-decoration-none">{{ $airline->name }}</a></td>
                                         <td>{{ $airline->icao_callsign }}</td>
                                         <td>
                                             <span class="text-muted small">{{ $airline->created_at->diffForHumans() }}</span>

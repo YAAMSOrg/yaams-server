@@ -32,12 +32,14 @@ Route::group(['prefix' => 'v1', 'as' => 'api.v1.', 'middleware' => 'auth:sanctum
     // so an aircraft outside {airline} is a 404.
     Route::apiResource('airlines.aircraft', AircraftAPIController::class)
         ->only(['index', 'store', 'show'])
-        ->scoped();
+        ->scoped()
+        ->middleware('airline.writable');
 
-    // Flights / PIREPs
+    // Flights / PIREPs - `airline.writable` refuses writes (403) while the
+    // airline is suspended by an instance admin.
     Route::get('airlines/{airline}/flights', [FlightAPIController::class, 'index'])->name('airlines.flights.index');
-    Route::post('airlines/{airline}/flights', [FlightAPIController::class, 'store'])->name('airlines.flights.store');
+    Route::post('airlines/{airline}/flights', [FlightAPIController::class, 'store'])->name('airlines.flights.store')->middleware('airline.writable');
     Route::get('airlines/{airline}/flights/review', [FlightAPIController::class, 'reviewList'])->name('airlines.flights.review');
-    Route::post('flights/{flight}/accept', [FlightAPIController::class, 'accept'])->name('flights.accept');
-    Route::post('flights/{flight}/reject', [FlightAPIController::class, 'reject'])->name('flights.reject');
+    Route::post('flights/{flight}/accept', [FlightAPIController::class, 'accept'])->name('flights.accept')->middleware('airline.writable');
+    Route::post('flights/{flight}/reject', [FlightAPIController::class, 'reject'])->name('flights.reject')->middleware('airline.writable');
 });

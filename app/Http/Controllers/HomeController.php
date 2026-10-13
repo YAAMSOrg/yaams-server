@@ -11,7 +11,7 @@ class HomeController extends Controller
     public function index()
     {
         $airlines = Airline::withCount(['users', 'flights' => fn($q) => $q->where('status_id', 2)])
-            ->where('active', true)
+            ->active()
             ->get();
 
         $acceptedFlights = Flight::where('status_id', 2)->get();

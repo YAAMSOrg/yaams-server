@@ -2,16 +2,11 @@
 @section('title', 'Users')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1"><i class="bi bi-people me-2"></i> Users</h1>
-        <p class="text-muted mb-0">
-            {{ $counts['total'] }} {{ Str::plural('account', $counts['total']) }}
-            &middot; {{ $counts['suspended'] }} suspended
-            &middot; {{ $counts['unverified'] }} unverified
-        </p>
-    </div>
-</div>
+<x-admin.page-header icon="people" title="Users">
+    {{ $counts['total'] }} {{ Str::plural('account', $counts['total']) }}
+    &middot; {{ $counts['suspended'] }} suspended
+    &middot; {{ $counts['unverified'] }} unverified
+</x-admin.page-header>
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}

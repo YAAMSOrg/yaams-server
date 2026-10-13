@@ -10,12 +10,8 @@
 @endphp
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1"><i class="bi bi-journal-text me-2"></i> Activity Log</h1>
-        <p class="text-muted mb-0">Instance-wide audit trail of user actions and model changes.</p>
-    </div>
-</div>
+<x-admin.page-header icon="journal-text" title="Activity Log"
+                     subtitle="Instance-wide audit trail of user actions and model changes." />
 
 <div class="row g-4">
     {{-- Sidebar: admin sections --}}
@@ -36,7 +32,14 @@
                 <input type="hidden" name="user" value="{{ $user->id }}">
                 <span class="badge bg-primary-subtle text-primary d-inline-flex align-items-center gap-1">
                     <i class="bi bi-person"></i> {{ $user->name }}
-                    <a href="{{ route('admin.activity.index', array_filter(['level' => $level])) }}" class="text-primary" aria-label="Remove user filter"><i class="bi bi-x-lg"></i></a>
+                    <a href="{{ route('admin.activity.index', array_filter(['level' => $level, 'airline' => $airline?->id])) }}" class="text-primary" aria-label="Remove user filter"><i class="bi bi-x-lg"></i></a>
+                </span>
+            @endif
+            @if ($airline)
+                <input type="hidden" name="airline" value="{{ $airline->id }}">
+                <span class="badge bg-primary-subtle text-primary d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-buildings"></i> {{ $airline->name }}
+                    <a href="{{ route('admin.activity.index', array_filter(['level' => $level, 'user' => $user?->id])) }}" class="text-primary" aria-label="Remove airline filter"><i class="bi bi-x-lg"></i></a>
                 </span>
             @endif
         </form>
