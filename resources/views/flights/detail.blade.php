@@ -93,8 +93,8 @@
                         
                         <div class="d-flex align-items-center gap-3 gap-md-4 my-3">
                             <div class="text-center flex-shrink-0">
-                                <h1 class="display-6 mb-0 fw-bold tracking-tight font-monospace lh-1">{{ $flight->departure_airport->icao_code }}</h1>
-                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;">{{ $flight->departure_airport->name }}</span>
+                                <h1 class="display-6 mb-0 fw-bold tracking-tight font-monospace lh-1">{{ $flight->departure_icao }}</h1>
+                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;">{{ $flight->departure_airport?->name }}</span>
                             </div>
 
                             <div class="flex-grow-1 px-1 text-center" style="min-width: 80px;">
@@ -108,8 +108,8 @@
                             </div>
 
                             <div class="text-center flex-shrink-0">
-                                <h1 class="display-6 mb-0 fw-bold tracking-tight font-monospace lh-1">{{ $flight->arrival_airport->icao_code }}</h1>
-                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;">{{ $flight->arrival_airport->name }}</span>
+                                <h1 class="display-6 mb-0 fw-bold tracking-tight font-monospace lh-1">{{ $flight->arrival_icao }}</h1>
+                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;">{{ $flight->arrival_airport?->name }}</span>
                             </div>
                         </div>
                     </div>
