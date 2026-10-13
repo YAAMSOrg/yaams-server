@@ -40,6 +40,22 @@ class FlightDurationTest extends TestCase
         $this->assertSame('01:30 h', $flight->flight_duration);
     }
 
+    public function test_duration_over_24_hours_includes_the_full_day(): void
+    {
+        $flight = $this->flightBetween('2026-07-11 10:00:00', '2026-07-12 11:30:00');
+
+        $this->assertSame(1530, $flight->flight_duration_minutes);
+        $this->assertSame('25:30 h', $flight->flight_duration);
+    }
+
+    public function test_duration_across_midnight_is_counted_correctly(): void
+    {
+        $flight = $this->flightBetween('2026-07-11 23:00:00', '2026-07-12 01:15:00');
+
+        $this->assertSame(135, $flight->flight_duration_minutes);
+        $this->assertSame('02:15 h', $flight->flight_duration);
+    }
+
     public function test_unparseable_times_return_an_error_string(): void
     {
         $flight = $this->flightBetween('not-a-date', 'also-not-a-date');
