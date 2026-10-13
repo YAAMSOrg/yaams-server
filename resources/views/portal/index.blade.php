@@ -79,7 +79,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                    {{ $airline->pivot->role ?? 'Pilot' }}
+                                    {{ $airline->isOwnedBy(auth()->user()) ? 'Owner' : ($airline->pivot->role ?? 'Pilot') }}
                                 </span>
                                 <form action="{{ route('changeactiveairline') }}" method="POST" class="d-inline">
                                     @csrf
