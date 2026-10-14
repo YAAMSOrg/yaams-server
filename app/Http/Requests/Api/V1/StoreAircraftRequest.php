@@ -10,8 +10,11 @@ class StoreAircraftRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('add aircraft')
-            && $this->user()->isMemberOf($this->route('airline'));
+        $airline = $this->route('airline');
+
+        // Per-airline Manager (AirlinePolicy), never a global role.
+        return $this->user()->isMemberOf($airline)
+            && $this->user()->can('addAircraft', $airline);
     }
 
     /**

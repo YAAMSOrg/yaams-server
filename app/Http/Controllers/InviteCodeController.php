@@ -16,7 +16,7 @@ class InviteCodeController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageInviteCodes', $airline), 403);
 
         $codes = InviteCode::where('airline_id', $airline->id)
             ->with(['creator', 'usedBy'])
@@ -30,7 +30,7 @@ class InviteCodeController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageInviteCodes', $airline), 403);
 
         $request->validate(['role' => 'required|in:Pilot,Dispatcher,Manager']);
 
@@ -53,7 +53,7 @@ class InviteCodeController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageInviteCodes', $airline), 403);
         abort_unless($inviteCode->airline_id === $airline->id, 403);
         abort_if($inviteCode->isUsed(), 422);
 

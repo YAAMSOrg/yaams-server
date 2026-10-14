@@ -21,7 +21,8 @@ class StoreFlightRequest extends FormRequest
         // rule), not an authorization failure.
         $airline = $this->airline();
 
-        return $airline === null || $this->user()->isMemberOf($airline);
+        return $airline === null
+            || ($this->user()->isMemberOf($airline) && $this->user()->can('fileFlights', $airline));
     }
 
     /**
@@ -39,7 +40,7 @@ class StoreFlightRequest extends FormRequest
                 'max:6',
                 'regex:/^[0-9]{1,4}[A-Za-z]{0,2}$/',
             ],
-            'crzalt' => 'numeric|max:50000|digits_between:1,5|required',
+            'crzalt' => 'required|integer|min:' . Flight::MIN_CRUISE_ALTITUDE . '|max:' . Flight::MAX_CRUISE_ALTITUDE . '|multiple_of:' . Flight::CRUISE_ALTITUDE_STEP,
             'blockoff' => 'required|date_format:Y-m-d H:i:s',
             'blockon' => 'required|date_format:Y-m-d H:i:s',
             'burned_fuel' => 'required|integer|min:' . Flight::MIN_BURNED_FUEL . '|max:' . Flight::MAX_BURNED_FUEL,

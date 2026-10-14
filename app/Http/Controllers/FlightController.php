@@ -172,7 +172,7 @@ class FlightController extends Controller
                     // ICAO Standard: 1-4 Ziffern, optional gefolgt von max 2 Buchstaben
                     "regex:/^[0-9]{1,4}[A-Za-z]{0,2}$/",
                 ],
-                "crzalt" => "numeric|max:50000|digits_between:1,5|required",
+                "crzalt" => "required|integer|min:" . Flight::MIN_CRUISE_ALTITUDE . "|max:" . Flight::MAX_CRUISE_ALTITUDE . "|multiple_of:" . Flight::CRUISE_ALTITUDE_STEP,
                 "blockoff" => "required",
                 "blockon" => "required",
                 "burned_fuel" => "required|integer|min:" . Flight::MIN_BURNED_FUEL . "|max:" . Flight::MAX_BURNED_FUEL,
@@ -248,24 +248,25 @@ class FlightController extends Controller
             }
 
             // All checks passed, so create the flight.
-            $flight = Flight::create(
+            $flight = new Flight(
                 $validated + [
                     "airline_id" => $currentActiveAirline->id,
                     "pilot_id" => auth()->user()->id,
                 ]
             );
+            // Set the status explicitly (not via the column default). Auto-accept
+            // when the airline does not require PIREP review.
+            $flight->status_id = $tempAirline->require_pirep_review ? 1 : 2;
+            $flight->save();
 
             // Location continuity: the airframe has physically moved to the arrival airport
             if ($tempAirline->location_continuity) {
                 $aircraft->update(["current_loc" => strtoupper($validated["arrival_icao"])]);
             }
 
+            // Without review nothing is dispatched to reviewers
             if ($tempAirline->require_pirep_review) {
                 event(new FlightFiled($flight));
-            } else {
-                // Auto-accept: the airline does not require PIREP review, so nothing is dispatched to reviewers
-                $flight->status_id = 2;
-                $flight->save();
             }
 
             activity()
@@ -414,7 +415,7 @@ class FlightController extends Controller
     {
         $currentActiveAirline = Session::get("activeairline");
 
-        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+        if (!auth()->user()->can('reviewFlights', $currentActiveAirline)) {
             return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
         }
 
@@ -431,7 +432,7 @@ class FlightController extends Controller
     {
         $currentActiveAirline = Session::get("activeairline");
 
-        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+        if (!auth()->user()->can('reviewFlights', $currentActiveAirline)) {
             return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
         }
 
@@ -470,7 +471,7 @@ class FlightController extends Controller
     {
         $currentActiveAirline = session()->get("activeairline");
 
-        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+        if (!auth()->user()->can('reviewFlights', $currentActiveAirline)) {
             return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
         }
 

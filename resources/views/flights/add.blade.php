@@ -113,7 +113,7 @@
                         </div>
                         <div class="col-md-4">
                             <label for="crzalt" class="form-label">Cruise Altitude (FT)</label>
-                            <input type="number" class="form-control font-monospace" step="1000" min="0" max="60000" name="crzalt" id="crzalt" required placeholder="33000" value="{{ old('crzalt') }}">
+                            <input type="number" class="form-control font-monospace" step="{{ \App\Models\Flight::CRUISE_ALTITUDE_STEP }}" min="{{ \App\Models\Flight::MIN_CRUISE_ALTITUDE }}" max="{{ \App\Models\Flight::MAX_CRUISE_ALTITUDE }}" name="crzalt" id="crzalt" required placeholder="33000" value="{{ old('crzalt') }}">
                         </div>
 
                         <div class="col-12">

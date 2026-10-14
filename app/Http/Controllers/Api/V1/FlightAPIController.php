@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ListFlightsRequest;
+use App\Http\Requests\Api\V1\ListReviewFlightsRequest;
 use App\Http\Requests\Api\V1\StoreFlightRequest;
 use App\Http\Resources\V1\FlightCollection;
 use App\Http\Resources\V1\FlightResource;
@@ -35,7 +37,16 @@ class FlightAPIController extends Controller
      *
      * @urlParam airline int required The airline ID. Example: 1
      *
-     * @queryParam status_id integer Filter by flight status: 1 = Pending, 2 = Accepted, 3 = Rejected. Example: 2
+     * @queryParam status string `pending`, `accepted` or `rejected`. Defaults to all. Example: accepted
+     * @queryParam status_id integer Deprecated, use `status`. 1 = Pending, 2 = Accepted, 3 = Rejected. Example: 2
+     * @queryParam aircraft_id integer Only flights with this aircraft. Example: 7
+     * @queryParam departure string Departure ICAO (case-insensitive). Example: EDDF
+     * @queryParam arrival string Arrival ICAO (case-insensitive). Example: EGLL
+     * @queryParam from string Block-off on or after this UTC day (Y-m-d). Example: 2026-07-01
+     * @queryParam to string Block-off on or before this UTC day (Y-m-d), must not be before `from`. Example: 2026-07-31
+     * @queryParam sort string `flight_number`, `callsign`, `departure`, `arrival`, `block_off`, `block_on`, `duration`, `burned_fuel`, `status` (workflow order: pending, accepted, rejected) or `created_at`, prefix with `-` for descending. Ties are ordered by flight ID. Defaults to `-created_at`. Example: -block_off
+     * @queryParam page integer Page number, starting at 1. Example: 1
+     * @queryParam per_page integer Items per page, 1 - 100. Defaults to 25. Example: 25
      *
      * @response 200 {
      *   "data": [
@@ -60,26 +71,20 @@ class FlightAPIController extends Controller
      *       "createdAt": "2026-07-11T11:35:00.000000Z",
      *       "updatedAt": "2026-07-11T11:40:00.000000Z"
      *     }
-     *   ]
+     *   ],
+     *   "links": {"first": "https://yaams.example/api/v1/airlines/1/flights?page=1", "last": "https://yaams.example/api/v1/airlines/1/flights?page=3", "prev": null, "next": "https://yaams.example/api/v1/airlines/1/flights?page=2"},
+     *   "meta": {"current_page": 1, "from": 1, "last_page": 3, "path": "https://yaams.example/api/v1/airlines/1/flights", "per_page": 25, "to": 25, "total": 61}
      * }
      * @response 403 {"message": "You are not a member of this airline."}
+     * @response 422 {"message": "The selected status is invalid.", "errors": {"status": ["The selected status is invalid."]}}
      */
-    public function index(Request $request, Airline $airline)
+    public function index(ListFlightsRequest $request, Airline $airline)
     {
-        if (! $request->user()->isMemberOf($airline)) {
-            return response()->json(['message' => 'You are not a member of this airline.'], 403);
-        }
-
-        $user = $request->user();
         $query = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
-            ->where('pilot_id', $user->id)
+            ->where('pilot_id', $request->user()->id)
             ->where('airline_id', $airline->id);
 
-        if ($request->has('status_id')) {
-            $query->where('status_id', $request->status_id);
-        }
-
-        return new FlightCollection($query->orderBy('created_at', 'DESC')->paginate(15));
+        return new FlightCollection($request->paginate($query));
     }
 
     /**
@@ -98,12 +103,12 @@ class FlightAPIController extends Controller
      * @bodyParam arrival_icao string required Arrival airport ICAO (must exist; uppercased). Example: EGLL
      * @bodyParam aircraft_id integer required ID of an active aircraft owned by the airline. Example: 7
      * @bodyParam callsign string required Radio callsign, 1-4 digits optionally followed by up to 2 letters. Example: 421
-     * @bodyParam crzalt integer required Cruise altitude in feet, max 50000. Example: 36000
+     * @bodyParam crzalt integer required Cruise altitude in feet, 1000-60000 in 500 ft steps (e.g. 35000, or 5500 for VFR). Must not exceed the aircraft's service ceiling when one is set. Example: 36000
      * @bodyParam blockoff string required Block-off time (UTC), format Y-m-d H:i:s. Example: 2026-07-11 10:00:00
      * @bodyParam blockon string required Block-on time (UTC), format Y-m-d H:i:s. Must be after blockoff; flight duration may not exceed 26 hours. Example: 2026-07-11 11:30:00
      * @bodyParam burned_fuel integer required Fuel burned, in the airline's unit (min 1, max 600000). Example: 4200
      * @bodyParam route string required Filed route string. Example: SOVAT UL610 KONAN
-     * @bodyParam online_network_id integer required Online network ID (must exist in online_networks). Example: 1
+     * @bodyParam online_network_id integer required Online network ID, see `GET /api/v1/online-networks`. Example: 1
      * @bodyParam remarks string Optional remarks (letters, digits, spaces, . , -). Example: Smooth flight.
      *
      * @response 201 {
@@ -139,22 +144,23 @@ class FlightAPIController extends Controller
         $validated = $request->validated();
         $aircraft = $request->aircraft();
 
-        $flight = Flight::create($validated + [
+        $flight = new Flight($validated + [
             'pilot_id' => $user->id,
             'airline_id' => $airline->id,
         ]);
+        // Set the status explicitly (not via the column default) so the response
+        // carries it. Auto-accept when the airline does not require PIREP review.
+        $flight->status_id = $airline->require_pirep_review ? 1 : 2;
+        $flight->save();
 
         // Location continuity: the airframe has physically moved to the arrival airport
         if ($airline->location_continuity) {
             $aircraft->update(['current_loc' => $validated['arrival_icao']]);
         }
 
+        // Without review nothing is dispatched to reviewers
         if ($airline->require_pirep_review) {
             event(new FlightFiled($flight));
-        } else {
-            // Auto-accept: the airline does not require PIREP review, so nothing is dispatched to reviewers
-            $flight->status_id = 2;
-            $flight->save();
         }
 
         activity()
@@ -172,10 +178,20 @@ class FlightAPIController extends Controller
     /**
      * List the review queue
      *
-     * List pending PIREPs (status 1) for an airline. Requires the per-airline
-     * Dispatcher or Manager role.
+     * List pending PIREPs (status 1) for an airline. Requires the
+     * `reviewFlights` ability (per-airline Dispatcher or Manager).
      *
      * @urlParam airline int required The airline ID. Example: 1
+     *
+     * @queryParam pilot_id integer Only flights filed by this pilot. Example: 3
+     * @queryParam aircraft_id integer Only flights with this aircraft. Example: 7
+     * @queryParam departure string Departure ICAO (case-insensitive). Example: EDDF
+     * @queryParam arrival string Arrival ICAO (case-insensitive). Example: EGLL
+     * @queryParam from string Block-off on or after this UTC day (Y-m-d). Example: 2026-07-01
+     * @queryParam to string Block-off on or before this UTC day (Y-m-d), must not be before `from`. Example: 2026-07-31
+     * @queryParam sort string `flight_number`, `callsign`, `departure`, `arrival`, `block_off`, `block_on`, `duration`, `burned_fuel` or `created_at`, prefix with `-` for descending. Ties are ordered by flight ID. Defaults to `-created_at`. Example: -block_off
+     * @queryParam page integer Page number, starting at 1. Example: 1
+     * @queryParam per_page integer Items per page, 1 - 100. Defaults to 25. Example: 25
      *
      * @response 200 {
      *   "data": [
@@ -200,31 +216,27 @@ class FlightAPIController extends Controller
      *       "createdAt": "2026-07-11T14:30:00.000000Z",
      *       "updatedAt": "2026-07-11T14:30:00.000000Z"
      *     }
-     *   ]
+     *   ],
+     *   "links": {"first": "https://yaams.example/api/v1/airlines/1/flights/review?page=1", "last": "https://yaams.example/api/v1/airlines/1/flights/review?page=1", "prev": null, "next": null},
+     *   "meta": {"current_page": 1, "from": 1, "last_page": 1, "path": "https://yaams.example/api/v1/airlines/1/flights/review", "per_page": 25, "to": 4, "total": 4}
      * }
      * @response 403 {"message": "You do not have permission to review flights for this airline."}
      */
-    public function reviewList(Request $request, Airline $airline)
+    public function reviewList(ListReviewFlightsRequest $request, Airline $airline)
     {
-        // Per-airline Dispatcher/Manager role - same rule as the web review pages.
-        if (! $request->user()->canReviewFlightsFor($airline)) {
-            return response()->json(['message' => 'You do not have permission to review flights for this airline.'], 403);
-        }
-
-        $flights = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
+        $query = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
             ->where('airline_id', $airline->id)
-            ->where('status_id', 1)
-            ->orderBy('created_at', 'DESC')
-            ->get();
+            ->where('status_id', 1);
 
-        return new FlightCollection($flights);
+        return new FlightCollection($request->paginate($query));
     }
 
     /**
      * Accept a PIREP
      *
      * Mark a pending PIREP as Accepted (status 2) and notify the pilot.
-     * Requires the "review flight" permission for the flight's airline.
+     * Requires the `reviewFlights` ability for the flight's airline; only
+     * Managers may review their own PIREPs.
      *
      * @urlParam flight int required The flight ID. Example: 43
      *
@@ -268,7 +280,8 @@ class FlightAPIController extends Controller
      *
      * Mark a PIREP as Rejected (status 3) and notify the pilot. If location
      * continuity is on and the flight was still pending, the aircraft is moved
-     * back to the flight's departure. Requires the "review flight" permission.
+     * back to the flight's departure. Requires the `reviewFlights` ability for
+     * the flight's airline; only Managers may review their own PIREPs.
      *
      * @urlParam flight int required The flight ID. Example: 43
      *

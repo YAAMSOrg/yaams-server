@@ -138,17 +138,29 @@ class User extends Authenticatable implements MustVerifyEmail
             ->orWhere('email', 'LIKE', "%{$term}%")));
     }
 
+    /**
+     * The per-airline role (Pilot | Dispatcher | Manager), null for a
+     * non-member. Reads the loaded `airlines` relation when present, so
+     * reporting the abilities of every membership (GET /api/v1/user) costs no
+     * query per check; otherwise one query.
+     */
+    public function airlineRole(Airline $airline): ?string
+    {
+        $membership = $this->relationLoaded('airlines')
+            ? $this->airlines->firstWhere('id', $airline->id)
+            : $this->airlines()->where('airline_id', $airline->id)->first();
+
+        return $membership?->pivot->role;
+    }
+
     public function isMemberOf(Airline $airline): bool
     {
-        return $this->airlines()->where('airline_id', $airline->id)->exists();
+        return $this->airlineRole($airline) !== null;
     }
 
     public function hasAirlineRole(Airline $airline, string|array $roles): bool
     {
-        return $this->airlines()
-            ->where('airline_id', $airline->id)
-            ->wherePivotIn('role', (array) $roles)
-            ->exists();
+        return in_array($this->airlineRole($airline), (array) $roles, true);
     }
 
     public function isOwnerOf(Airline $airline): bool

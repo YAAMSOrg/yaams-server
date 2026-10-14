@@ -47,11 +47,7 @@ class AirlineController extends Controller
                 'aircraft' => fn ($q) => $q->where('status', '!=', Aircraft::STATUS_RETIRED),
                 'flights as pending_flights_count' => fn ($q) => $q->where('status_id', 1),
             ])
-            ->when($filters['q'] !== '', fn ($q) => $q->where(fn ($q) => $q
-                ->where('name', 'like', '%'.$filters['q'].'%')
-                ->orWhere('icao_callsign', 'like', '%'.$filters['q'].'%')
-                ->orWhere('prefix', 'like', '%'.$filters['q'].'%')
-                ->orWhere('atc_callsign', 'like', '%'.$filters['q'].'%')))
+            ->search($filters['q'])
             ->when($filters['status'] === 'active', fn ($q) => $q->active())
             ->when($filters['status'] === 'suspended', fn ($q) => $q->suspended())
             ->when($filters['status'] === 'orphaned', fn ($q) => $q->whereNull('owner_user_id'))

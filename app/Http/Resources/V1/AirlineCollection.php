@@ -3,17 +3,17 @@
 namespace App\Http\Resources\V1;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class AirlineCollection extends ResourceCollection
+class AirlineCollection extends ApiCollection
 {
     /**
-     * Transform the resource collection into an array.
-     *
-     * @return array<int|string, mixed>
+     * Every airline list is requested by the token owner, so each item
+     * carries their `membership`.
      */
     public function toArray(Request $request): array
     {
+        $this->collection->each->withMembership();
+
         return parent::toArray($request);
     }
 }

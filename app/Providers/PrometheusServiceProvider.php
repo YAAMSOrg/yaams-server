@@ -11,6 +11,7 @@ use App\Models\InviteCode;
 use App\Models\Notam;
 use App\Models\User;
 use App\Support\ActivityLevel;
+use App\Support\BlockTime;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
@@ -160,7 +161,7 @@ class PrometheusServiceProvider extends ServiceProvider
             ->value(fn () => (int) Flight::query()
                 ->toBase()
                 ->where('status_id', 2)
-                ->selectRaw(self::blockSecondsSql() . ' as aggregate')
+                ->selectRaw('coalesce(sum('.BlockTime::secondsSql(DB::connection()).'), 0) as aggregate')
                 ->value('aggregate'));
 
         Prometheus::addGauge('Aircraft images total')
@@ -214,18 +215,5 @@ class PrometheusServiceProvider extends ServiceProvider
             QueueSizeCollector::class,
             QueueOldestPendingJobCollector::class,
         ]);
-    }
-
-    /**
-     * Sum of (blockon - blockoff) in seconds. There is no portable SQL for a
-     * datetime difference, so this branches on the driver (SQLite runs the tests).
-     */
-    private static function blockSecondsSql(): string
-    {
-        return match (DB::connection()->getDriverName()) {
-            'sqlite' => 'coalesce(sum((julianday(blockon) - julianday(blockoff)) * 86400), 0)',
-            'pgsql' => 'coalesce(sum(extract(epoch from (blockon - blockoff))), 0)',
-            default => 'coalesce(sum(timestampdiff(second, blockoff, blockon)), 0)',
-        };
     }
 }

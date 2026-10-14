@@ -19,7 +19,7 @@ class NotamController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageNotams', $airline), 403);
 
         $notams = Notam::where('airline_id', $airline->id)
             ->with('author')
@@ -33,7 +33,7 @@ class NotamController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageNotams', $airline), 403);
 
         $validated = $request->validate([
             'title'      => 'required|string|max:255',
@@ -72,7 +72,7 @@ class NotamController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageNotams', $airline), 403);
         abort_unless($notam->airline_id === $airline->id, 403);
 
         $validated = $request->validate([
@@ -100,7 +100,7 @@ class NotamController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageNotams', $airline), 403);
         abort_unless($notam->airline_id === $airline->id, 403);
 
         $notam->delete();

@@ -132,6 +132,16 @@ class FlightSanityWebTest extends TestCase
         $this->assertDatabaseCount('flights', 0);
     }
 
+    public function test_a_cruise_altitude_off_the_500_ft_grid_is_rejected(): void
+    {
+        [$airline, $aircraft, $pilot] = $this->airlineWithAircraft();
+
+        $this->file($pilot, $airline, $this->payload($aircraft, ['crzalt' => 41444]))
+            ->assertSessionHasErrors('crzalt');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
     public function test_a_valid_flight_is_still_accepted(): void
     {
         [$airline, $aircraft, $pilot] = $this->airlineWithAircraft();

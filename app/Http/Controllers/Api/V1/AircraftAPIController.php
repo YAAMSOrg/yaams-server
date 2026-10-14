@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ListAircraftRequest;
 use App\Http\Requests\Api\V1\StoreAircraftRequest;
 use App\Http\Resources\V1\AircraftCollection;
 use App\Http\Resources\V1\AircraftResource;
@@ -29,6 +30,13 @@ class AircraftAPIController extends Controller
      * List the airline's aircraft.
      *
      * @urlParam airline int required The airline ID. Example: 1
+     *
+     * @queryParam status string `active`, `inactive` or `retired`. Defaults to all. Example: active
+     * @queryParam location string Current location ICAO (case-insensitive). Example: EDDF
+     * @queryParam search string Match on registration, manufacturer or model. Example: D-E
+     * @queryParam sort string `registration`, `model` or `created_at`, prefix with `-` for descending. Defaults to `registration`. Example: registration
+     * @queryParam page integer Page number, starting at 1. Example: 1
+     * @queryParam per_page integer Items per page, 1 - 100. Defaults to 25. Example: 25
      *
      * @response 200 {
      *   "data": [
@@ -57,17 +65,16 @@ class AircraftAPIController extends Controller
      *       "createdAt": "2026-01-01T00:00:00.000000Z",
      *       "updatedAt": "2026-01-01T00:00:00.000000Z"
      *     }
-     *   ]
+     *   ],
+     *   "links": {"first": "https://yaams.example/api/v1/airlines/1/aircraft?page=1", "last": "https://yaams.example/api/v1/airlines/1/aircraft?page=2", "prev": null, "next": "https://yaams.example/api/v1/airlines/1/aircraft?page=2"},
+     *   "meta": {"current_page": 1, "from": 1, "last_page": 2, "path": "https://yaams.example/api/v1/airlines/1/aircraft", "per_page": 25, "to": 25, "total": 31}
      * }
      * @response 403 {"message": "You are not a member of this airline."}
+     * @response 422 {"message": "The selected status is invalid.", "errors": {"status": ["The selected status is invalid."]}}
      */
-    public function index(Request $request, Airline $airline)
+    public function index(ListAircraftRequest $request, Airline $airline)
     {
-        if (! $request->user()->isMemberOf($airline)) {
-            return response()->json(['message' => 'You are not a member of this airline.'], 403);
-        }
-
-        return new AircraftCollection($airline->aircraft()->get());
+        return new AircraftCollection($request->paginate($airline->aircraft()));
     }
 
     /**
@@ -120,8 +127,8 @@ class AircraftAPIController extends Controller
     /**
      * Add an aircraft
      *
-     * Add an aircraft to the airline's fleet. Requires the "add aircraft"
-     * permission and membership of the airline. Permission, membership,
+     * Add an aircraft to the airline's fleet. Requires the `addAircraft`
+     * ability of your membership (per-airline Manager). Permission,
      * normalization and the duplicate-registration rule are enforced by
      * StoreAircraftRequest.
      *

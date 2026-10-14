@@ -129,4 +129,18 @@ class Airline extends Model
     {
         return $query->whereNotNull('suspended_at');
     }
+
+    /**
+     * Case-insensitive match on name, ICAO callsign, prefix or ATC callsign.
+     */
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        $term = trim((string) $term);
+
+        return $query->when($term !== '', fn ($q) => $q->where(fn ($q) => $q
+            ->where('name', 'LIKE', "%{$term}%")
+            ->orWhere('icao_callsign', 'LIKE', "%{$term}%")
+            ->orWhere('prefix', 'LIKE', "%{$term}%")
+            ->orWhere('atc_callsign', 'LIKE', "%{$term}%")));
+    }
 }

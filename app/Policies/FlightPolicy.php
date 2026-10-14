@@ -19,7 +19,7 @@ class FlightPolicy
      */
     public function review(User $user, Flight $flight): bool
     {
-        if (! $user->canReviewFlightsFor($flight->airline)) {
+        if (! $user->can('reviewFlights', $flight->airline)) {
             return false;
         }
 

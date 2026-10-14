@@ -32,6 +32,15 @@ class Flight extends Model
      */
     public const MAX_BURNED_FUEL = 600000;
 
+    /**
+     * Cruise altitude in feet: 500 ft steps cover IFR levels (35000) and the
+     * VFR semicircular half-thousands (5500). 60000 ft clears every real
+     * airframe (Concorde) and matches the aircraft service_ceiling bounds.
+     */
+    public const MIN_CRUISE_ALTITUDE = 1000;
+    public const MAX_CRUISE_ALTITUDE = 60000;
+    public const CRUISE_ALTITUDE_STEP = 500;
+
     protected $fillable = [
         'airline_id',
         'callsign',

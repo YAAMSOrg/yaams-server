@@ -157,9 +157,7 @@ class AircraftController extends Controller
     public function create(Request $request) {
         $currentActiveAirline = $request->session()->get('activeairline');
 
-        if (!auth()->user()->isManagerOf($currentActiveAirline)) {
-            return redirect()->route('dashboard')->with('error', 'You do not have permission to add aircraft to this airline.');
-        }
+        abort_unless(auth()->user()->can('addAircraft', $currentActiveAirline), 403);
 
         if ($request->getMethod() == "POST") {
             $validated = $request->validate([
@@ -221,6 +219,8 @@ class AircraftController extends Controller
     }
 
     public function edit(Request $request, Aircraft $aircraft) {
+        abort_unless($request->user()->can('editAircraft', $request->session()->get('activeairline')), 403);
+
         // Authorize using AircraftPolicy
         if ($request->user()->cannot('update', $aircraft)) {
             return redirect()->route('dashboard')->with('error', 'You did something nasty!');
@@ -344,6 +344,8 @@ class AircraftController extends Controller
     }
 
     public function retire(Request $request, Aircraft $aircraft) {
+        abort_unless($request->user()->can('editAircraft', $request->session()->get('activeairline')), 403);
+
         // Authorize using AircraftPolicy - denies non-managers and already-retired aircraft.
         if ($request->user()->cannot('retire', $aircraft)) {
             return redirect()->route('fleetmanager')->with('error', 'You cannot retire this aircraft.');

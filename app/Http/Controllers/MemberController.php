@@ -20,7 +20,7 @@ class MemberController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageMembers', $airline), 403);
 
         // Reload from DB — the session model is a snapshot
         $airline = Airline::findOrFail($airline->id);
@@ -44,7 +44,7 @@ class MemberController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageMembers', $airline), 403);
         abort_unless($airline->isMember($member), 403);
 
         // Reload fresh to have accurate owner_user_id
@@ -78,7 +78,7 @@ class MemberController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('manageMembers', $airline), 403);
         abort_unless($airline->isMember($member), 403);
 
         // Reload fresh to have accurate owner_user_id
