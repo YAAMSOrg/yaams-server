@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ListFlightsRequest;
+use App\Http\Requests\Api\V1\ListReviewFlightsRequest;
 use App\Http\Requests\Api\V1\StoreFlightRequest;
 use App\Http\Resources\V1\FlightCollection;
 use App\Http\Resources\V1\FlightResource;
@@ -35,7 +37,16 @@ class FlightAPIController extends Controller
      *
      * @urlParam airline int required The airline ID. Example: 1
      *
-     * @queryParam status_id integer Filter by flight status: 1 = Pending, 2 = Accepted, 3 = Rejected. Example: 2
+     * @queryParam status string `pending`, `accepted` or `rejected`. Defaults to all. Example: accepted
+     * @queryParam status_id integer Deprecated, use `status`. 1 = Pending, 2 = Accepted, 3 = Rejected. Example: 2
+     * @queryParam aircraft_id integer Only flights with this aircraft. Example: 7
+     * @queryParam departure string Departure ICAO (case-insensitive). Example: EDDF
+     * @queryParam arrival string Arrival ICAO (case-insensitive). Example: EGLL
+     * @queryParam from string Block-off on or after this UTC day (Y-m-d). Example: 2026-07-01
+     * @queryParam to string Block-off on or before this UTC day (Y-m-d), must not be before `from`. Example: 2026-07-31
+     * @queryParam sort string `block_off` or `created_at`, prefix with `-` for descending. Defaults to `-created_at`. Example: -block_off
+     * @queryParam page integer Page number, starting at 1. Example: 1
+     * @queryParam per_page integer Items per page, 1 - 100. Defaults to 25. Example: 25
      *
      * @response 200 {
      *   "data": [
@@ -60,26 +71,20 @@ class FlightAPIController extends Controller
      *       "createdAt": "2026-07-11T11:35:00.000000Z",
      *       "updatedAt": "2026-07-11T11:40:00.000000Z"
      *     }
-     *   ]
+     *   ],
+     *   "links": {"first": "https://yaams.example/api/v1/airlines/1/flights?page=1", "last": "https://yaams.example/api/v1/airlines/1/flights?page=3", "prev": null, "next": "https://yaams.example/api/v1/airlines/1/flights?page=2"},
+     *   "meta": {"current_page": 1, "from": 1, "last_page": 3, "path": "https://yaams.example/api/v1/airlines/1/flights", "per_page": 25, "to": 25, "total": 61}
      * }
      * @response 403 {"message": "You are not a member of this airline."}
+     * @response 422 {"message": "The selected status is invalid.", "errors": {"status": ["The selected status is invalid."]}}
      */
-    public function index(Request $request, Airline $airline)
+    public function index(ListFlightsRequest $request, Airline $airline)
     {
-        if (! $request->user()->isMemberOf($airline)) {
-            return response()->json(['message' => 'You are not a member of this airline.'], 403);
-        }
-
-        $user = $request->user();
         $query = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
-            ->where('pilot_id', $user->id)
+            ->where('pilot_id', $request->user()->id)
             ->where('airline_id', $airline->id);
 
-        if ($request->has('status_id')) {
-            $query->where('status_id', $request->status_id);
-        }
-
-        return new FlightCollection($query->orderBy('created_at', 'DESC')->paginate(15));
+        return new FlightCollection($request->paginate($query));
     }
 
     /**
@@ -177,6 +182,16 @@ class FlightAPIController extends Controller
      *
      * @urlParam airline int required The airline ID. Example: 1
      *
+     * @queryParam pilot_id integer Only flights filed by this pilot. Example: 3
+     * @queryParam aircraft_id integer Only flights with this aircraft. Example: 7
+     * @queryParam departure string Departure ICAO (case-insensitive). Example: EDDF
+     * @queryParam arrival string Arrival ICAO (case-insensitive). Example: EGLL
+     * @queryParam from string Block-off on or after this UTC day (Y-m-d). Example: 2026-07-01
+     * @queryParam to string Block-off on or before this UTC day (Y-m-d), must not be before `from`. Example: 2026-07-31
+     * @queryParam sort string `block_off` or `created_at`, prefix with `-` for descending. Defaults to `-created_at`. Example: -block_off
+     * @queryParam page integer Page number, starting at 1. Example: 1
+     * @queryParam per_page integer Items per page, 1 - 100. Defaults to 25. Example: 25
+     *
      * @response 200 {
      *   "data": [
      *     {
@@ -200,24 +215,19 @@ class FlightAPIController extends Controller
      *       "createdAt": "2026-07-11T14:30:00.000000Z",
      *       "updatedAt": "2026-07-11T14:30:00.000000Z"
      *     }
-     *   ]
+     *   ],
+     *   "links": {"first": "https://yaams.example/api/v1/airlines/1/flights/review?page=1", "last": "https://yaams.example/api/v1/airlines/1/flights/review?page=1", "prev": null, "next": null},
+     *   "meta": {"current_page": 1, "from": 1, "last_page": 1, "path": "https://yaams.example/api/v1/airlines/1/flights/review", "per_page": 25, "to": 4, "total": 4}
      * }
      * @response 403 {"message": "You do not have permission to review flights for this airline."}
      */
-    public function reviewList(Request $request, Airline $airline)
+    public function reviewList(ListReviewFlightsRequest $request, Airline $airline)
     {
-        // Per-airline Dispatcher/Manager role - same rule as the web review pages.
-        if (! $request->user()->canReviewFlightsFor($airline)) {
-            return response()->json(['message' => 'You do not have permission to review flights for this airline.'], 403);
-        }
-
-        $flights = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
+        $query = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
             ->where('airline_id', $airline->id)
-            ->where('status_id', 1)
-            ->orderBy('created_at', 'DESC')
-            ->get();
+            ->where('status_id', 1);
 
-        return new FlightCollection($flights);
+        return new FlightCollection($request->paginate($query));
     }
 
     /**

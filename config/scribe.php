@@ -22,6 +22,15 @@ return [
 
             Except for the public `GET /api/v1/info` endpoint, requests must be authenticated with a personal Sanctum bearer token (see the Authenticating section below).
 
+            Send `Accept: application/json`. Errors are always JSON: `401` (missing or invalid token), `403` (no permission, with a `message`), `404`, and `422` validation errors (`message` plus an `errors` object keyed by parameter).
+
+            **Lists** (airlines, aircraft, flights, review queue) share one contract:
+
+            - Pagination: `page` (from 1) and `per_page` (1 - 100, default 25). Responses carry `data`, `links` (`first`, `last`, `prev`, `next`; `null` when there is no such page) and `meta` (`current_page`, `from`, `to`, `per_page`, `total`, `last_page`, `path`). Follow `links.next` until it is `null` - it keeps your filters.
+            - Sorting: `sort` takes one of the endpoint's documented keys, prefixed with `-` for descending, e.g. `sort=-block_off`.
+            - Filtering: flat query parameters documented per endpoint, e.g. `?status=accepted&departure=EDDF&from=2026-07-01`. Booleans accept `true`/`false`/`1`/`0`, dates are UTC days (`Y-m-d`).
+            - Unknown sort keys and invalid filter values are rejected with `422`, never silently ignored.
+
             <aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).
             You can switch the language used with the tabs at the top right (or from the nav menu at the top left on mobile).</aside>
         INTRO,

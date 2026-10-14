@@ -241,6 +241,17 @@ Accept/reject actions notify the pilot the same way — `Notification::send($fli
 
 All API responses go through Laravel API Resources at `app/Http/Resources/V1/`. Controllers return `FlightResource`, `FlightCollection`, etc. — never raw model data.
 
+### API Pagination & Filtering
+
+Every list endpoint (airlines, aircraft, my flights, review queue) is paginated, sortable and filterable through one contract - keep new list endpoints on it:
+
+- **Request** - a subclass of `App\Http\Requests\Api\V1\ListRequest` (`ListAirlinesRequest`, `ListAircraftRequest`, `ListFlightsRequest`, `ListReviewFlightsRequest`; the two flight lists share `FlightListRequest`). It declares `sortable()` (public key => column), `defaultSort()`, `filterRules()` and `applyFilters()`; the controller calls `$request->paginate($query)` (filters, sort + id tie-breaker, `per_page`, `withQueryString()`)
+- **Params** - flat query params: `page`, `per_page` (default 25, max 100), `sort` (`-` prefix = descending), filters. Invalid values are a 422, never ignored. Boolean flags use `in:1,0,true,false` (Laravel's `boolean` rule refuses `true`/`false` from a query string). Flight status is filtered by name (`status=accepted`); `status_id` is a deprecated alias
+- **Authorization** - membership/reviewer checks live in the request's `authorize()` with `failedAuthorization()` throwing the endpoint's 403 message, so a forbidden caller gets a 403 before any 422
+- **Response** - collections extend `App\Http\Resources\V1\ApiCollection`: Laravel's standard `data` / `links` / `meta`, with the redundant `meta.links` pager array removed
+- **Errors** - `App\Exceptions\Handler` renders JSON for every `api/*` request (`shouldRenderJsonWhen`), even without `Accept: application/json`, so API clients never get a redirect to `/login`
+- **Docs** - document every filter/sort as `@queryParam`, and include `links`/`meta` in the `@response` example; the shared contract is described in `config/scribe.php` `intro_text`
+
 ### API Documentation (Scribe)
 
 The `/api/v1` REST API is documented with [Scribe](https://scribe.knuckles.wtf) (`knuckleswtf/scribe`, a **runtime** dependency in `require`). Docs are generated as a **`laravel`-type Blade view** (`resources/views/scribe/index.blade.php` + assets under `public/vendor/scribe/`) and served by a Laravel route at **`/docs`** — `Route::view('/docs', 'scribe.index')->name('scribe')` in `routes/web.php`. Because the page is rendered at request time, its **base URL resolves to the live `APP_URL`** on each request (fixing the old static-HTML bug where the build-time `localhost` was baked in). An "API Reference" link is in the footer of both the `app` and `landing` layouts (`url('/docs')`).
