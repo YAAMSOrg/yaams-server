@@ -41,6 +41,7 @@
                 <x-admin.fact label="E-mail">{{ $user->email_verified_at ? 'Verified' : 'Unverified' }}</x-admin.fact>
                 <x-admin.fact label="Two-factor">{{ $user->hasTwoFactorEnabled() ? 'Enabled' : 'Off' }}</x-admin.fact>
                 <x-admin.fact label="Notifications">{{ $user->email_notifications ? 'In-app + e-mail' : 'In-app only' }}</x-admin.fact>
+                <x-admin.fact label="Legal accepted">{{ $user->legal_accepted_at?->toDateString() ?? '-' }}</x-admin.fact>
                 <x-admin.fact label="API tokens">{{ $user->tokens->count() }}</x-admin.fact>
             </x-slot:facts>
         </x-admin.entity-header>

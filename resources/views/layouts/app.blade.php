@@ -65,6 +65,7 @@
         <div class="container d-flex justify-content-between align-items-center text-muted">
             <small>&copy; {{ date('Y') }} {{ $instanceName }} Virtual Airline Management</small>
             <small>
+                @include('layouts._legal_links', ['separator' => true])
                 @php($supportEmail = \App\Models\Setting::get('support_email'))
                 @if($supportEmail)
                     <a href="mailto:{{ $supportEmail }}" class="text-decoration-none text-secondary"><i class="bi bi-envelope"></i> Contact</a> |

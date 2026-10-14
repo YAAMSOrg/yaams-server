@@ -57,6 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_notifications' => 'boolean',
         'two_factor_confirmed_at' => 'datetime',
         'suspended_at' => 'datetime',
+        'legal_accepted_at' => 'datetime',
     ];
 
     //protected $appends = [

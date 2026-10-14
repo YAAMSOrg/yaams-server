@@ -1,5 +1,5 @@
 {{-- User settings sections sidebar. Pass $active
-     ('profile' | 'security' | 'notifications' | 'danger') to highlight
+     ('profile' | 'security' | 'notifications' | 'privacy' | 'danger') to highlight
      the current section. --}}
 @php($active = $active ?? 'profile')
 <div class="col-12 col-lg-3">
@@ -16,6 +16,10 @@
             <a href="{{ route('settings.notifications') }}"
                class="list-group-item list-group-item-action {{ $active === 'notifications' ? 'active' : '' }}">
                 <i class="bi bi-bell me-2"></i> Notifications
+            </a>
+            <a href="{{ route('settings.privacy') }}"
+               class="list-group-item list-group-item-action {{ $active === 'privacy' ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-lock me-2"></i> Privacy &amp; data
             </a>
             <a href="{{ route('settings.danger') }}"
                class="list-group-item list-group-item-action text-danger {{ $active === 'danger' ? 'active' : '' }}">

@@ -36,6 +36,14 @@ class Setting extends Model
             'aircraft_image_max_filesize_kb'  => '4096',
             'aircraft_image_max_dimension'    => '4000',
             'aircraft_image_max_per_aircraft' => '12',
+            // Legal pages (see App\Support\LegalPage). Content is Markdown;
+            // a null privacy_content falls back to the built-in template.
+            'imprint_enabled'  => '0',
+            'imprint_content'  => null,
+            'privacy_content'  => null,
+            'terms_enabled'    => '0',
+            'terms_content'    => null,
+            'legal_updated_at' => null,
         ];
     }
 

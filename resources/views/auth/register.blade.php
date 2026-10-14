@@ -69,6 +69,23 @@
                 </div>
             </div>
 
+            <div class="mb-4">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input @error('accept_legal') is-invalid @enderror" name="accept_legal" id="accept_legal" value="1" required {{ old('accept_legal') ? 'checked' : '' }}>
+                    <label class="form-check-label small" for="accept_legal">
+                        I have read the <a href="{{ route('legal.privacy') }}" target="_blank" class="text-primary">privacy policy</a>
+                        @if (\App\Support\LegalPage::enabled('terms'))
+                            and accept the <a href="{{ route('legal.terms') }}" target="_blank" class="text-primary">terms of use</a>
+                        @endif
+                    </label>
+                </div>
+                @error('accept_legal')
+                    <div class="invalid-feedback d-block mt-1">
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+
             <button class="btn btn-primary w-100 mb-3" type="submit">
                 <i class="bi bi-person-plus-fill me-2"></i> Register
             </button>

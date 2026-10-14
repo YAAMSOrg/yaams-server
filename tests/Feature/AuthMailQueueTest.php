@@ -35,6 +35,7 @@ class AuthMailQueueTest extends TestCase
             'email' => 'new@test.com',
             'password' => 'secret-password',
             'password_confirmation' => 'secret-password',
+            'accept_legal' => '1',
         ])->assertRedirect();
 
         $this->assertDatabaseHas('users', ['email' => 'new@test.com']);

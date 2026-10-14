@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Users\DeleteUser;
+use App\Actions\Users\ExportUserData;
 use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -168,6 +169,35 @@ class SettingsController extends Controller
         return redirect()
             ->route('settings.notifications')
             ->with('status', 'Notification preferences saved.');
+    }
+
+    public function privacy()
+    {
+        return view('settings.privacy');
+    }
+
+    /**
+     * Download everything YAAMS stores about the user as JSON (GDPR Art. 15/20).
+     */
+    public function export(Request $request, ExportUserData $exportUserData)
+    {
+        $user = $request->user();
+        $data = $exportUserData($user);
+
+        activity()
+            ->causedBy($user)
+            ->performedOn($user)
+            ->withProperties(['level' => ActivityLevel::INFO])
+            ->event('user_data_exported')
+            ->log('Exported personal data');
+
+        $filename = sprintf('yaams-data-%d-%s.json', $user->id, now()->format('Y-m-d'));
+
+        return response()->streamDownload(
+            fn () => print(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)),
+            $filename,
+            ['Content-Type' => 'application/json'],
+        );
     }
 
     public function danger()

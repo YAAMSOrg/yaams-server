@@ -124,6 +124,20 @@ Current setting keys:
 - `aircraft_image_max_dimension` — max accepted width **and** height for an aircraft screenshot, in px (default `4000`). Enforced as a reject rule (also guards against decompression bombs).
 - `aircraft_image_max_per_aircraft` — max number of screenshots per aircraft (default `12`).
   These three image keys follow the `LOG_LEVEL` precedent: wired into `Setting::defaults()` + the admin settings page but **intentionally not** the setup wizard (post-install fine-tuning, see Aircraft Screenshot Gallery below).
+- `imprint_enabled` / `imprint_content`, `privacy_content`, `terms_enabled` / `terms_content`, `legal_updated_at` — legal pages (see Legal Pages & GDPR below). Edited on their own admin page `/admin/legal`, not the instance settings page, and **intentionally not** in the setup wizard.
+
+### Legal Pages & GDPR
+
+Instances may run in the EU, so operators get Imprint / Privacy Policy / Terms of Use pages plus GDPR self-service. Everything goes through `App\Support\LegalPage`:
+
+- **Pages** - public routes `/imprint`, `/privacy`, `/terms` (`legal.*`, `LegalController`, view `legal/show`). Imprint (not required in the US) and Terms are off by default and 404 unless `*_enabled === '1'` **and** content is set; Privacy is always published
+- **Content** - Markdown in the `*_content` settings, rendered by `LegalPage::html()` via `Str::markdown()` with `html_input => strip` and `allow_unsafe_links => false` - never render it any other way (admin content must not inject HTML/JS). Single line breaks render as `<br>` (`soft_break`, like GitHub comments) so Imprint addresses keep their lines. Styles: `.yaams-legal` in `public/css/yaams-theme.css`
+- **Default privacy template** - `resources/views/legal/default-privacy.blade.php` (Blade producing Markdown) is used while `privacy_content` is empty. It describes what YAAMS stores and is filled live with the instance name, `support_email` and the activity-log retention. **When adding a feature that stores new personal data, update this template**
+- **Admin** - Super-Admins edit all three at `/admin/legal` (`Admin\LegalController`, sidebar `legal`). Saving bumps `legal_updated_at` when privacy/terms change (shown as "Last updated"), logs `legal_pages_updated` (`info`, changed keys in properties)
+- **Footer links** - `layouts/_legal_links` is included in all five layouts; it reads settings through `rescue()` so error pages stay DB-independent
+- **Consent** - registration requires the `accept_legal` checkbox (privacy policy, plus terms when published); `CreateNewUser` stores `users.legal_accepted_at` (not fillable, `forceFill`). Shown on the admin user page. No re-acceptance on policy changes yet
+- **Data export** - `/settings/privacy` + `GET /settings/privacy/export` download a JSON of the user's data via `App\Actions\Users\ExportUserData` (profile, memberships, flights, screenshots, notifications, token names, own activity) and log `user_data_exported` (`info`). Never add secrets (password, 2FA, token hashes) or other users' identities to it; extend it when new personal data is stored
+- **API** - `GET /api/v1/info` exposes `legal.imprintUrl` / `privacyUrl` / `termsUrl` (null when unpublished)
 
 ### Application Logging (Activity Log)
 
@@ -158,7 +172,8 @@ The page mirrors the admin dashboard layout (page header + `row g-4` with a `set
 - **Profile** (`settings.profile`) — name/email form posting to Fortify's existing `user-profile-information.update` route. Since `User implements MustVerifyEmail`, changing the email re-triggers verification. Errors read from the `updateProfileInformation` bag.
 - **Security** (`settings.security`) — password form posting to Fortify's `user-password.update` route. Errors read from the `updatePassword` bag. Both Fortify features are enabled in `config/fortify.php`.
 - **Notifications** (`settings.notifications`) — toggles the `users.email_notifications` column via `SettingsController::updateNotifications()`. The form uses a hidden `0` + checkbox `1` so unchecking submits a value.
-- **Danger zone** (`settings.danger`) — placeholder only; the "Delete account" button is disabled and no route/logic exists yet.
+- **Privacy & data** (`settings.privacy`) — GDPR data export download (see Legal Pages & GDPR).
+- **Danger zone** (`settings.danger`) — password-confirmed self-deletion via the shared `App\Actions\Users\DeleteUser`.
 
 The `email_notifications` boolean column (`$fillable` + `'boolean'` cast on `User`) is read in each PIREP notification's `via()`: `database` is always on, `mail` is appended only when `$notifiable->email_notifications ?? true`.
 
