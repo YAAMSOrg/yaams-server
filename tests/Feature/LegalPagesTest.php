@@ -56,6 +56,16 @@ class LegalPagesTest extends TestCase
         $this->get(route('home'))->assertDontSee(route('legal.terms'), false);
     }
 
+    public function test_single_line_breaks_are_kept(): void
+    {
+        Setting::set('imprint_enabled', '1');
+        Setting::set('imprint_content', "## Operator\n\nJane Doe\nExample Street 1\n12345 Example City");
+
+        $this->get(route('legal.imprint'))
+            ->assertOk()
+            ->assertSee("<p>Jane Doe<br>\nExample Street 1<br>\n12345 Example City</p>", false);
+    }
+
     public function test_an_enabled_page_without_content_stays_hidden(): void
     {
         Setting::set('terms_enabled', '1');

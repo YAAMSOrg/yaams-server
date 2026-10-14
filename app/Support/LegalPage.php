@@ -88,7 +88,8 @@ class LegalPage
     /**
      * The page body rendered to HTML. Raw HTML in the Markdown is stripped and
      * unsafe links (javascript:, data:) are dropped, so admin content cannot
-     * inject scripts.
+     * inject scripts. Single line breaks are kept (like GitHub comments), so
+     * addresses in an Imprint render line by line as typed.
      */
     public static function html(string $page): HtmlString
     {
@@ -98,6 +99,7 @@ class LegalPage
         return new HtmlString(Str::markdown($markdown, [
             'html_input'         => 'strip',
             'allow_unsafe_links' => false,
+            'renderer'           => ['soft_break' => "<br>\n"],
         ]));
     }
 
