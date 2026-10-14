@@ -21,7 +21,8 @@ class StoreFlightRequest extends FormRequest
         // rule), not an authorization failure.
         $airline = $this->airline();
 
-        return $airline === null || $this->user()->isMemberOf($airline);
+        return $airline === null
+            || ($this->user()->isMemberOf($airline) && $this->user()->can('fileFlights', $airline));
     }
 
     /**

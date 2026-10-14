@@ -414,7 +414,7 @@ class FlightController extends Controller
     {
         $currentActiveAirline = Session::get("activeairline");
 
-        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+        if (!auth()->user()->can('reviewFlights', $currentActiveAirline)) {
             return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
         }
 
@@ -431,7 +431,7 @@ class FlightController extends Controller
     {
         $currentActiveAirline = Session::get("activeairline");
 
-        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+        if (!auth()->user()->can('reviewFlights', $currentActiveAirline)) {
             return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
         }
 
@@ -470,7 +470,7 @@ class FlightController extends Controller
     {
         $currentActiveAirline = session()->get("activeairline");
 
-        if (!auth()->user()->canReviewFlightsFor($currentActiveAirline)) {
+        if (!auth()->user()->can('reviewFlights', $currentActiveAirline)) {
             return redirect()->route('dashboard')->with('error', 'You do not have permission to review flights for this airline.');
         }
 

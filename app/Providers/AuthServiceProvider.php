@@ -16,6 +16,7 @@ class AuthServiceProvider extends ServiceProvider
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
         \App\Models\Aircraft::class => \App\Policies\AircraftPolicy::class,
         \App\Models\Flight::class => \App\Policies\FlightPolicy::class,
+        \App\Models\Airline::class => \App\Policies\AirlinePolicy::class,
     ];
 
     /**
@@ -33,5 +34,8 @@ class AuthServiceProvider extends ServiceProvider
                 return true;
             }
         });
+
+        // Instance administration (/admin, guarded by the `role:Super-Admin` middleware).
+        Gate::define('administerInstance', fn ($user) => $user->hasRole('Super-Admin'));
     }
 }

@@ -38,7 +38,7 @@
                         </a>
                         <ul class="dropdown-menu shadow-sm border-0" aria-labelledby="navbarDropdownFleet">
                             <li><a class="dropdown-item {{ request()->routeIs('fleetmanager', 'viewaircraft', 'editaircraft') ? 'active' : '' }}" href="{{ route('fleetmanager') }}"><i class="bi bi-airplane me-2 text-secondary"></i> Fleet overview</a></li>
-                            @can('add aircraft')
+                            @can('addAircraft', $activeAirline)
                                 <li><a class="dropdown-item {{ request()->routeIs('createaircraft') ? 'active' : '' }}" href="{{ route('createaircraft') }}"><i class="bi bi-plus-circle me-2 text-secondary"></i> Add aircraft</a></li>
                             @endcan
                         </ul>
@@ -53,10 +53,16 @@
                     </li>
 
                     @php
-                        $canReviewFlights = $activeAirline->require_pirep_review && auth()->user()->canReviewFlightsFor($activeAirline);
-                        $isAirlineManager = auth()->user()->isManagerOf($activeAirline);
+                        // Same AirlinePolicy abilities the API reports to clients.
+                        $canReviewFlights = $activeAirline->require_pirep_review && auth()->user()->can('reviewFlights', $activeAirline);
+                        $managerLinks = collect([
+                            'editSettings' => ['airline.settings', 'bi-sliders', 'Operations'],
+                            'manageMembers' => ['members.index', 'bi-people', 'Members'],
+                            'manageInviteCodes' => ['invitecodes.index', 'bi-ticket-perforated', 'Invite codes'],
+                            'manageNotams' => ['notams.index', 'bi-megaphone', 'Announcements'],
+                        ])->filter(fn ($link, $ability) => auth()->user()->can($ability, $activeAirline));
                     @endphp
-                    @if($canReviewFlights || $isAirlineManager)
+                    @if($canReviewFlights || $managerLinks->isNotEmpty())
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {{ request()->routeIs('flightreviewindex', 'airline.settings', 'members.index', 'invitecodes.index', 'notams.index') ? 'active' : '' }}" href="#" id="navbarDropdownManagement" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-briefcase"></i> Management
@@ -65,15 +71,12 @@
                                 @if($canReviewFlights)
                                     <li><a class="dropdown-item {{ request()->routeIs('flightreviewindex') ? 'active' : '' }}" href="{{ route('flightreviewindex') }}"><i class="bi bi-clipboard-check me-2 text-secondary"></i> Review flights</a></li>
                                 @endif
-                                @if($canReviewFlights && $isAirlineManager)
+                                @if($canReviewFlights && $managerLinks->isNotEmpty())
                                     <li><hr class="dropdown-divider"></li>
                                 @endif
-                                @if($isAirlineManager)
-                                    <li><a class="dropdown-item {{ request()->routeIs('airline.settings') ? 'active' : '' }}" href="{{ route('airline.settings') }}"><i class="bi bi-sliders me-2 text-secondary"></i> Operations</a></li>
-                                    <li><a class="dropdown-item {{ request()->routeIs('members.index') ? 'active' : '' }}" href="{{ route('members.index') }}"><i class="bi bi-people me-2 text-secondary"></i> Members</a></li>
-                                    <li><a class="dropdown-item {{ request()->routeIs('invitecodes.index') ? 'active' : '' }}" href="{{ route('invitecodes.index') }}"><i class="bi bi-ticket-perforated me-2 text-secondary"></i> Invite codes</a></li>
-                                    <li><a class="dropdown-item {{ request()->routeIs('notams.index') ? 'active' : '' }}" href="{{ route('notams.index') }}"><i class="bi bi-megaphone me-2 text-secondary"></i> Announcements</a></li>
-                                @endif
+                                @foreach($managerLinks as [$route, $icon, $label])
+                                    <li><a class="dropdown-item {{ request()->routeIs($route) ? 'active' : '' }}" href="{{ route($route) }}"><i class="bi {{ $icon }} me-2 text-secondary"></i> {{ $label }}</a></li>
+                                @endforeach
                             </ul>
                         </li>
                     @endif

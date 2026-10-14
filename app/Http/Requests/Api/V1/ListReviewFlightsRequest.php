@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ListReviewFlightsRequest extends FlightListRequest
 {
-    // Per-airline Dispatcher/Manager role - same rule as the web review pages.
+    // AirlinePolicy::reviewFlights() - same rule as the web review pages.
     public function authorize(): bool
     {
-        return $this->user()->canReviewFlightsFor($this->route('airline'));
+        return $this->user()->can('reviewFlights', $this->route('airline'));
     }
 
     protected function failedAuthorization(): void

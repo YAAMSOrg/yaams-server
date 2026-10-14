@@ -27,7 +27,6 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -185,23 +184,5 @@ class AppServiceProvider extends ServiceProvider
         Sanctum::authenticateAccessTokensUsing(
             fn ($accessToken, bool $isValid) => $isValid && ! $accessToken->tokenable?->isSuspended()
         );
-
-        Gate::before(function ($user, $ability) {
-            $activeAirline = session('activeairline');
-            if ($activeAirline) {
-                if ($ability === 'add aircraft' || $ability === 'edit aircraft') {
-                    return $user->isManagerOf($activeAirline);
-                }
-                if ($ability === 'review flight') {
-                    return $user->canReviewFlightsFor($activeAirline);
-                }
-            }
-
-            if ($user->hasRole('Super-Admin')) {
-                return true;
-            }
-
-            return null;
-        });
     }
 }

@@ -127,8 +127,8 @@ class AircraftAPIController extends Controller
     /**
      * Add an aircraft
      *
-     * Add an aircraft to the airline's fleet. Requires the "add aircraft"
-     * permission and membership of the airline. Permission, membership,
+     * Add an aircraft to the airline's fleet. Requires the `addAircraft`
+     * ability of your membership (per-airline Manager). Permission,
      * normalization and the duplicate-registration rule are enforced by
      * StoreAircraftRequest.
      *

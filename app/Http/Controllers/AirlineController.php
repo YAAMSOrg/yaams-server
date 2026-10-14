@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Airline;
-use App\Models\Setting;
 use App\Support\ActivityLevel;
 use Illuminate\Http\Request;
 
@@ -14,22 +13,16 @@ class AirlineController extends Controller
         $this->middleware('auth');
     }
 
-    private function canFoundAirline(): bool
-    {
-        return auth()->user()->hasRole('Super-Admin')
-            || Setting::get('allow_user_airline_creation') === '1';
-    }
-
     public function found()
     {
-        abort_unless($this->canFoundAirline(), 403);
+        abort_unless(auth()->user()->can('create', Airline::class), 403);
 
         return view('airline.found');
     }
 
     public function foundStore(Request $request)
     {
-        abort_unless($this->canFoundAirline(), 403);
+        abort_unless(auth()->user()->can('create', Airline::class), 403);
 
         $validated = $request->validate([
             'airline_name'     => 'required|string|max:255',
@@ -70,7 +63,7 @@ class AirlineController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('editSettings', $airline), 403);
 
         // Reload from DB — the session model is a snapshot
         $airline = Airline::findOrFail($airline->id);
@@ -82,7 +75,7 @@ class AirlineController extends Controller
     {
         $airline = session('activeairline');
 
-        abort_unless($airline && auth()->user()->isManagerOf($airline), 403);
+        abort_unless($airline && auth()->user()->can('editSettings', $airline), 403);
 
         $airline = Airline::findOrFail($airline->id);
 

@@ -34,11 +34,11 @@
             </p>
         </div>
         <div>
-            @if(session('activeairline') && auth()->user()->isManagerOf(session('activeairline')) && !$aircraft->isRetired())
+            @can('update', $aircraft)
                 <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-outline-primary me-2">
                     <i class="bi bi-pencil-square me-1"></i> Edit Aircraft
                 </a>
-            @endif
+            @endcan
             <a href="{{ route('fleetmanager') }}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Back to Fleet
             </a>
@@ -95,9 +95,7 @@
 
             @include('fleet._gallery', [
                 'aircraft' => $aircraft,
-                'canModerate' => session('activeairline')
-                    && auth()->user()->isManagerOf(session('activeairline'))
-                    && !$aircraft->isRetired(),
+                'canModerate' => auth()->user()->can('update', $aircraft),
                 // Any member viewing this page may contribute a screenshot,
                 // unless the airframe is retired.
                 'canUpload' => !$aircraft->isRetired(),

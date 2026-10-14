@@ -33,7 +33,7 @@ class AircraftPolicy
         // A retired aircraft is permanently locked and can never be edited or reactivated.
         return $activeAirline
             && $aircraft->ownedBy($activeAirline)
-            && $user->isManagerOf($activeAirline)
+            && $user->can('editAircraft', $activeAirline)
             && !$aircraft->isRetired();
     }
 
@@ -65,7 +65,7 @@ class AircraftPolicy
         $activeAirline = session('activeairline');
         return $activeAirline
             && $aircraft->ownedBy($activeAirline)
-            && $user->isManagerOf($activeAirline)
+            && $user->can('editAircraft', $activeAirline)
             && !$aircraft->isRetired();
     }
 }

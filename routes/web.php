@@ -192,20 +192,17 @@ Route::middleware(['auth'])->group(function () {
             ->name("notificationsacknowledgeall")
             ->withoutMiddleware('airline.writable');
 
-        // Fleet Management
+        // Fleet Management - the controller authorizes via AirlinePolicy / AircraftPolicy.
         Route::match(["GET", "POST"], "/airline/fleetmanager", [AircraftController::class, "index"])
             ->name("fleetmanager")
             ->withoutMiddleware('airline.writable');
         Route::match(["GET", "POST"], "/airline/fleetmanager/create", [AircraftController::class, "create"])
-            ->name("createaircraft")
-            ->middleware(["can:add aircraft"]);
+            ->name("createaircraft");
         Route::get("/airline/fleetmanager/view/{aircraft}", [AircraftController::class, "view"])->name("viewaircraft");
         Route::match(["GET", "POST"], "/airline/fleetmanager/edit/{aircraft}", [AircraftController::class, "edit"])
-            ->name("editaircraft")
-            ->middleware(["can:edit aircraft"]);
+            ->name("editaircraft");
         Route::post("/airline/fleetmanager/retire/{aircraft}", [AircraftController::class, "retire"])
-            ->name("retireaircraft")
-            ->middleware(["can:edit aircraft"]);
+            ->name("retireaircraft");
 
         // Aircraft screenshot gallery. Authorization is enforced in the controller
         // via AircraftPolicy: `show` requires `view` (any member of the owning

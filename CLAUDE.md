@@ -55,8 +55,10 @@ Two auth systems coexist:
 - **Sanctum** — stateless API token auth; `auth:sanctum` middleware on all `/api/v1/` routes
 
 Two role systems coexist — do not confuse them:
-- **Spatie roles** (global): `Pilot`, `Manager` (`add aircraft`, `edit aircraft`, `review flight`), `Super-Admin` (bypasses all checks via `Gate::before` in `AppServiceProvider`). The `AircraftPolicy` handles model-level aircraft authorization.
-- **Per-airline role** in `airline_memberships.role` (enum: `Pilot`, `Dispatcher`, `Manager`): checked via `User::isManagerOf()`, `hasAirlineRole()`, `canReviewFlightsFor()`. This is what controls invite code generation and flight review access.
+- **Spatie roles** (global): only `Super-Admin` matters - it bypasses all checks via `Gate::before` in `AuthServiceProvider` (and is the `administerInstance` gate). The global `Pilot` / `Manager` roles and their `add aircraft` / `edit aircraft` / `review flight` permissions are legacy setup data and grant nothing.
+- **Per-airline role** in `airline_memberships.role` (enum: `Pilot`, `Dispatcher`, `Manager`; the owner always has Manager rights): the low-level helpers are `User::airlineRole()`, `isMemberOf()`, `hasAirlineRole()`, `isManagerOf()`, `canReviewFlightsFor()` (they reuse a loaded `airlines` relation instead of querying).
+
+**`App\Policies\AirlinePolicy` is the single source of per-airline permissions** - web controllers, views, API requests and the API `abilities` all go through it (`$user->can('manageMembers', $airline)`). It is session-free (works under Sanctum) and does not check suspension (the `airline.writable` middleware does). Abilities: `create` (found an airline: Super-Admin or `allow_user_airline_creation`), `fileFlights` (member), `reviewFlights` (Dispatcher/Manager), `addAircraft`, `editAircraft`, `manageMembers`, `manageInviteCodes`, `manageNotams`, `editSettings` (Manager). Record-level rules stay in `AircraftPolicy` (owned + not retired) and `FlightPolicy::review()` (only Managers review their own PIREP). **A new per-airline permission is a new `AirlinePolicy` method plus an entry in `App\Support\Abilities::AIRLINE`** - never an inline role check.
 
 **Admin 2FA reset (account recovery)** — `php artisan yaams:reset-2fa {email} [--force]` (`App\Console\Commands\ResetTwoFactorCommand`) or the "Reset 2FA" button on the admin user page, both via the shared `App\Actions\Users\ResetTwoFactor` action, removes 2FA from a user who lost their authenticator and recovery codes:
 - Clears the three `two_factor_*` columns directly instead of using Fortify's `DisableTwoFactorAuthentication` - its `TwoFactorAuthenticationDisabled` event would be logged by `AuthEventSubscriber` as caused by the user themselves
@@ -240,6 +242,15 @@ Accept/reject actions notify the pilot the same way — `Notification::send($fli
 ### API Resources
 
 All API responses go through Laravel API Resources at `app/Http/Resources/V1/`. Controllers return `FlightResource`, `FlightCollection`, etc. — never raw model data.
+
+### API Abilities (role-aware clients)
+
+Clients (e.g. the YAAMS Commander desktop app) build role-aware UIs from flags computed by `App\Support\Abilities`, never from role names:
+
+- **Instance** - `GET /api/v1/user` -> `abilities`: `foundAirline` (`can('create', Airline::class)`), `administerInstance` (Super-Admin)
+- **Per airline** - `membership` on each airline of `GET /api/v1/user`, `GET /api/v1/airlines` and `GET /api/v1/airlines/{airline}` (`null` for a non-member): `role` (lowercase `pilot|dispatcher|manager`, display only), `isOwner`, `abilities` (every `Abilities::AIRLINE` key as an explicit boolean). Opt-in via `AirlineResource::withMembership()`, so airlines nested in other payloads stay lean; controllers `loadMissing('airlines')` on the user so it costs no query per airline
+- Flags go through the same `Gate`/`AirlinePolicy` checks the endpoints enforce; Super-Admin reports its effective (all true) abilities; every per-airline ability is `false` while the airline is suspended
+- They are UI hints only - endpoints keep enforcing and returning 403. `tests/Feature/Api/AbilitiesTest.php` pins every flag to the real allow/deny of its endpoint, so extend it when adding an ability
 
 ### API Pagination & Filtering
 

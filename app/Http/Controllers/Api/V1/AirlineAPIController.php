@@ -8,6 +8,8 @@ use App\Http\Requests\Api\V1\StoreAirlineRequest;
 use App\Http\Resources\V1\AirlineCollection;
 use App\Http\Resources\V1\AirlineResource;
 use App\Models\Airline;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @group Airlines
@@ -23,6 +25,9 @@ class AirlineAPIController extends Controller
 
     /**
      * List airlines
+     *
+     * Each airline carries the token owner's `membership` (`null` for a
+     * non-member) - see "Current user" for the role and ability keys.
      *
      * @queryParam members_only boolean Only return airlines the token owner belongs to. Defaults to all airlines. Example: true
      * @queryParam search string Match on name, ICAO callsign, prefix or ATC callsign. Example: EVA
@@ -43,6 +48,20 @@ class AirlineAPIController extends Controller
      *       "requirePirepReview": true,
      *       "locationContinuity": false,
      *       "isSuspended": false,
+     *       "membership": {
+     *         "role": "pilot",
+     *         "isOwner": false,
+     *         "abilities": {
+     *           "fileFlights": true,
+     *           "reviewFlights": false,
+     *           "addAircraft": false,
+     *           "editAircraft": false,
+     *           "manageMembers": false,
+     *           "manageInviteCodes": false,
+     *           "manageNotams": false,
+     *           "editSettings": false
+     *         }
+     *       },
      *       "createdAt": "2026-01-01T00:00:00.000000Z",
      *       "updatedAt": "2026-01-01T00:00:00.000000Z"
      *     }
@@ -53,6 +72,9 @@ class AirlineAPIController extends Controller
      */
     public function index(ListAirlinesRequest $request)
     {
+        // Each item carries the token owner's membership - load it once.
+        $request->user()->loadMissing('airlines');
+
         $query = $request->boolean('members_only') ? $request->user()->airlines() : Airline::query();
 
         return new AirlineCollection($request->paginate($query));
@@ -60,6 +82,9 @@ class AirlineAPIController extends Controller
 
     /**
      * Show an airline
+     *
+     * Includes the token owner's `membership` (`null` for a non-member) - see
+     * "Current user" for the role and ability keys.
      *
      * @urlParam airline int required The airline ID. Example: 1
      *
@@ -74,26 +99,47 @@ class AirlineAPIController extends Controller
      *     "requirePirepReview": true,
      *     "locationContinuity": false,
      *     "isSuspended": false,
+     *     "membership": {
+     *       "role": "pilot",
+     *       "isOwner": false,
+     *       "abilities": {
+     *         "fileFlights": true,
+     *         "reviewFlights": false,
+     *         "addAircraft": false,
+     *         "editAircraft": false,
+     *         "manageMembers": false,
+     *         "manageInviteCodes": false,
+     *         "manageNotams": false,
+     *         "editSettings": false
+     *       }
+     *     },
      *     "createdAt": "2026-01-01T00:00:00.000000Z",
      *     "updatedAt": "2026-01-01T00:00:00.000000Z"
      *   }
      * }
      * @response 404 {"message": "No query results for model [App\\Models\\Airline] 999"}
      */
-    public function show(Airline $airline)
+    public function show(Request $request, Airline $airline)
     {
-        return new AirlineResource($airline);
+        $request->user()->loadMissing('airlines');
+
+        return (new AirlineResource($airline))->withMembership();
     }
 
     /**
      * Found a new airline
      *
-     * Requires the "add airlines" permission (enforced by StoreAirlineRequest).
+     * The token owner becomes the airline's owner and Manager; PIREP review
+     * starts switched on, like founding on the web. Allowed for
+     * Super-Admins, and for everyone when the instance allows user airline
+     * creation - see `abilities.foundAirline` on `GET /api/v1/user`.
      *
      * @bodyParam name string required Display name, max 50 chars, unique. Example: Example Virtual Airlines
      * @bodyParam prefix string required Two-letter IATA-style prefix, unique, uppercased. Example: EV
      * @bodyParam icao_callsign string required Three-letter ICAO callsign, unique, uppercased. Example: EVA
      * @bodyParam atc_callsign string required Spoken ATC callsign, max 25 chars, unique. Example: EXAMPLE
+     * @bodyParam hub string required ICAO code of the home airport (case-insensitive). Example: EDDF
+     * @bodyParam country string required ISO 3166-1 alpha-2 country code (case-insensitive). Example: DE
      *
      * @response 201 {
      *   "data": {
@@ -106,6 +152,20 @@ class AirlineAPIController extends Controller
      *     "requirePirepReview": true,
      *     "locationContinuity": false,
      *     "isSuspended": false,
+     *     "membership": {
+     *       "role": "manager",
+     *       "isOwner": true,
+     *       "abilities": {
+     *         "fileFlights": true,
+     *         "reviewFlights": true,
+     *         "addAircraft": true,
+     *         "editAircraft": true,
+     *         "manageMembers": true,
+     *         "manageInviteCodes": true,
+     *         "manageNotams": true,
+     *         "editSettings": true
+     *       }
+     *     },
      *     "createdAt": "2026-01-01T00:00:00.000000Z",
      *     "updatedAt": "2026-01-01T00:00:00.000000Z"
      *   }
@@ -115,9 +175,21 @@ class AirlineAPIController extends Controller
      */
     public function store(StoreAirlineRequest $request)
     {
-        $airline = Airline::create($request->validated());
+        // Like founding on the web: the founder becomes owner and Manager.
+        $airline = DB::transaction(function () use ($request) {
+            $airline = Airline::create($request->validated() + [
+                'owner_user_id' => $request->user()->id,
+                'founded_at' => now()->toDateString(),
+                'require_pirep_review' => true,
+            ]);
+            $airline->users()->attach($request->user()->id, ['role' => 'Manager']);
 
-        return (new AirlineResource($airline))
+            return $airline;
+        });
+
+        $request->user()->load('airlines');
+
+        return (new AirlineResource($airline))->withMembership()
             ->response()
             ->setStatusCode(201);
     }

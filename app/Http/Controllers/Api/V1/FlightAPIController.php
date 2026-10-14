@@ -177,8 +177,8 @@ class FlightAPIController extends Controller
     /**
      * List the review queue
      *
-     * List pending PIREPs (status 1) for an airline. Requires the per-airline
-     * Dispatcher or Manager role.
+     * List pending PIREPs (status 1) for an airline. Requires the
+     * `reviewFlights` ability (per-airline Dispatcher or Manager).
      *
      * @urlParam airline int required The airline ID. Example: 1
      *
@@ -234,7 +234,8 @@ class FlightAPIController extends Controller
      * Accept a PIREP
      *
      * Mark a pending PIREP as Accepted (status 2) and notify the pilot.
-     * Requires the "review flight" permission for the flight's airline.
+     * Requires the `reviewFlights` ability for the flight's airline; only
+     * Managers may review their own PIREPs.
      *
      * @urlParam flight int required The flight ID. Example: 43
      *
@@ -278,7 +279,8 @@ class FlightAPIController extends Controller
      *
      * Mark a PIREP as Rejected (status 3) and notify the pilot. If location
      * continuity is on and the flight was still pending, the aircraft is moved
-     * back to the flight's departure. Requires the "review flight" permission.
+     * back to the flight's departure. Requires the `reviewFlights` ability for
+     * the flight's airline; only Managers may review their own PIREPs.
      *
      * @urlParam flight int required The flight ID. Example: 43
      *
