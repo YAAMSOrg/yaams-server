@@ -26,10 +26,9 @@ class LegalController extends Controller
         ];
 
         return view('admin.legal', [
-            'settings'        => $settings,
-            'usesDefault'     => LegalPage::usesDefaultPrivacy(),
-            'defaultPrivacy'  => LegalPage::defaultPrivacy(),
-            'updatedAt'       => LegalPage::updatedAt(),
+            'settings'       => $settings,
+            'usesDefault'    => LegalPage::usesDefaultPrivacy(),
+            'defaultPrivacy' => LegalPage::defaultPrivacy(),
         ]);
     }
 

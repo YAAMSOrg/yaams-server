@@ -32,10 +32,8 @@
             <div class="small">
                 Pages are written in <strong>Markdown</strong> (<code>## Heading</code>, <code>**bold**</code>,
                 <code>- list</code>, <code>[link](https://...)</code>); raw HTML is removed.
+                See the <a href="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax" target="_blank" rel="noopener noreferrer">GitHub Markdown guide <i class="bi bi-box-arrow-up-right"></i></a> for the full syntax.
                 YAAMS provides the pages, but you as the operator are responsible for their legal content.
-                @if ($updatedAt)
-                    Privacy policy / terms last changed {{ $updatedAt->toDateString() }}.
-                @endif
             </div>
         </div>
 
