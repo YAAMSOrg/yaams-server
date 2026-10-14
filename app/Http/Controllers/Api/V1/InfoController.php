@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Support\LegalPage;
 
 /**
  * @group Instance
@@ -30,6 +31,11 @@ class InfoController extends Controller
      *     "features": {
      *       "registration": true,
      *       "userAirlineCreation": false
+     *     },
+     *     "legal": {
+     *       "imprintUrl": "https://va.example.com/imprint",
+     *       "privacyUrl": "https://va.example.com/privacy",
+     *       "termsUrl": null
      *     }
      *   }
      * }
@@ -45,6 +51,12 @@ class InfoController extends Controller
                 'features' => [
                     'registration' => Setting::get('allow_registration', '1') === '1',
                     'userAirlineCreation' => Setting::get('allow_user_airline_creation') === '1',
+                ],
+                // Published legal pages, so clients can link them (null = not published).
+                'legal' => [
+                    'imprintUrl' => LegalPage::enabled(LegalPage::IMPRINT) ? LegalPage::url(LegalPage::IMPRINT) : null,
+                    'privacyUrl' => LegalPage::url(LegalPage::PRIVACY),
+                    'termsUrl'   => LegalPage::enabled(LegalPage::TERMS) ? LegalPage::url(LegalPage::TERMS) : null,
                 ],
             ],
         ]);

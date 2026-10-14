@@ -1,4 +1,4 @@
-{{-- Admin sections sidebar. Pass $active ('overview' | 'users' | 'airlines' | 'instance' | 'activity')
+{{-- Admin sections sidebar. Pass $active ('overview' | 'users' | 'airlines' | 'instance' | 'legal' | 'activity')
      to highlight the current section. --}}
 @php($active = $active ?? 'overview')
 <div class="col-12 col-lg-3">
@@ -19,6 +19,10 @@
             <a href="{{ route('admin.settings.edit') }}"
                class="list-group-item list-group-item-action {{ $active === 'instance' ? 'active' : '' }}">
                 <i class="bi bi-gear me-2"></i> Instance
+            </a>
+            <a href="{{ route('admin.legal.edit') }}"
+               class="list-group-item list-group-item-action {{ $active === 'legal' ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-text me-2"></i> Legal pages
             </a>
             <a href="{{ route('admin.activity.index') }}"
                class="list-group-item list-group-item-action {{ $active === 'activity' ? 'active' : '' }}">

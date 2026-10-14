@@ -10,6 +10,7 @@ use App\Http\Controllers\AirlineMembershipController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\InviteCodeController;
 use App\Http\Controllers\MemberController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\LegalController as AdminLegalController;
 use App\Http\Controllers\Admin\AirlineController as AdminAirlineController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 
@@ -34,6 +36,12 @@ Route::get("/", [HomeController::class, "index"])->name("home");
 // own add_routes is off) so only this page is exposed - not the disabled Postman/OpenAPI
 // spec routes. The base URL in the page resolves to the live APP_URL at render time.
 Route::view('/docs', 'scribe.index')->name('scribe');
+
+// Legal pages - public, so guests and the login/register pages can link them.
+// Imprint and Terms 404 unless enabled at /admin/legal; Privacy is always on.
+Route::get('/imprint', [LegalController::class, 'imprint'])->name('legal.imprint');
+Route::get('/privacy', [LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/terms', [LegalController::class, 'terms'])->name('legal.terms');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -70,6 +78,10 @@ Route::middleware(['auth'])->group(function () {
         // Instance settings — edit the key/value rows in the `settings` table
         Route::get('/settings', [AdminSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
+
+        // Legal pages - Imprint, Privacy Policy, Terms of Use (Markdown)
+        Route::get('/legal', [AdminLegalController::class, 'edit'])->name('legal.edit');
+        Route::put('/legal', [AdminLegalController::class, 'update'])->name('legal.update');
 
         // Activity log — browse the instance-wide audit trail
         Route::get('/activity', [ActivityLogController::class, 'index'])->name('activity.index');
@@ -122,6 +134,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/settings/tokens/{tokenId}', [SettingsController::class, 'destroyToken'])->name('settings.tokens.destroy');
     Route::get('/settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');
     Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
+    Route::get('/settings/privacy', [SettingsController::class, 'privacy'])->name('settings.privacy');
+    Route::get('/settings/privacy/export', [SettingsController::class, 'export'])->name('settings.export');
     Route::get('/settings/danger', [SettingsController::class, 'danger'])->name('settings.danger');
     Route::delete('/settings', [SettingsController::class, 'destroy'])->name('settings.destroy');
 

@@ -54,6 +54,10 @@
 
     <main class="form-signin">
         @yield('content')
+
+        <div class="text-center mt-2 small">
+            @include('layouts._legal_links')
+        </div>
     </main>
 
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>

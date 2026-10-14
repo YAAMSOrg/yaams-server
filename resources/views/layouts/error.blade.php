@@ -58,6 +58,10 @@
 
     <main class="error-page">
         @yield('content')
+
+        <div class="text-center mt-2 small">
+            @include('layouts._legal_links')
+        </div>
     </main>
 </body>
 </html>

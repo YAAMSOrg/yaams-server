@@ -35,6 +35,7 @@ A decentralised, open-source virtual airline management platform. Track PIREPs, 
 - **Multi-airline** - belong to several airlines and switch between them
 - **Notifications** - in-app and email delivery
 - **Activity log** - audit trail with a configurable verbosity level
+- **Legal pages** - optional Imprint, Privacy Policy (built-in template) and Terms of Use, plus a self-service GDPR data export
 - **Prometheus metrics** - live domain gauges at `/metrics` for monitoring
 - **REST API (v1)** - for custom ACARS clients and integrations
 
@@ -193,6 +194,16 @@ docker compose -f docker-compose.prod.yml exec app php artisan yaams:reset-2fa u
 ```
 
 The command asks for confirmation (`--force` skips it), records the reset in the activity log and informs the user by e-mail (requires the queue worker).
+
+### Legal pages (Imprint / Privacy / Terms)
+
+After installing, a Super-Admin should review **Administration - Legal pages** (`/admin/legal`). Pages are written in Markdown and linked in the footer of every page:
+
+- **Imprint** - off by default. Operators in e.g. Germany or Austria are required to publish one; US operators usually are not
+- **Privacy Policy** - always published. Until you write your own, a built-in template describes what YAAMS stores, filled with your instance name, support e-mail and activity-log retention. Review it - as the operator you are responsible for its content
+- **Terms of Use** - optional house rules. When published, new users must accept them at registration
+
+New users must accept the privacy policy to register (the date is stored), and every user can download their personal data as JSON under *Settings - Privacy & data*.
 
 ## Contributing
 

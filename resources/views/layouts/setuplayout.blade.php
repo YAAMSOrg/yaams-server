@@ -80,6 +80,7 @@
         @yield('content')
         <div class="text-center mt-4">
             <small class="text-muted">&copy; {{ date('Y') }} YAAMS Virtual Airline Management</small>
+            <div class="small mt-1">@include('layouts._legal_links')</div>
         </div>
     </div>
 
