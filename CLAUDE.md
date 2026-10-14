@@ -243,6 +243,10 @@ Accept/reject actions notify the pilot the same way — `Notification::send($fli
 
 All API responses go through Laravel API Resources at `app/Http/Resources/V1/`. Controllers return `FlightResource`, `FlightCollection`, etc. — never raw model data.
 
+### API Reference Data
+
+`GET /api/v1/online-networks` (`OnlineNetworkAPIController`, `OnlineNetworkResource`: `id`, `name` from `networkname`) lists the valid `online_network_id` values for filing a PIREP. Unpaginated on purpose (small, stable list), so it is not on the `ListRequest` contract. IDs differ between installs (the setup wizard and the dev seeder insert in different orders), so clients must never hardcode them.
+
 ### API Abilities (role-aware clients)
 
 Clients (e.g. the YAAMS Commander desktop app) build role-aware UIs from flags computed by `App\Support\Abilities`, never from role names:

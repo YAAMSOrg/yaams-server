@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AircraftAPIController;
 use App\Http\Controllers\Api\V1\AirlineAPIController;
 use App\Http\Controllers\Api\V1\FlightAPIController;
 use App\Http\Controllers\Api\V1\InfoController;
+use App\Http\Controllers\Api\V1\OnlineNetworkAPIController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,9 @@ Route::get('v1/info', [InfoController::class, 'index'])->name('api.v1.info');
 Route::group(['prefix' => 'v1', 'as' => 'api.v1.', 'middleware' => 'auth:sanctum'], function () {
     // "Who am I" - token sanity check for API clients.
     Route::get('user', [UserController::class, 'show'])->name('user');
+
+    // Reference data for filing PIREPs (online_network_id).
+    Route::get('online-networks', [OnlineNetworkAPIController::class, 'index'])->name('online-networks.index');
 
     // Only the actions AirlineAPIController implements - update/destroy do not exist.
     Route::apiResource('airlines', AirlineAPIController::class)->only(['index', 'show', 'store']);

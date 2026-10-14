@@ -108,7 +108,7 @@ class FlightAPIController extends Controller
      * @bodyParam blockon string required Block-on time (UTC), format Y-m-d H:i:s. Must be after blockoff; flight duration may not exceed 26 hours. Example: 2026-07-11 11:30:00
      * @bodyParam burned_fuel integer required Fuel burned, in the airline's unit (min 1, max 600000). Example: 4200
      * @bodyParam route string required Filed route string. Example: SOVAT UL610 KONAN
-     * @bodyParam online_network_id integer required Online network ID (must exist in online_networks). Example: 1
+     * @bodyParam online_network_id integer required Online network ID, see `GET /api/v1/online-networks`. Example: 1
      * @bodyParam remarks string Optional remarks (letters, digits, spaces, . , -). Example: Smooth flight.
      *
      * @response 201 {
