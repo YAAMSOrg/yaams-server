@@ -2,18 +2,32 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Support\BlockTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Filters shared by the flight lists (my flights, review queue).
+ * Sort keys and filters shared by the flight lists (my flights, review queue).
  */
 abstract class FlightListRequest extends ListRequest
 {
     protected function sortable(): array
     {
         return [
+            // Integer column, so this is a numeric sort (9 before 10).
+            'flight_number' => 'flightnumber',
+            'callsign' => 'callsign',
+            'departure' => 'departure_icao',
+            'arrival' => 'arrival_icao',
             'block_off' => 'blockoff',
+            'block_on' => 'blockon',
+            'duration' => fn (Builder $query) => DB::raw(BlockTime::secondsSql(
+                $query->getConnection(),
+                $query->getGrammar()->wrap($query->qualifyColumn('blockoff')),
+                $query->getGrammar()->wrap($query->qualifyColumn('blockon')),
+            )),
+            'burned_fuel' => 'burned_fuel',
             'created_at' => 'created_at',
         ];
     }

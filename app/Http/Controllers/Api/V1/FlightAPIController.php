@@ -44,7 +44,7 @@ class FlightAPIController extends Controller
      * @queryParam arrival string Arrival ICAO (case-insensitive). Example: EGLL
      * @queryParam from string Block-off on or after this UTC day (Y-m-d). Example: 2026-07-01
      * @queryParam to string Block-off on or before this UTC day (Y-m-d), must not be before `from`. Example: 2026-07-31
-     * @queryParam sort string `block_off` or `created_at`, prefix with `-` for descending. Defaults to `-created_at`. Example: -block_off
+     * @queryParam sort string `flight_number`, `callsign`, `departure`, `arrival`, `block_off`, `block_on`, `duration`, `burned_fuel`, `status` (workflow order: pending, accepted, rejected) or `created_at`, prefix with `-` for descending. Ties are ordered by flight ID. Defaults to `-created_at`. Example: -block_off
      * @queryParam page integer Page number, starting at 1. Example: 1
      * @queryParam per_page integer Items per page, 1 - 100. Defaults to 25. Example: 25
      *
@@ -188,7 +188,7 @@ class FlightAPIController extends Controller
      * @queryParam arrival string Arrival ICAO (case-insensitive). Example: EGLL
      * @queryParam from string Block-off on or after this UTC day (Y-m-d). Example: 2026-07-01
      * @queryParam to string Block-off on or before this UTC day (Y-m-d), must not be before `from`. Example: 2026-07-31
-     * @queryParam sort string `block_off` or `created_at`, prefix with `-` for descending. Defaults to `-created_at`. Example: -block_off
+     * @queryParam sort string `flight_number`, `callsign`, `departure`, `arrival`, `block_off`, `block_on`, `duration`, `burned_fuel` or `created_at`, prefix with `-` for descending. Ties are ordered by flight ID. Defaults to `-created_at`. Example: -block_off
      * @queryParam page integer Page number, starting at 1. Example: 1
      * @queryParam per_page integer Items per page, 1 - 100. Defaults to 25. Example: 25
      *

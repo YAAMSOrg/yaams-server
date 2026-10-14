@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use Closure;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -20,9 +22,11 @@ abstract class ListRequest extends FormRequest
     public const MAX_PER_PAGE = 100;
 
     /**
-     * Sort keys a client may use, mapped to their database column.
+     * Sort keys a client may use, mapped to their database column, or to a
+     * closure returning a computed sort expression for the given query, e.g.
+     * a duration. The closure should qualify the columns it references.
      *
-     * @return array<string, string>
+     * @return array<string, string|Closure(Builder): Expression>
      */
     abstract protected function sortable(): array;
 
@@ -91,8 +95,10 @@ abstract class ListRequest extends FormRequest
         $sort = $this->validated('sort', $this->defaultSort());
         $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
 
+        $column = $this->sortable()[ltrim($sort, '-')];
+
         // Qualified, so a sort on a pivot-joined query is never ambiguous.
-        $builder->orderBy($builder->qualifyColumn($this->sortable()[ltrim($sort, '-')]), $direction)
+        $builder->orderBy($column instanceof Closure ? $column($builder) : $builder->qualifyColumn($column), $direction)
             // Tie-breaker so rows never shift between pages.
             ->orderBy($builder->getModel()->getQualifiedKeyName(), $direction);
 

@@ -141,6 +141,101 @@ class ListEndpointsTest extends TestCase
             ->assertJsonValidationErrors('to');
     }
 
+    public function test_flights_can_be_sorted_by_every_column(): void
+    {
+        $airline = Airline::factory()->create();
+        $pilot = $this->memberOf($airline, 'Pilot');
+        $flight = fn (array $attributes) => Flight::factory()->create(['airline_id' => $airline->id, 'pilot_id' => $pilot->id] + $attributes);
+
+        // Each column orders the three flights differently from their IDs, so
+        // a sort silently falling back to the tie-breaker would fail.
+        $a = $flight([
+            'flightnumber' => 100, 'callsign' => 'MM1', 'departure_icao' => 'KJFK', 'arrival_icao' => 'EDDM',
+            'blockoff' => '2026-07-12 10:00:00', 'blockon' => '2026-07-12 11:00:00', // 1 h
+            'burned_fuel' => 900, 'status_id' => 2, 'created_at' => now()->subDays(1),
+        ]);
+        $b = $flight([
+            'flightnumber' => 9, 'callsign' => 'AB1', 'departure_icao' => 'EDDF', 'arrival_icao' => 'KLAX',
+            'blockoff' => '2026-07-10 10:00:00', 'blockon' => '2026-07-12 12:00:00', // 50 h, spans days
+            'burned_fuel' => 12000, 'status_id' => 3, 'created_at' => now()->subDays(3),
+        ]);
+        $c = $flight([
+            'flightnumber' => 10, 'callsign' => 'ZZ1', 'departure_icao' => 'EGLL', 'arrival_icao' => 'EGLL',
+            'blockoff' => '2026-07-11 10:00:00', 'blockon' => '2026-07-11 12:00:00', // 2 h
+            'burned_fuel' => 5000, 'status_id' => 1, 'created_at' => now()->subDays(2),
+        ]);
+        Sanctum::actingAs($pilot);
+
+        $ascending = [
+            'flight_number' => [$b, $c, $a], // numeric: a string sort would give 10, 100, 9
+            'callsign' => [$b, $a, $c],
+            'departure' => [$b, $c, $a],
+            'arrival' => [$a, $c, $b],
+            'block_off' => [$b, $c, $a],
+            'block_on' => [$c, $a, $b],
+            'duration' => [$a, $c, $b],
+            'burned_fuel' => [$a, $c, $b], // numeric: a string sort would give 12000, 5000, 900
+            'status' => [$c, $a, $b], // workflow order: pending, accepted, rejected
+            'created_at' => [$b, $c, $a],
+        ];
+
+        foreach ($ascending as $key => $flights) {
+            $ids = array_map(fn (Flight $f) => $f->id, $flights);
+
+            $this->getJson(route('api.v1.airlines.flights.index', [$airline, 'sort' => $key]))
+                ->assertOk()
+                ->assertJsonPath('data.*.id', $ids, "sort={$key}");
+
+            $this->getJson(route('api.v1.airlines.flights.index', [$airline, 'sort' => '-'.$key]))
+                ->assertOk()
+                ->assertJsonPath('data.*.id', array_reverse($ids), "sort=-{$key}");
+        }
+    }
+
+    public function test_flight_sorts_page_stably_on_ties(): void
+    {
+        $airline = Airline::factory()->create();
+        $pilot = $this->memberOf($airline, 'Pilot');
+        // Same fuel and the same 90 min duration, on different days.
+        $ids = collect(range(1, 5))
+            ->map(fn (int $day) => Flight::factory()->create([
+                'airline_id' => $airline->id, 'pilot_id' => $pilot->id, 'burned_fuel' => 5000,
+                'blockoff' => "2026-07-0{$day} 10:00:00", 'blockon' => "2026-07-0{$day} 11:30:00",
+            ])->id)
+            ->all();
+        Sanctum::actingAs($pilot);
+
+        foreach (['burned_fuel', 'duration', '-burned_fuel', '-duration'] as $sort) {
+            $paged = collect(range(1, 3))
+                ->flatMap(fn (int $page) => $this->getJson(route('api.v1.airlines.flights.index', [
+                    $airline, 'sort' => $sort, 'per_page' => 2, 'page' => $page,
+                ]))->assertOk()->json('data.*.id'))
+                ->all();
+
+            // Ties fall back to the ID in the sort direction: no row is skipped or repeated.
+            $this->assertSame(str_starts_with($sort, '-') ? array_reverse($ids) : $ids, $paged, "sort={$sort}");
+        }
+    }
+
+    public function test_unknown_flight_sort_is_rejected(): void
+    {
+        $airline = Airline::factory()->create();
+        $dispatcher = $this->memberOf($airline, 'Dispatcher');
+        Sanctum::actingAs($dispatcher);
+
+        foreach (['route', '-pilot_id', 'flightnumber', '--duration'] as $sort) {
+            $this->getJson(route('api.v1.airlines.flights.index', [$airline, 'sort' => $sort]))
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors('sort');
+        }
+
+        // The review queue shares the flight sorts, except `status` (it only holds pending flights).
+        $this->getJson(route('api.v1.airlines.flights.review', [$airline, 'sort' => '-duration']))->assertOk();
+        $this->getJson(route('api.v1.airlines.flights.review', [$airline, 'sort' => 'status']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('sort');
+    }
+
     public function test_flights_list_only_contains_the_pilots_own_flights(): void
     {
         $airline = Airline::factory()->create();

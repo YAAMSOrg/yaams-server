@@ -20,6 +20,13 @@ class ListFlightsRequest extends FlightListRequest
         throw new AuthorizationException('You are not a member of this airline.');
     }
 
+    // Sorts by status ID, i.e. workflow order Pending, Accepted, Rejected.
+    // Not offered on the review queue, which only holds pending flights.
+    protected function sortable(): array
+    {
+        return array_merge(parent::sortable(), ['status' => 'status_id']);
+    }
+
     protected function filterRules(): array
     {
         return array_merge(parent::filterRules(), [
