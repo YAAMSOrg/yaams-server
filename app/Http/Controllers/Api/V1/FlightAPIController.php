@@ -144,22 +144,23 @@ class FlightAPIController extends Controller
         $validated = $request->validated();
         $aircraft = $request->aircraft();
 
-        $flight = Flight::create($validated + [
+        $flight = new Flight($validated + [
             'pilot_id' => $user->id,
             'airline_id' => $airline->id,
         ]);
+        // Set the status explicitly (not via the column default) so the response
+        // carries it. Auto-accept when the airline does not require PIREP review.
+        $flight->status_id = $airline->require_pirep_review ? 1 : 2;
+        $flight->save();
 
         // Location continuity: the airframe has physically moved to the arrival airport
         if ($airline->location_continuity) {
             $aircraft->update(['current_loc' => $validated['arrival_icao']]);
         }
 
+        // Without review nothing is dispatched to reviewers
         if ($airline->require_pirep_review) {
             event(new FlightFiled($flight));
-        } else {
-            // Auto-accept: the airline does not require PIREP review, so nothing is dispatched to reviewers
-            $flight->status_id = 2;
-            $flight->save();
         }
 
         activity()

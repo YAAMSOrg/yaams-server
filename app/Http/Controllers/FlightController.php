@@ -248,24 +248,25 @@ class FlightController extends Controller
             }
 
             // All checks passed, so create the flight.
-            $flight = Flight::create(
+            $flight = new Flight(
                 $validated + [
                     "airline_id" => $currentActiveAirline->id,
                     "pilot_id" => auth()->user()->id,
                 ]
             );
+            // Set the status explicitly (not via the column default). Auto-accept
+            // when the airline does not require PIREP review.
+            $flight->status_id = $tempAirline->require_pirep_review ? 1 : 2;
+            $flight->save();
 
             // Location continuity: the airframe has physically moved to the arrival airport
             if ($tempAirline->location_continuity) {
                 $aircraft->update(["current_loc" => strtoupper($validated["arrival_icao"])]);
             }
 
+            // Without review nothing is dispatched to reviewers
             if ($tempAirline->require_pirep_review) {
                 event(new FlightFiled($flight));
-            } else {
-                // Auto-accept: the airline does not require PIREP review, so nothing is dispatched to reviewers
-                $flight->status_id = 2;
-                $flight->save();
             }
 
             activity()

@@ -61,7 +61,8 @@ class FlightApiTest extends TestCase
         Sanctum::actingAs($pilot);
 
         $this->postJson(route('api.v1.airlines.flights.store', $airline), $this->payload($aircraft))
-            ->assertCreated();
+            ->assertCreated()
+            ->assertJsonPath('data.status', ['id' => 1, 'name' => 'Pending']);
 
         $this->assertDatabaseHas('flights', [
             'airline_id' => $airline->id,
@@ -69,6 +70,19 @@ class FlightApiTest extends TestCase
             'departure_icao' => 'EDDF',
             'arrival_icao' => 'EGLL',
         ]);
+    }
+
+    public function test_an_auto_accepted_pirep_reports_its_status(): void
+    {
+        Notification::fake();
+
+        $airline = Airline::factory()->noReview()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        Sanctum::actingAs($this->memberOf($airline, 'Pilot'));
+
+        $this->postJson(route('api.v1.airlines.flights.store', $airline), $this->payload($aircraft))
+            ->assertCreated()
+            ->assertJsonPath('data.status', ['id' => 2, 'name' => 'Accepted']);
     }
 
     public function test_non_positive_fuel_is_rejected(): void
