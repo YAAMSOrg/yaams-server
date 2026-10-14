@@ -8,6 +8,7 @@ use App\Models\Flight;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\SeedsDomain;
 use Tests\TestCase;
 
@@ -195,6 +196,47 @@ class FlightApiTest extends TestCase
             ->assertJsonValidationErrors('crzalt');
 
         $this->assertDatabaseCount('flights', 0);
+    }
+
+    public static function invalidCruiseAltitudes(): array
+    {
+        return [
+            'not a 500 ft step' => [41444],
+            'below the minimum' => [500],
+            'above the maximum' => [60500],
+            'not an integer' => ['35000.5'],
+        ];
+    }
+
+    #[DataProvider('invalidCruiseAltitudes')]
+    public function test_unrealistic_cruise_altitudes_are_rejected(int|string $crzalt): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]); // no service ceiling
+        Sanctum::actingAs($this->memberOf($airline, 'Pilot'));
+
+        $this->postJson(
+            route('api.v1.airlines.flights.store', $airline),
+            ['crzalt' => $crzalt] + $this->payload($aircraft),
+        )
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('crzalt');
+
+        $this->assertDatabaseCount('flights', 0);
+    }
+
+    public function test_a_vfr_half_thousand_cruise_altitude_is_accepted(): void
+    {
+        Notification::fake();
+
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        Sanctum::actingAs($this->memberOf($airline, 'Pilot'));
+
+        $this->postJson(
+            route('api.v1.airlines.flights.store', $airline),
+            ['crzalt' => 5500] + $this->payload($aircraft),
+        )->assertCreated();
     }
 
     public function test_location_continuity_is_enforced_on_the_api(): void
