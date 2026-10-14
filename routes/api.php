@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AircraftAPIController;
 use App\Http\Controllers\Api\V1\AirlineAPIController;
 use App\Http\Controllers\Api\V1\FlightAPIController;
 use App\Http\Controllers\Api\V1\InfoController;
+use App\Http\Controllers\Api\V1\NotificationAPIController;
 use App\Http\Controllers\Api\V1\OnlineNetworkAPIController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,14 @@ Route::get('v1/info', [InfoController::class, 'index'])->name('api.v1.info');
 Route::group(['prefix' => 'v1', 'as' => 'api.v1.', 'middleware' => 'auth:sanctum'], function () {
     // "Who am I" - token sanity check for API clients.
     Route::get('user', [UserController::class, 'show'])->name('user');
+
+    // The token owner's in-app notifications - always scoped to the caller.
+    Route::get('notifications', [NotificationAPIController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/unread-count', [NotificationAPIController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::post('notifications/read-all', [NotificationAPIController::class, 'readAll'])->name('notifications.read-all');
+    Route::post('notifications/{notification}/read', [NotificationAPIController::class, 'read'])
+        ->whereUuid('notification')
+        ->name('notifications.read');
 
     // Reference data for filing PIREPs (online_network_id).
     Route::get('online-networks', [OnlineNetworkAPIController::class, 'index'])->name('online-networks.index');

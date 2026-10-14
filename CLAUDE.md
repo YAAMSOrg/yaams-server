@@ -247,6 +247,17 @@ All API responses go through Laravel API Resources at `app/Http/Resources/V1/`. 
 
 `GET /api/v1/online-networks` (`OnlineNetworkAPIController`, `OnlineNetworkResource`: `id`, `name` from `networkname`) lists the valid `online_network_id` values for filing a PIREP. Unpaginated on purpose (small, stable list), so it is not on the `ListRequest` contract. IDs differ between installs (the setup wizard and the dev seeder insert in different orders), so clients must never hardcode them.
 
+### API Notifications
+
+`Api\V1\NotificationAPIController` exposes the token owner's in-app (`database` channel) notifications, the API counterpart of the web `NotificationsController`:
+
+- `GET /api/v1/notifications` - list on the `ListRequest` contract (`ListNotificationsRequest`: sorts `created_at` / `read_at`, default `-created_at`, `unread` boolean filter). Items via `NotificationResource`: `id` (uuid), `type`, `title`, `message`, `url` (nullable), `readAt`, `createdAt`
+- `GET /api/v1/notifications/unread-count` - `{ "count": n }`, a single `count()` query for polling the bell
+- `POST /api/v1/notifications/{id}/read` (returns the item, idempotent) and `POST /api/v1/notifications/read-all` (`204`, one bulk `update`)
+- **Scoping** - ids are resolved through `$request->user()->notifications()->findOrFail()`, never route-model binding, so another user's notification is a plain `404`
+- **`type`** is `Str::camel(class_basename(...))` of the notification class (`pirepFiled`, `twoFactorReset`, ...), never the FQCN. A new notification class with the `database` channel is a new `type` - add it to the list in the controller's `@group` docblock
+- **Sorting gotcha** - Laravel's `notifications()` relation has a built-in `latest()`, so the controller calls `reorder()` before `ListRequest::paginate()`; otherwise every requested sort is overridden
+
 ### API Abilities (role-aware clients)
 
 Clients (e.g. the YAAMS Commander desktop app) build role-aware UIs from flags computed by `App\Support\Abilities`, never from role names:
@@ -258,9 +269,9 @@ Clients (e.g. the YAAMS Commander desktop app) build role-aware UIs from flags c
 
 ### API Pagination & Filtering
 
-Every list endpoint (airlines, aircraft, my flights, review queue) is paginated, sortable and filterable through one contract - keep new list endpoints on it:
+Every list endpoint (airlines, aircraft, my flights, review queue, notifications) is paginated, sortable and filterable through one contract - keep new list endpoints on it:
 
-- **Request** - a subclass of `App\Http\Requests\Api\V1\ListRequest` (`ListAirlinesRequest`, `ListAircraftRequest`, `ListFlightsRequest`, `ListReviewFlightsRequest`; the two flight lists share `FlightListRequest`). It declares `sortable()` (public key => column, or a closure `fn (Builder $query) => Expression` for a computed sort - it must qualify its columns), `defaultSort()`, `filterRules()` and `applyFilters()`; the controller calls `$request->paginate($query)` (filters, sort + id tie-breaker, `per_page`, `withQueryString()`)
+- **Request** - a subclass of `App\Http\Requests\Api\V1\ListRequest` (`ListAirlinesRequest`, `ListAircraftRequest`, `ListFlightsRequest`, `ListReviewFlightsRequest`, `ListNotificationsRequest`; the two flight lists share `FlightListRequest`). It declares `sortable()` (public key => column, or a closure `fn (Builder $query) => Expression` for a computed sort - it must qualify its columns), `defaultSort()`, `filterRules()` and `applyFilters()`; the controller calls `$request->paginate($query)` (filters, sort + id tie-breaker, `per_page`, `withQueryString()`)
 - **Params** - flat query params: `page`, `per_page` (default 25, max 100), `sort` (`-` prefix = descending), filters. Invalid values are a 422, never ignored. Boolean flags use `in:1,0,true,false` (Laravel's `boolean` rule refuses `true`/`false` from a query string). Flight status is filtered by name (`status=accepted`); `status_id` is a deprecated alias
 - **Flight sorts** - `FlightListRequest` (both flight lists): `flight_number` (numeric), `callsign`, `departure`, `arrival`, `block_off`, `block_on`, `duration` (computed via `App\Support\BlockTime::secondsSql()`), `burned_fuel`, `created_at` (default `-created_at`). Only "my flights" adds `status`, sorted by `status_id` (workflow order Pending, Accepted, Rejected); the review queue holds only pending flights
 - **Authorization** - membership/reviewer checks live in the request's `authorize()` with `failedAuthorization()` throwing the endpoint's 403 message, so a forbidden caller gets a 403 before any 422

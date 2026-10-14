@@ -24,7 +24,7 @@ return [
 
             Send `Accept: application/json`. Errors are always JSON: `401` (missing or invalid token), `403` (no permission, with a `message`), `404`, and `422` validation errors (`message` plus an `errors` object keyed by parameter).
 
-            **Lists** (airlines, aircraft, flights, review queue) share one contract:
+            **Lists** (airlines, aircraft, flights, review queue, notifications) share one contract:
 
             - Pagination: `page` (from 1) and `per_page` (1 - 100, default 25). Responses carry `data`, `links` (`first`, `last`, `prev`, `next`; `null` when there is no such page) and `meta` (`current_page`, `from`, `to`, `per_page`, `total`, `last_page`, `path`). Follow `links.next` until it is `null` - it keeps your filters.
             - Sorting: `sort` takes one of the endpoint's documented keys, prefixed with `-` for descending, e.g. `sort=-block_off`.
