@@ -32,3 +32,6 @@ yarn-error.log
 /public/vendor/scribe
 /storage/app/scribe
 /.serena
+
+# Impeccable design tool working state (critiques, live mode)
+/.impeccable/
