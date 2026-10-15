@@ -208,26 +208,7 @@
                                 </td>
                                 
                                 <td class="pe-4 text-end">
-                                    @php
-                                        // Case-insensitive check for different states
-                                        $statusName = strtolower($flight->status->name);
-                                        $badgeClass = 'bg-secondary';
-                                        $icon = 'bi-circle';
- 
-                                        if (str_contains($statusName, 'accept') || str_contains($statusName, 'approv')) {
-                                            $badgeClass = 'bg-success-subtle text-success border border-success-subtle';
-                                            $icon = 'bi-check-circle-fill';
-                                        } elseif (str_contains($statusName, 'pend') || str_contains($statusName, 'review')) {
-                                            $badgeClass = 'bg-warning-subtle text-warning-heading border border-warning-subtle';
-                                            $icon = 'bi-hourglass-split';
-                                        } elseif (str_contains($statusName, 'reject') || str_contains($statusName, 'deni')) {
-                                            $badgeClass = 'bg-danger-subtle text-danger border border-danger-subtle';
-                                            $icon = 'bi-x-circle-fill';
-                                        }
-                                    @endphp
-                                    <span class="badge rounded-pill {{ $badgeClass }} px-3 py-1.5 d-inline-flex align-items-center gap-1.5 fw-semibold small">
-                                        <i class="bi {{ $icon }}"></i> {{ $flight->status->name }}
-                                    </span>
+                                    <x-flight-status :flight="$flight" class="px-3 small" />
                                 </td>
                             </tr>
                             @endforeach

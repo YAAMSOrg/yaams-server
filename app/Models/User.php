@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Concerns\LogsModelActivity;
 use App\Notifications\ResetPassword;
 use App\Notifications\VerifyEmail;
+use App\Support\BlockTime;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -74,22 +76,23 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new ResetPassword($token));
     }
 
-    public function logged_hours(Airline $airline) {
-        $flights = Flight::query()
+    /**
+     * Whole block-time minutes of the user's accepted flights for an airline,
+     * summed in one aggregate query.
+     */
+    public function logged_minutes(Airline $airline): int {
+        $query = Flight::query()
         ->where('airline_id', '=', $airline->id)
         ->where('pilot_id', '=', $this->id)
-        ->where('status_id', '=', 2)
-        ->get();
+        ->where('status_id', '=', 2);
 
-        $totalFlightMinutes = 0;
+        $seconds = $query->sum(DB::raw(BlockTime::secondsSql($query->getConnection())));
 
-        foreach ($flights as $flight) {
-            $totalFlightMinutes += $flight->flight_duration_minutes;
-        }
-        $hours = floor($totalFlightMinutes / 60);
-        $minutes = $totalFlightMinutes % 60;
+        return intdiv((int) $seconds, 60);
+    }
 
-        return $hours;
+    public function logged_hours(Airline $airline) {
+        return intdiv($this->logged_minutes($airline), 60);
     }
 
     public function logged_flights(Airline $airline) {

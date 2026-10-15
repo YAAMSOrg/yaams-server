@@ -97,11 +97,11 @@ class Flight extends Model
     }
 
     public function getFullFlightNumberAttribute() {
-        return $this->Airline->prefix . $this->flightnumber;
+        return $this->airline->prefix . $this->flightnumber;
     }
 
     public function getFullIcaoCallsignAttribute() {
-        return $this->Airline->icao_callsign . $this->flightnumber;
+        return $this->airline->icao_callsign . $this->flightnumber;
     }
 
     public function getFlightDurationAttribute() {
