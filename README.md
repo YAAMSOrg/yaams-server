@@ -59,10 +59,10 @@ The dev stack runs entirely in containers (Docker or Podman).
    ```bash
    docker network create yaams
    ```
-2. **Install PHP dependencies and prepare the environment file** (the compose services mount the repo and expect `vendor/` to exist):
+2. **Install PHP dependencies and prepare the environment file** (the compose services mount the repo and expect `vendor/` to exist). Composer runs inside the dev image, which has the required PHP extensions (e.g. `gd`) and the right PHP version - the plain `composer` image lacks `gd`:
    ```bash
    cp .env.example .env
-   docker run --rm -v $(pwd):/app -w /app composer:latest install
+   docker compose -f Docker/docker-compose.yml run --rm --no-deps app composer install
    ```
 3. **Bring up the whole stack:**
    ```bash
