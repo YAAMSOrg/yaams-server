@@ -9,7 +9,7 @@
 @endphp
 <div class="row g-4">
     <div class="col-12 col-lg-4">
-        <div class="card h-100">
+        <div class="card">
             <div class="card-header d-flex align-items-center gap-2">
                 <i class="bi bi-person-badge text-primary"></i>
                 <span>Pilot Profile</span>
