@@ -177,20 +177,6 @@
             </div>
         </div>
 
-        <div class="card mb-4">
-            <div class="card-header d-flex align-items-center gap-2">
-                <i class="bi bi-globe-americas text-primary"></i>
-                <span>Live Flights</span>
-            </div>
-            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center py-5 bg-white" style="min-height: 250px;">
-                <div class="text-muted mb-2">
-                    <i class="bi bi-cone-striped fs-1 text-secondary opacity-50"></i>
-                </div>
-                <h5 class="fw-semibold text-dark mb-1">Live Map coming soon</h5>
-                <p class="text-muted small mb-0">The real-time tracking system is currently under heavy maintenance.</p>
-            </div>
-        </div>
-
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-2">
