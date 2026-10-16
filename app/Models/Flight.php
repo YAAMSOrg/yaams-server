@@ -92,6 +92,10 @@ class Flight extends Model
         return $this->belongsTo(Airport::class, 'departure_icao');
     }
 
+    public function online_network() {
+        return $this->belongsTo(OnlineNetwork::class, 'online_network_id');
+    }
+
     public function arrival_airport() {
         return $this->belongsTo(Airport::class, 'arrival_icao');
     }

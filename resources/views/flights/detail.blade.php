@@ -1,12 +1,19 @@
 @extends('layouts.app')
-@section('title', 'Flight #' . $flight->id)
+@section('title', 'Flight ' . $flight->full_flight_number)
 
 @section('content')
 <div class="row justify-content-center">
     <div class="col-xl-10 col-lg-12">
 
         <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
-            <a href="{{ url()->previous()  }}" class="btn btn-outline-secondary btn-sm px-3 d-inline-flex align-items-center gap-1.5 shadow-sm">
+            @php
+                // Deep links (e.g. from a notification mail) have no useful previous page
+                $backUrl = url()->previous(route('flightlist'));
+                if ($backUrl === url()->current()) {
+                    $backUrl = route('flightlist');
+                }
+            @endphp
+            <a href="{{ $backUrl }}" class="btn btn-outline-secondary btn-sm px-3 d-inline-flex align-items-center gap-1.5 shadow-sm">
                 <i class="bi bi-arrow-left"></i> Back
             </a>
 
@@ -67,12 +74,31 @@
         </div>
         @endif
 
-        @if($flight->status_id == 3 && $flight->rejection_remarks)
-            <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center gap-3 mb-4" role="alert">
-                <i class="bi bi-x-octagon-fill fs-4"></i>
+        @if($flight->status_id == 3)
+            <div class="alert alert-danger border-0 shadow-sm d-flex align-items-start gap-3 mb-4" role="status">
+                <i class="bi bi-x-octagon-fill fs-4" aria-hidden="true"></i>
                 <div>
-                    <h6 class="alert-heading fw-bold mb-1">Rejection Reason</h6>
-                    <p class="small mb-0 opacity-75">{{ $flight->rejection_remarks }}</p>
+                    <h2 class="alert-heading h6 fw-bold mb-1">This PIREP was rejected</h2>
+                    @if($flight->rejection_remarks)
+                        <p class="small mb-0" style="white-space: pre-line;">{{ $flight->rejection_remarks }}</p>
+                    @else
+                        <p class="small mb-0">No reason was given. Ask your airline's dispatchers or managers if you're unsure why.</p>
+                    @endif
+                    <p class="small mb-0 mt-1">Its block time doesn't count towards logged hours.</p>
+                </div>
+            </div>
+        @elseif($flight->status_id == 1)
+            <div class="alert alert-warning border-0 shadow-sm d-flex align-items-start gap-3 mb-4" role="status">
+                <i class="bi bi-hourglass-split fs-4" aria-hidden="true"></i>
+                <div>
+                    <h2 class="alert-heading h6 fw-bold mb-1">Awaiting review</h2>
+                    <p class="small mb-0">
+                        @if($canReview)
+                            Approve or reject this PIREP to complete the review.
+                        @else
+                            A dispatcher or manager of {{ $flight->airline->name }} will review this PIREP. Its block time counts towards logged hours once accepted.
+                        @endif
+                    </p>
                 </div>
             </div>
         @endif
@@ -89,7 +115,7 @@
                         <div class="d-flex align-items-center gap-3 gap-md-4 my-3">
                             <div class="text-center flex-shrink-0">
                                 <h1 class="display-6 mb-0 fw-bold tracking-tight font-monospace lh-1">{{ $flight->departure_icao }}</h1>
-                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;">{{ $flight->departure_airport?->name }}</span>
+                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;" title="{{ $flight->departure_airport?->name }}">{{ $flight->departure_airport?->name ?? 'Unknown airport' }}</span>
                             </div>
 
                             <div class="flex-grow-1 px-1 text-center" style="min-width: 80px;">
@@ -104,7 +130,7 @@
 
                             <div class="text-center flex-shrink-0">
                                 <h1 class="display-6 mb-0 fw-bold tracking-tight font-monospace lh-1">{{ $flight->arrival_icao }}</h1>
-                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;">{{ $flight->arrival_airport?->name }}</span>
+                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;" title="{{ $flight->arrival_airport?->name }}">{{ $flight->arrival_airport?->name ?? 'Unknown airport' }}</span>
                             </div>
                         </div>
                     </div>
@@ -115,16 +141,7 @@
                             <span class="font-monospace fw-bold fs-5 text-white">#{{ $flight->id }}</span>
                         </div>
                         <div class="mt-md-2">
-                            @php
-                                $statusName = strtolower($flight->status->name);
-                                $badgeClass = 'bg-secondary';
-                                if (str_contains($statusName, 'accept') || str_contains($statusName, 'approv')) $badgeClass = 'bg-success';
-                                elseif (str_contains($statusName, 'pend') || str_contains($statusName, 'review')) $badgeClass = 'bg-warning text-dark';
-                                elseif (str_contains($statusName, 'reject') || str_contains($statusName, 'deni')) $badgeClass = 'bg-danger';
-                            @endphp
-                            <span class="badge {{ $badgeClass }} px-3 py-2 fw-bold text-uppercase tracking-wider">
-                                {{ $flight->status->name }}
-                            </span>
+                            <x-flight-status :flight="$flight" class="px-3 py-2" />
                         </div>
                     </div>
 
@@ -213,7 +230,7 @@
                                         <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot_name }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2 text-muted">Total flights</td>
+                                        <td class="py-2 text-muted">Accepted flights</td>
                                         <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot ? $flight->pilot->logged_flights($flight->airline) : '—' }}</td>
                                     </tr>
                                     <tr>
@@ -261,24 +278,20 @@
                         </div>
                         <div>
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-2.5 py-1">
-                                <i class="bi bi-globe me-1"></i>{{ $flight->online_network->name ?? 'Offline' }}
+                                <i class="bi bi-globe me-1" aria-hidden="true"></i>{{ $flight->online_network?->networkname ?? 'Offline' }}
                             </span>
                         </div>
                     </div>
                     <div class="card-body pt-0">
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase tracking-wider mb-1">Filed ATC Route</label>
-                            <div class="p-3 bg-light font-monospace rounded border text-dark fs-6 text-uppercase" style="letter-spacing: 0.5px; line-height: 1.6; word-break: break-all;">
-                                {{ $flight->route }}
-                            </div>
+                            <div class="p-3 bg-light font-monospace rounded border text-dark fs-6 text-uppercase" style="letter-spacing: 0.5px; line-height: 1.6; overflow-wrap: anywhere;">{{ $flight->route ?: 'No route filed' }}</div>
                         </div>
 
                         @if($flight->remarks)
                             <div>
                                 <label class="form-label text-muted small fw-bold text-uppercase tracking-wider mb-1">Pilot Remarks</label>
-                                <div class="p-3 bg-light-subtle rounded border text-secondary italic small">
-                                    <i class="bi bi-chat-quote me-1 text-muted"></i> "{{ $flight->remarks }}"
-                                </div>
+                                <div class="p-3 bg-light-subtle rounded border text-body small" style="white-space: pre-line; overflow-wrap: anywhere;">{{ $flight->remarks }}</div>
                             </div>
                         @endif
                     </div>
