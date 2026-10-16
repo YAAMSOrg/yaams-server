@@ -75,12 +75,13 @@
         @endif
 
 
-        <div class="card border-0 shadow-sm bg-dark text-white overflow-hidden mb-4 position-relative" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+        <div class="card border-0 shadow-sm yaams-flight-hero overflow-hidden mb-4 position-relative">
             <div class="card-body p-4 p-md-5 position-relative z-1">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
                     
                     <div>
                         <h1 class="yaams-flight-hero__title">
+                            <span class="yaams-flight-hero__airline" title="{{ $flight->airline->name }}">{{ $flight->airline->icao_callsign }}</span>
                             <span class="font-monospace">{{ $flight->full_flight_number }}</span>
                             <span class="yaams-flight-hero__callsign">Callsign <span class="font-monospace">{{ $flight->full_icao_callsign }}</span></span>
                         </h1>
@@ -98,7 +99,7 @@
                                 </div>
                                 <span class="visually-hidden">to</span>
                                 <div class="route-line position-relative">
-                                    <span class="route-plane"><i class="bi bi-airplane-fill text-primary" aria-hidden="true"></i></span>
+                                    <span class="route-plane"><i class="bi bi-airplane-fill" aria-hidden="true"></i></span>
                                 </div>
                             </div>
 
@@ -109,7 +110,7 @@
                         </div>
                     </div>
 
-                    <div class="text-md-end d-flex flex-row flex-md-column justify-content-between align-items-center align-items-md-end gap-2 bg-black bg-opacity-25 p-3 rounded border border-white border-opacity-10">
+                    <div class="text-md-end d-flex flex-row flex-md-column justify-content-between align-items-center align-items-md-end gap-2 p-3 rounded yaams-flight-hero__meta">
                         <div>
                             <span class="text-white-50 small d-block">PIREP ID</span>
                             <span class="font-monospace fw-bold fs-5 text-white">#{{ $flight->id }}</span>
@@ -304,41 +305,4 @@
         </div> </div>
 </div>
 
-<style>
-    /* Ein kleiner, feiner CSS-Dashed-Border-Effekt für die Route */
-    .border-dashed {
-        border-style: dashed !important;
-    }
-    .w-40 {
-        width: 40%;
-    }
-
-    /* Boarding-pass style route connector in the hero */
-    .route-line {
-        height: 2px;
-        background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, .45) 0 6px, transparent 6px 13px);
-    }
-    .route-line::before,
-    .route-line::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: var(--bs-primary);
-        transform: translateY(-50%);
-    }
-    .route-line::before { left: 0; }
-    .route-line::after  { right: 0; }
-    .route-plane {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 0 .6rem;
-        background: #1e293b;
-        line-height: 1;
-    }
-</style>
 @endsection
