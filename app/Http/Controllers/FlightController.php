@@ -41,6 +41,23 @@ class FlightController extends Controller
             ->where('pilot_id', $current_auth_user_id)
             ->where('airline_id', $currentActiveAirline->id);
 
+        // The pilot's record for this airline (independent of search/filter):
+        // flights per status and accepted block time
+        $statusCounts = (clone $flightsQuery)
+            ->selectRaw('status_id, count(*) as total')
+            ->groupBy('status_id')
+            ->pluck('total', 'status_id');
+        $acceptedMinutes = $request->user()->logged_minutes($currentActiveAirline);
+
+        // Status filter by name, same names as the API (status=accepted)
+        $statusIds = ['pending' => 1, 'accepted' => 2, 'rejected' => 3];
+        $status = $request->get('status');
+        if (isset($statusIds[$status])) {
+            $flightsQuery->where('flights.status_id', $statusIds[$status]);
+        } else {
+            $status = null;
+        }
+
         // 2. Apply search
         if ($search = $request->get('search')) {
             $flightsQuery->where(function($q) use ($search, $currentActiveAirline) {
@@ -139,14 +156,24 @@ class FlightController extends Controller
 
         // 7. Get results
         $flights = $flightsQuery
+            ->with(['airline', 'aircraft', 'departure_airport', 'arrival_airport'])
             ->offset($offset)
             ->limit($limit)
             ->get();
 
         return view('flights.list', [
-            'flights'     => $flights,
-            'maxPages'    => $maxPages,
-            'currentPage' => $page
+            'flights'         => $flights,
+            'maxPages'        => $maxPages,
+            'currentPage'     => $page,
+            'maxEntries'      => $maxEntries,
+            'status'          => $status,
+            'statusCounts'    => [
+                'pending'  => (int) ($statusCounts[1] ?? 0),
+                'accepted' => (int) ($statusCounts[2] ?? 0),
+                'rejected' => (int) ($statusCounts[3] ?? 0),
+            ],
+            'totalFlights'    => (int) $statusCounts->sum(),
+            'acceptedMinutes' => $acceptedMinutes,
         ]);
     }
 
