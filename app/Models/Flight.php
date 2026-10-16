@@ -84,6 +84,42 @@ class Flight extends Model
         return $this->belongsTo(User::class, 'pilot_id');
     }
 
+    public function reviewer() {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    protected function casts(): array {
+        return ['reviewed_at' => 'datetime'];
+    }
+
+    /**
+     * Set the review outcome (2 accepted, 3 rejected) and who decided it.
+     * reviewed_by / reviewed_at are not fillable: only a review writes them.
+     */
+    public function recordReview(User $reviewer, int $statusId): void {
+        $this->forceFill([
+            'status_id' => $statusId,
+            'reviewed_by' => $reviewer->id,
+            'reviewed_at' => now(),
+        ]);
+    }
+
+    /**
+     * The oldest pending PIREP of the same airline that $reviewer may review,
+     * so a reviewer can move straight on after a decision.
+     */
+    public function nextPendingFor(User $reviewer): ?Flight {
+        return static::query()
+            ->where('airline_id', $this->airline_id)
+            ->where('status_id', 1)
+            ->whereKeyNot($this->getKey())
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->with('airline')
+            ->get()
+            ->first(fn (Flight $flight) => $reviewer->can('review', $flight));
+    }
+
     public function getPilotNameAttribute(): string {
         return $this->pilot?->name ?? 'Deleted pilot';
     }

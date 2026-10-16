@@ -95,7 +95,7 @@ class LocationContinuityTest extends TestCase
 
         $this->actingAs($manager)
             ->withSession(['activeairline' => $airline])
-            ->post(route('flightreviewreject', $flight));
+            ->post(route('flightreviewreject', $flight), ['rejection_remarks' => 'Wrong aircraft.']);
 
         $this->assertSame('EDDF', $aircraft->fresh()->current_loc);
     }
@@ -121,7 +121,7 @@ class LocationContinuityTest extends TestCase
         // Rejecting leg 1 must not drag the airframe back - it has moved on.
         $this->actingAs($manager)
             ->withSession(['activeairline' => $airline])
-            ->post(route('flightreviewreject', $legOne));
+            ->post(route('flightreviewreject', $legOne), ['rejection_remarks' => 'Wrong aircraft.']);
 
         $this->assertSame('KJFK', $aircraft->fresh()->current_loc);
     }

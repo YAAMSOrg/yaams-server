@@ -3,6 +3,7 @@
 namespace App\Actions\Users;
 
 use App\Models\AircraftImage;
+use App\Models\Flight;
 use App\Models\User;
 use Spatie\Activitylog\Models\Activity;
 
@@ -64,6 +65,21 @@ class ExportUserData
                     'remarks'           => $flight->remarks,
                     'status'            => $flight->status?->name,
                     'filed_at'          => $flight->created_at?->toIso8601String(),
+                    'reviewed_at'       => $flight->reviewed_at?->toIso8601String(),
+                ])->all(),
+
+            // Decisions this user made as a reviewer (no pilot identities)
+            'pirep_reviews' => Flight::query()
+                ->where('reviewed_by', $user->id)
+                ->with(['airline', 'status'])
+                ->orderBy('reviewed_at')
+                ->get()
+                ->map(fn (Flight $flight) => [
+                    'flight_id'     => $flight->id,
+                    'airline'       => $flight->airline?->icao_callsign,
+                    'flight_number' => $flight->full_flight_number,
+                    'decision'      => $flight->status?->name,
+                    'reviewed_at'   => $flight->reviewed_at?->toIso8601String(),
                 ])->all(),
 
             'aircraft_screenshots' => AircraftImage::query()

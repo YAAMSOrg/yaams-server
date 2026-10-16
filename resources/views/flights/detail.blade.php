@@ -20,47 +20,14 @@
             @php
                 $canReview = auth()->user()->can('review', $flight);
             @endphp
-            @if($flight->status_id == 1 && $canReview)
-                <div class="d-flex gap-2">
-                    <form action="{{ route('flightreviewaccept', $flight->id) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-sm px-3 d-inline-flex align-items-center gap-1 shadow-sm">
-                            <i class="bi bi-check-lg" aria-hidden="true"></i> Approve PIREP
-                        </button>
-                    </form>
-                    
-                    <button type="button" class="btn btn-danger btn-sm px-3 d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                        <i class="bi bi-x-lg" aria-hidden="true"></i> Reject PIREP
-                    </button>
-                </div>
-
-                <!-- Reject Modal -->
-                <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content border-0 shadow">
-                            <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title fw-bold" id="rejectModalLabel">Reject PIREP #{{ $flight->id }}</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form action="{{ route('flightreviewreject', $flight->id) }}" method="POST">
-                                @csrf
-                                <div class="modal-body text-dark">
-                                    <p>Are you sure you want to reject this flight? You can optionally provide a reason below.</p>
-                                    <div class="mb-3">
-                                        <label for="rejection_remarks" class="form-label small fw-bold text-uppercase">Reason (optional)</label>
-                                        <textarea class="form-control" name="rejection_remarks" id="rejection_remarks" rows="3" placeholder="e.g. Invalid fuel consumption, wrong aircraft type..."></textarea>
-                                    </div>
-                                </div>
-                                <div class="modal-footer bg-light">
-                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-danger btn-sm px-4 fw-bold">Confirm Rejection</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @endif
         </div>
+
+        @if(session('success'))
+            <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 mb-4" role="status">
+                <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
 
         @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
@@ -137,18 +104,53 @@
                     <p class="small mb-0 mt-1">Its block time doesn't count towards logged hours.</p>
                 </div>
             </div>
+        @elseif($flight->status_id == 1 && $canReview)
+            @php
+                $reviewMinutes = (int) $flight->flight_duration_minutes;
+                $reviewHours = $reviewMinutes / 60;
+                $reviewFuelUnit = $flight->airline->unit_is_lbs ? 'lbs' : 'kg';
+            @endphp
+            <section class="card shadow-sm mb-4 yaams-review-panel" aria-labelledby="review-heading">
+                <div class="card-body d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
+                    <div class="flex-grow-1">
+                        <h2 id="review-heading" class="h6 fw-bold mb-1">Review this PIREP</h2>
+                        <p class="small text-secondary mb-3">
+                            Filed {{ $flight->created_at?->utc()->format('Y-m-d H:i') }}Z by {{ $flight->pilot_name }}
+                        </p>
+                        <dl class="yaams-flight-facts yaams-review-panel__facts">
+                            <div>
+                                <dt>Block time</dt>
+                                <dd>{{ intdiv($reviewMinutes, 60) }}:{{ sprintf('%02d', $reviewMinutes % 60) }}</dd>
+                            </div>
+                            <div>
+                                <dt title="Distance divided by block time">Groundspeed</dt>
+                                <dd>{{ $reviewHours > 0 && $flight->raw_distance !== null ? number_format($flight->raw_distance / $reviewHours) . ' kt' : '—' }}</dd>
+                            </div>
+                            <div>
+                                <dt>Fuel / hour</dt>
+                                <dd>{{ $reviewHours > 0 ? number_format($flight->burned_fuel / $reviewHours) . ' ' . $reviewFuelUnit . '/h' : '—' }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="d-flex gap-2 flex-shrink-0">
+                        <form class="flex-fill" action="{{ route('flightreviewaccept', $flight->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-success w-100 d-inline-flex align-items-center justify-content-center gap-2 text-nowrap">
+                                <i class="bi bi-check-lg" aria-hidden="true"></i> Accept PIREP
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-outline-danger flex-fill d-inline-flex align-items-center justify-content-center gap-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            <i class="bi bi-x-lg" aria-hidden="true"></i> Reject…
+                        </button>
+                    </div>
+                </div>
+            </section>
         @elseif($flight->status_id == 1)
             <div class="alert alert-warning border-0 shadow-sm d-flex align-items-start gap-3 mb-4" role="status">
                 <i class="bi bi-hourglass-split fs-4" aria-hidden="true"></i>
                 <div>
                     <h2 class="alert-heading h6 fw-bold mb-1">Awaiting review</h2>
-                    <p class="small mb-0">
-                        @if($canReview)
-                            Approve or reject this PIREP to complete the review.
-                        @else
-                            A dispatcher or manager of {{ $flight->airline->name }} will review this PIREP. Its block time counts towards logged hours once accepted.
-                        @endif
-                    </p>
+                    <p class="small mb-0">A dispatcher or manager of {{ $flight->airline->name }} will review this PIREP. Its block time counts towards logged hours once accepted.</p>
                 </div>
             </div>
         @endif
@@ -214,6 +216,15 @@
                             <span class="text-secondary">· {{ $flight->aircraft->full_type }}</span>
                         </span>
                     </div>
+                    @if($flight->reviewed_at && in_array((int) $flight->status_id, [2, 3], true))
+                        <div>
+                            <i class="bi {{ $flight->status_id == 2 ? 'bi-check-circle' : 'bi-x-circle' }}" aria-hidden="true"></i>
+                            <span>
+                                <span class="fw-semibold">{{ $flight->status_id == 2 ? 'Accepted' : 'Rejected' }} by {{ $flight->reviewer?->name ?? 'a deleted user' }}</span>
+                                <span class="text-secondary">· {{ $flight->reviewed_at->utc()->format('Y-m-d H:i') }}Z</span>
+                            </span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>
@@ -246,4 +257,37 @@
         </div> </div>
 </div>
 
+@if($flight->status_id == 1 && $canReview)
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content border-0 shadow" action="{{ route('flightreviewreject', $flight->id) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="rejectModalLabel">Reject PIREP {{ $flight->full_flight_number }}</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="rejection_remarks" class="form-label fw-semibold">Reason for {{ $flight->pilot_name }}</label>
+                    <textarea class="form-control @error('rejection_remarks') is-invalid @enderror" id="rejection_remarks" name="rejection_remarks" rows="4" maxlength="1000" required aria-describedby="rejection_remarks_help">{{ old('rejection_remarks') }}</textarea>
+                    @error('rejection_remarks')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <div id="rejection_remarks_help" class="form-text">The pilot sees this reason. The flight's block time won't count towards their hours.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger fw-semibold">Reject PIREP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if($errors->has('rejection_remarks'))
+        @push('scripts')
+            <script>
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('rejectModal')).show();
+            </script>
+        @endpush
+    @endif
+@endif
 @endsection

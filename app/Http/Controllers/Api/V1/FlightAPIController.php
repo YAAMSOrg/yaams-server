@@ -67,7 +67,7 @@ class FlightAPIController extends Controller
      *       "onlineNetwork": 1,
      *       "status": {"id": 2, "name": "Accepted"},
      *       "remarks": null,
-     *       "rejectionRemarks": null,
+     *       "rejectionRemarks": null, "reviewedBy": null, "reviewedAt": null,
      *       "createdAt": "2026-07-11T11:35:00.000000Z",
      *       "updatedAt": "2026-07-11T11:40:00.000000Z"
      *     }
@@ -80,7 +80,7 @@ class FlightAPIController extends Controller
      */
     public function index(ListFlightsRequest $request, Airline $airline)
     {
-        $query = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
+        $query = Flight::with(['airline', 'aircraft', 'pilot', 'status', 'reviewer'])
             ->where('pilot_id', $request->user()->id)
             ->where('airline_id', $airline->id);
 
@@ -129,7 +129,7 @@ class FlightAPIController extends Controller
      *     "onlineNetwork": 1,
      *     "status": {"id": 1, "name": "Pending"},
      *     "remarks": null,
-     *     "rejectionRemarks": null,
+     *     "rejectionRemarks": null, "reviewedBy": null, "reviewedAt": null,
      *     "createdAt": "2026-07-11T11:35:00.000000Z",
      *     "updatedAt": "2026-07-11T11:35:00.000000Z"
      *   }
@@ -170,7 +170,7 @@ class FlightAPIController extends Controller
             ->event('pirep_filed')
             ->log('Filed PIREP ' . $flight->full_flight_number);
 
-        return (new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status'])))
+        return (new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status', 'reviewer'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -212,7 +212,7 @@ class FlightAPIController extends Controller
      *       "onlineNetwork": 1,
      *       "status": {"id": 1, "name": "Pending"},
      *       "remarks": null,
-     *       "rejectionRemarks": null,
+     *       "rejectionRemarks": null, "reviewedBy": null, "reviewedAt": null,
      *       "createdAt": "2026-07-11T14:30:00.000000Z",
      *       "updatedAt": "2026-07-11T14:30:00.000000Z"
      *     }
@@ -224,7 +224,7 @@ class FlightAPIController extends Controller
      */
     public function reviewList(ListReviewFlightsRequest $request, Airline $airline)
     {
-        $query = Flight::with(['airline', 'aircraft', 'pilot', 'status'])
+        $query = Flight::with(['airline', 'aircraft', 'pilot', 'status', 'reviewer'])
             ->where('airline_id', $airline->id)
             ->where('status_id', 1);
 
@@ -249,7 +249,7 @@ class FlightAPIController extends Controller
      *     "departureIcao": "EGLL",
      *     "arrivalIcao": "EDDF",
      *     "status": {"id": 2, "name": "Accepted"},
-     *     "rejectionRemarks": null
+     *     "rejectionRemarks": null, "reviewedBy": null, "reviewedAt": null
      *   }
      * }
      * @response 403 {"message": "This action is unauthorized."}
@@ -259,7 +259,7 @@ class FlightAPIController extends Controller
     {
         $this->authorize('review', $flight);
 
-        $flight->status_id = 2;
+        $flight->recordReview($request->user(), 2);
         $flight->save();
 
         // Notify the pilot (in-app + email). Channels live in PirepAccepted::via().
@@ -272,7 +272,7 @@ class FlightAPIController extends Controller
             ->event('pirep_accepted')
             ->log('Accepted PIREP ' . $flight->full_flight_number);
 
-        return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status']));
+        return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status', 'reviewer']));
     }
 
     /**
@@ -285,7 +285,7 @@ class FlightAPIController extends Controller
      *
      * @urlParam flight int required The flight ID. Example: 43
      *
-     * @bodyParam rejection_remarks string Reason shown to the pilot. Example: Cruise altitude above aircraft ceiling.
+     * @bodyParam rejection_remarks string required Reason shown to the pilot (max. 1000 characters). Example: Cruise altitude above aircraft ceiling.
      *
      * @response 200 {
      *   "data": {
@@ -296,11 +296,12 @@ class FlightAPIController extends Controller
      *     "departureIcao": "EGLL",
      *     "arrivalIcao": "EDDF",
      *     "status": {"id": 3, "name": "Rejected"},
-     *     "rejectionRemarks": "Cruise altitude above aircraft ceiling."
+     *     "rejectionRemarks": "Cruise altitude above aircraft ceiling.", "reviewedBy": null, "reviewedAt": null
      *   }
      * }
      * @response 403 {"message": "This action is unauthorized."}
      * @response status=403 scenario="airline suspended" {"message": "Lufthansa Virtual has been suspended by the instance administrator and is read-only."}
+     * @response 422 {"message": "The rejection remarks field is required.", "errors": {"rejection_remarks": ["The rejection remarks field is required."]}}
      */
     public function reject(Request $request, Flight $flight)
     {
@@ -308,12 +309,13 @@ class FlightAPIController extends Controller
 
         $wasPending = $flight->status_id === 1;
 
-        $flight->status_id = 3;
+        // The pilot always learns why
+        $validated = $request->validate([
+            'rejection_remarks' => ['required', 'string', 'max:1000'],
+        ]);
 
-        if ($request->has('rejection_remarks')) {
-            $flight->rejection_remarks = $request->input('rejection_remarks');
-        }
-
+        $flight->recordReview($request->user(), 3);
+        $flight->rejection_remarks = $validated['rejection_remarks'];
         $flight->save();
 
         // Location continuity: undo the movement from filing, unless a later flight has already moved the airframe on
@@ -333,6 +335,6 @@ class FlightAPIController extends Controller
             ->event('pirep_rejected')
             ->log('Rejected PIREP ' . $flight->full_flight_number);
 
-        return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status']));
+        return new FlightResource($flight->load(['airline', 'aircraft', 'pilot', 'status', 'reviewer']));
     }
 }

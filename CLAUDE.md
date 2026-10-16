@@ -226,6 +226,15 @@ Two safeguards: `AirlineController::updateSettings()` refuses to switch review *
 
 When a PIREP is filed (both web and API paths) and the airline requires PIREP review (see above), `event(new FlightFiled($flight))` is dispatched. The `FlightFiledNotification` listener (`app/Listeners/FlightFiledNotification.php`) resolves the airline's reviewers (per-airline `Dispatcher`/`Manager`, excluding the filing pilot) and hands them to Laravel's notification system via `Notification::send($reviewers, new PirepFiled($flight))`.
 
+### PIREP Review Decisions
+
+Reviewers decide pending PIREPs from the review panel on the PIREP detail page (`flights/detail.blade.php`, shown only when `can('review', $flight)` and the flight is pending; pilots see an "Awaiting review" note instead):
+
+- **Who and when** - `flights.reviewed_by` (FK users, null on delete) + `reviewed_at`, written only through `Flight::recordReview($reviewer, $statusId)` (not fillable) by both web and API accept/reject. Shown as "Accepted/Rejected by X" on the detail page, exposed as `reviewedBy` / `reviewedAt` in `FlightResource`, included in the GDPR export (`pirep_reviews`)
+- **Reason required** - rejecting needs `rejection_remarks` (max. 1000) on the web and in the API (422 otherwise), so the pilot always learns why
+- **Next PIREP** - after a web decision the reviewer lands on `Flight::nextPendingFor($reviewer)` (oldest pending PIREP of the airline they may review), or the review queue when none are left
+- **Plausibility facts** - the panel shows block time, groundspeed (distance / block time) and fuel per block hour; facts only, no thresholds
+
 ### Notifications (Multi-Channel)
 
 Notifications use Laravel's native notification system so delivery channels are pluggable without touching the trigger/listener logic. A notification class (e.g. `app/Notifications/PirepFiled.php`) declares its channels in `via()` — `database` is always included, `mail` is appended only when the recipient's `email_notifications` preference is on (see User Account Settings) — and renders each with a matching method (`toArray()`, `toMail()`).

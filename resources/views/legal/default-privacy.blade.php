@@ -18,7 +18,7 @@ The operator has not published a contact address yet.
 
 **Account data** - your name, e-mail address and password (stored only as a one-way hash). If you enable two-factor authentication, an encrypted secret and recovery codes are stored too. We need this to provide your account (Art. 6(1)(b) GDPR).
 
-**Airline and flight data** - your airline memberships and roles, and the flight reports (PIREPs) you file: flight numbers, aircraft, departure and arrival airports, times, fuel, route and remarks. This is the core purpose of the service (Art. 6(1)(b) GDPR). Members of your airline can see the flights you file.
+**Airline and flight data** - your airline memberships and roles, and the flight reports (PIREPs) you file: flight numbers, aircraft, departure and arrival airports, times, fuel, route and remarks. When you review a PIREP as a dispatcher or manager, your name and the time of the decision are stored with it and shown to the airline. This is the core purpose of the service (Art. 6(1)(b) GDPR). Members of your airline can see the flights you file.
 
 **Screenshots** - flight-simulator screenshots you upload for aircraft. Uploaded images are re-encoded and their metadata (EXIF) is removed. They are visible to members of the airline.
 
