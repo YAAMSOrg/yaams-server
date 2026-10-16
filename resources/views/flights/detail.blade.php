@@ -153,137 +153,78 @@
             </div>
         @endif
 
-        <div class="row g-3 mb-4">
-            @php
-                $fuelUnit = session('activeairline')->unit_is_lbs ? 'lbs' : 'kg';
-                $stats = [
-                    ['icon' => 'stopwatch',   'label' => 'Duration',     'value' => $flight->flight_duration],
-                    ['icon' => 'geo-alt',     'label' => 'Distance',     'value' => ($flight->raw_distance !== null ? number_format($flight->raw_distance) : '—') . ' nm'],
-                    ['icon' => 'fuel-pump',   'label' => 'Fuel Burned',  'value' => number_format($flight->burned_fuel) . ' ' . $fuelUnit],
-                    ['icon' => 'arrows-expand', 'label' => 'Cruise Alt', 'value' => 'FL' . round($flight->crzalt / 100)],
-                ];
-            @endphp
-            @foreach ($stats as $stat)
-                <div class="col-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center gap-3 py-3 yaams-flight-stat">
-                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary flex-shrink-0" style="width: 44px; height: 44px;">
-                                <i class="bi bi-{{ $stat['icon'] }} fs-5" aria-hidden="true"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <span class="text-muted small text-uppercase d-block">{{ $stat['label'] }}</span>
-                                <span class="fw-bold text-dark font-monospace text-truncate d-block">{{ $stat['value'] }}</span>
-                            </div>
-                        </div>
+        @php
+            $fuelUnit = session('activeairline')->unit_is_lbs ? 'lbs' : 'kg';
+            $blockOff = \Illuminate\Support\Carbon::parse($flight->blockoff);
+            $blockOn = \Illuminate\Support\Carbon::parse($flight->blockon);
+            $blockMinutes = (int) $flight->flight_duration_minutes;
+        @endphp
+        <section class="card border-0 shadow-sm mb-4" aria-labelledby="flight-record-heading">
+            <div class="card-body">
+                <h2 id="flight-record-heading" class="visually-hidden">Flight record</h2>
+                <dl class="yaams-flight-facts">
+                    <div>
+                        <dt>Date</dt>
+                        <dd>{{ $blockOff->format('Y-m-d') }}</dd>
+                    </div>
+                    <div>
+                        <dt>Block off</dt>
+                        <dd>{{ $blockOff->format('H:i') }}Z</dd>
+                    </div>
+                    <div>
+                        <dt>Block on</dt>
+                        <dd>{{ $blockOn->format('H:i') }}Z</dd>
+                    </div>
+                    <div>
+                        <dt>Block time</dt>
+                        <dd>{{ intdiv($blockMinutes, 60) }}:{{ sprintf('%02d', $blockMinutes % 60) }}</dd>
+                    </div>
+                    <div>
+                        <dt>Distance</dt>
+                        <dd>{{ $flight->raw_distance !== null ? number_format($flight->raw_distance) . ' nm' : '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Fuel burned</dt>
+                        <dd>{{ number_format($flight->burned_fuel) }} {{ $fuelUnit }}</dd>
+                    </div>
+                    <div>
+                        <dt>Cruise</dt>
+                        <dd title="{{ number_format($flight->crzalt) }} ft">FL{{ str_pad((string) round($flight->crzalt / 100), 3, '0', STR_PAD_LEFT) }}</dd>
+                    </div>
+                    <div>
+                        <dt>Network</dt>
+                        <dd>{{ $flight->online_network?->networkname ?? 'Offline' }}</dd>
+                    </div>
+                </dl>
+
+                <div class="yaams-flight-crew">
+                    <div>
+                        <i class="bi bi-person-badge" aria-hidden="true"></i>
+                        <span>
+                            <span class="fw-semibold">{{ $flight->pilot_name }}</span>
+                            @if($flight->pilot)
+                                <span class="text-secondary">· {{ $flight->pilot->logged_flights($flight->airline) }} accepted flights</span>
+                            @endif
+                        </span>
+                    </div>
+                    <div>
+                        <i class="bi bi-airplane" aria-hidden="true"></i>
+                        <span>
+                            <a class="fw-semibold font-monospace" href="{{ route('viewaircraft', $flight->aircraft->id) }}">{{ $flight->aircraft->registration }}</a>
+                            <span class="text-secondary">· {{ $flight->aircraft->full_type }}</span>
+                        </span>
                     </div>
                 </div>
-            @endforeach
-        </div>
+            </div>
+        </section>
 
         <div class="row g-4">
-
-            <div class="col-md-7">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
-                        <i class="bi bi-journal-text text-primary" aria-hidden="true"></i>
-                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase">Flight Log Metrics</h2>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-borderless align-middle mb-0">
-                                <tbody class="fs-6">
-                                    <tr class="border-bottom">
-                                        <td class="py-2 text-muted w-40"><i class="bi bi-calendar3 me-2" aria-hidden="true"></i>Flight Date</td>
-                                        <td class="py-2 fw-semibold text-dark">{{ $flight->flight_date }}</td>
-                                    </tr>
-                                    <tr class="border-bottom">
-                                        <td class="py-2 text-muted"><i class="bi bi-alt me-2" aria-hidden="true"></i>Cruise Altitude</td>
-                                        <td class="py-2 font-monospace fw-semibold text-dark">{{ number_format($flight->crzalt) }} ft (FL{{ round($flight->crzalt / 100) }})</td>
-                                    </tr>
-                                    <tr class="border-bottom">
-                                        <td class="py-2 text-muted"><i class="bi bi-fuel-pump me-2" aria-hidden="true"></i>Fuel Burned</td>
-                                        <td class="py-2 font-monospace fw-semibold text-dark">{{ number_format($flight->burned_fuel) }} {{ session('activeairline')->unit_is_lbs ? 'lbs' : 'kg' }}</td>
-                                    </tr>
-                                    <tr class="border-bottom">
-                                        <td class="py-2 text-muted"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Block Off</td>
-                                        <td class="py-2 font-monospace fw-semibold text-dark">{{ $flight->blockoff }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-muted"><i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Block On</td>
-                                        <td class="py-2 font-monospace fw-semibold text-dark">{{ $flight->blockon }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-5">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
-                        <i class="bi bi-person-badge text-primary" aria-hidden="true"></i>
-                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase">Pilot Information</h2>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-borderless align-middle mb-0 small">
-                                <tbody>
-                                    <tr>
-                                        <td class="py-2 text-muted">Name</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-muted">Accepted flights</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot ? $flight->pilot->logged_flights($flight->airline) : '—' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-muted">Member since</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot ? $flight->pilot->created_at->format('M j, Y') : '—' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
-                        <i class="bi bi-airplane-fill text-primary" aria-hidden="true"></i>
-                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase">Aircraft Information</h2>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="p-3 bg-light rounded border border-dashed mb-3">
-                            <span class="text-muted small d-block mb-1">Registration & Type</span>
-                            <h3 class="h5 font-monospace fw-bold text-dark mb-1"><a class="text-decoration-none" href="{{ route('viewaircraft', $flight->aircraft->id) }}">{{ $flight->aircraft->registration }}</a></h3>
-                            <p class="text-secondary small mb-0">{{ $flight->aircraft->full_type }}</p>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-sm table-borderless align-middle mb-0 small">
-                                <tbody>
-                                    <tr>
-                                        <td class="py-2 text-muted">In service since</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->aircraft->in_service_since ?? 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-map text-primary" aria-hidden="true"></i>
                             <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase">ATC Route & Remarks</h2>
-                        </div>
-                        <div>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-2 py-1">
-                                <i class="bi bi-globe me-1" aria-hidden="true"></i>{{ $flight->online_network?->networkname ?? 'Offline' }}
-                            </span>
                         </div>
                     </div>
                     <div class="card-body pt-0">
