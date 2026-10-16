@@ -86,16 +86,16 @@
                             <span class="yaams-flight-hero__callsign">Callsign <span class="font-monospace">{{ $flight->full_icao_callsign }}</span></span>
                         </h1>
                         
-                        <div class="d-flex align-items-center gap-3 gap-md-4 my-3">
-                            <div class="text-center flex-shrink-0">
-                                <span class="d-block display-6 mb-0 fw-bold font-monospace lh-1">{{ $flight->departure_icao }}</span>
-                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;" title="{{ $flight->departure_airport?->name }}">{{ $flight->departure_airport?->name ?? 'Unknown airport' }}</span>
+                        <div class="d-flex align-items-center gap-2 gap-sm-3 gap-md-4 my-3">
+                            <div class="text-center yaams-flight-hero__endpoint">
+                                <span class="d-block yaams-flight-hero__icao fw-bold font-monospace lh-1">{{ $flight->departure_icao }}</span>
+                                <span class="small text-white-50 text-truncate d-block mt-1" title="{{ $flight->departure_airport?->name }}">{{ $flight->departure_airport?->name ?? 'Unknown airport' }}</span>
                             </div>
 
-                            <div class="flex-grow-1 px-1 text-center" style="min-width: 80px;">
-                                <div class="d-flex justify-content-center gap-3 mb-2 small text-white-50 font-monospace">
-                                    <span><i class="bi bi-clock me-1" aria-hidden="true"></i>{{ $flight->flight_duration }}</span>
-                                    <span><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ $flight->raw_distance !== null ? number_format($flight->raw_distance) : '—' }} nm</span>
+                            <div class="flex-grow-1 px-1 text-center yaams-flight-hero__leg">
+                                <div class="d-flex flex-wrap justify-content-center column-gap-3 mb-2 small text-white-50 font-monospace">
+                                    <span class="text-nowrap"><i class="bi bi-clock me-1" aria-hidden="true"></i>{{ $flight->flight_duration }}</span>
+                                    <span class="text-nowrap"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ $flight->raw_distance !== null ? number_format($flight->raw_distance) : '—' }} nm</span>
                                 </div>
                                 <span class="visually-hidden">to</span>
                                 <div class="route-line position-relative">
@@ -103,9 +103,9 @@
                                 </div>
                             </div>
 
-                            <div class="text-center flex-shrink-0">
-                                <span class="d-block display-6 mb-0 fw-bold font-monospace lh-1">{{ $flight->arrival_icao }}</span>
-                                <span class="small text-white-50 text-truncate d-block mt-1" style="max-width: 150px;" title="{{ $flight->arrival_airport?->name }}">{{ $flight->arrival_airport?->name ?? 'Unknown airport' }}</span>
+                            <div class="text-center yaams-flight-hero__endpoint">
+                                <span class="d-block yaams-flight-hero__icao fw-bold font-monospace lh-1">{{ $flight->arrival_icao }}</span>
+                                <span class="small text-white-50 text-truncate d-block mt-1" title="{{ $flight->arrival_airport?->name }}">{{ $flight->arrival_airport?->name ?? 'Unknown airport' }}</span>
                             </div>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
             @foreach ($stats as $stat)
                 <div class="col-6 col-lg-3">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center gap-3 py-3">
+                        <div class="card-body d-flex align-items-center gap-3 py-3 yaams-flight-stat">
                             <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary flex-shrink-0" style="width: 44px; height: 44px;">
                                 <i class="bi bi-{{ $stat['icon'] }} fs-5" aria-hidden="true"></i>
                             </div>

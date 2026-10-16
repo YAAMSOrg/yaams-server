@@ -881,3 +881,60 @@
 .w-40 {
     width: 40%;
 }
+
+/* Hero route row: endpoints shrink and truncate their airport names instead of overflowing on phones. */
+.yaams-flight-hero__endpoint {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.yaams-flight-hero__endpoint > span:last-child {
+    max-width: 150px;
+}
+
+.yaams-flight-hero__icao {
+    font-size: 1.75rem;
+}
+
+.yaams-flight-hero__leg {
+    min-width: 64px;
+}
+
+@media (min-width: 576px) {
+    .yaams-flight-hero__icao {
+        font-size: calc(1.375rem + 1.5vw);
+    }
+
+    .yaams-flight-hero__leg {
+        min-width: 80px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .yaams-flight-hero__icao {
+        font-size: 2.5rem;
+    }
+}
+
+.yaams-flight-hero__icao {
+    white-space: nowrap;
+}
+
+/* Narrow phones (iPhone SE and similar): tighter hero, stat tiles drop their icon so labels fit. */
+@media (max-width: 374.98px) {
+    .yaams-flight-hero__icao {
+        font-size: 1.4rem;
+    }
+
+    .yaams-flight-hero__leg {
+        min-width: 48px;
+    }
+
+    .yaams-flight-stat {
+        padding-inline: 0.75rem;
+    }
+
+    .yaams-flight-stat > div:first-child {
+        display: none !important;
+    }
+}
