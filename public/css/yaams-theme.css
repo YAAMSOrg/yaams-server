@@ -793,3 +793,22 @@
     /* Registration only on a phone, the type is on the PIREP page */
     .yaams-logbook__aircraft .yaams-logbook__sub { display: none; }
 }
+
+/* Flight detail hero: the flight number is the page heading, the ATC callsign its quieter companion. */
+.yaams-flight-hero__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.yaams-flight-hero__callsign {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+}
