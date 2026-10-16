@@ -38,6 +38,11 @@ class FlightResource extends JsonResource
             ],
             'remarks' => $this->remarks,
             'rejectionRemarks' => $this->rejection_remarks,
+            'reviewedBy' => $this->reviewed_by === null ? null : [
+                'id' => $this->reviewed_by,
+                'name' => $this->reviewer?->name,
+            ],
+            'reviewedAt' => $this->reviewed_at,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at
         ];

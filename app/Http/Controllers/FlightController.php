@@ -477,8 +477,7 @@ class FlightController extends Controller
             return redirect()->route('flightreviewindex')->with('error', 'You cannot accept your own PIREP.');
         }
 
-        // Status auf 'Accepted' setzen (Status ID 2)
-        $flight->status_id = 2; 
+        $flight->recordReview(auth()->user(), 2);
         $flight->save();
 
         // Notify the pilot (in-app + email). Channels live in PirepAccepted::via().
@@ -491,7 +490,22 @@ class FlightController extends Controller
             ->event('pirep_accepted')
             ->log('Accepted PIREP ' . $flight->full_flight_number);
 
-        return redirect()->route('flightreviewindex')->with('success', 'Flight successfully approved.');
+        return $this->afterReview($flight, 'PIREP ' . $flight->full_flight_number . ' accepted.');
+    }
+
+    /**
+     * After a decision, open the next PIREP the reviewer may decide, or the
+     * review queue once none are left.
+     */
+    private function afterReview(Flight $flight, string $message)
+    {
+        $next = $flight->nextPendingFor(auth()->user());
+
+        if ($next) {
+            return redirect()->route('viewflight', $next)->with('success', $message . ' Next PIREP to review:');
+        }
+
+        return redirect()->route('flightreviewindex')->with('success', $message . ' No more PIREPs to review.');
     }
 
     public function rejectFlight(Request $request, Flight $flight)
@@ -518,14 +532,13 @@ class FlightController extends Controller
 
         $wasPending = $flight->status_id === 1;
 
-        // Status auf 'Rejected' setzen (Status ID 3)
-        $flight->status_id = 3;
+        // The pilot always learns why
+        $validated = $request->validate([
+            'rejection_remarks' => ['required', 'string', 'max:1000'],
+        ]);
 
-        // Optional: Rejection Remarks speichern
-        if ($request->has('rejection_remarks')) {
-            $flight->rejection_remarks = $request->input('rejection_remarks');
-        }
-
+        $flight->recordReview(auth()->user(), 3);
+        $flight->rejection_remarks = $validated['rejection_remarks'];
         $flight->save();
 
         // Location continuity: undo the movement from filing, unless a later flight has already moved the airframe on
@@ -545,6 +558,6 @@ class FlightController extends Controller
             ->event('pirep_rejected')
             ->log('Rejected PIREP ' . $flight->full_flight_number);
 
-        return redirect()->route('flightreviewindex')->with('success', 'Flight has been rejected.');
+        return $this->afterReview($flight, 'PIREP ' . $flight->full_flight_number . ' rejected.');
     }
 }

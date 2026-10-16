@@ -20,47 +20,14 @@
             @php
                 $canReview = auth()->user()->can('review', $flight);
             @endphp
-            @if($flight->status_id == 1 && $canReview)
-                <div class="d-flex gap-2">
-                    <form action="{{ route('flightreviewaccept', $flight->id) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-sm px-3 d-inline-flex align-items-center gap-1 shadow-sm">
-                            <i class="bi bi-check-lg" aria-hidden="true"></i> Approve PIREP
-                        </button>
-                    </form>
-                    
-                    <button type="button" class="btn btn-danger btn-sm px-3 d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                        <i class="bi bi-x-lg" aria-hidden="true"></i> Reject PIREP
-                    </button>
-                </div>
-
-                <!-- Reject Modal -->
-                <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content border-0 shadow">
-                            <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title fw-bold" id="rejectModalLabel">Reject PIREP #{{ $flight->id }}</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form action="{{ route('flightreviewreject', $flight->id) }}" method="POST">
-                                @csrf
-                                <div class="modal-body text-dark">
-                                    <p>Are you sure you want to reject this flight? You can optionally provide a reason below.</p>
-                                    <div class="mb-3">
-                                        <label for="rejection_remarks" class="form-label small fw-bold text-uppercase">Reason (optional)</label>
-                                        <textarea class="form-control" name="rejection_remarks" id="rejection_remarks" rows="3" placeholder="e.g. Invalid fuel consumption, wrong aircraft type..."></textarea>
-                                    </div>
-                                </div>
-                                <div class="modal-footer bg-light">
-                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-danger btn-sm px-4 fw-bold">Confirm Rejection</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @endif
         </div>
+
+        @if(session('success'))
+            <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 mb-4" role="status">
+                <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
 
         @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
@@ -137,153 +104,138 @@
                     <p class="small mb-0 mt-1">Its block time doesn't count towards logged hours.</p>
                 </div>
             </div>
+        @elseif($flight->status_id == 1 && $canReview)
+            @php
+                $reviewMinutes = (int) $flight->flight_duration_minutes;
+                $reviewHours = $reviewMinutes / 60;
+                $reviewFuelUnit = $flight->airline->unit_is_lbs ? 'lbs' : 'kg';
+            @endphp
+            <section class="card shadow-sm mb-4 yaams-review-panel" aria-labelledby="review-heading">
+                <div class="card-body d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
+                    <div class="flex-grow-1">
+                        <h2 id="review-heading" class="h6 fw-bold mb-1">Review this PIREP</h2>
+                        <p class="small text-secondary mb-3">
+                            Filed {{ $flight->created_at?->utc()->format('Y-m-d H:i') }}Z by {{ $flight->pilot_name }}
+                        </p>
+                        <dl class="yaams-flight-facts yaams-review-panel__facts">
+                            <div>
+                                <dt>Block time</dt>
+                                <dd>{{ intdiv($reviewMinutes, 60) }}:{{ sprintf('%02d', $reviewMinutes % 60) }}</dd>
+                            </div>
+                            <div>
+                                <dt title="Distance divided by block time">Groundspeed</dt>
+                                <dd>{{ $reviewHours > 0 && $flight->raw_distance !== null ? number_format($flight->raw_distance / $reviewHours) . ' kt' : '—' }}</dd>
+                            </div>
+                            <div>
+                                <dt>Fuel / hour</dt>
+                                <dd>{{ $reviewHours > 0 ? number_format($flight->burned_fuel / $reviewHours) . ' ' . $reviewFuelUnit . '/h' : '—' }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="d-flex gap-2 flex-shrink-0">
+                        <form class="flex-fill" action="{{ route('flightreviewaccept', $flight->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-success w-100 d-inline-flex align-items-center justify-content-center gap-2 text-nowrap">
+                                <i class="bi bi-check-lg" aria-hidden="true"></i> Accept PIREP
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-outline-danger flex-fill d-inline-flex align-items-center justify-content-center gap-2 text-nowrap" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            <i class="bi bi-x-lg" aria-hidden="true"></i> Reject…
+                        </button>
+                    </div>
+                </div>
+            </section>
         @elseif($flight->status_id == 1)
             <div class="alert alert-warning border-0 shadow-sm d-flex align-items-start gap-3 mb-4" role="status">
                 <i class="bi bi-hourglass-split fs-4" aria-hidden="true"></i>
                 <div>
                     <h2 class="alert-heading h6 fw-bold mb-1">Awaiting review</h2>
-                    <p class="small mb-0">
-                        @if($canReview)
-                            Approve or reject this PIREP to complete the review.
-                        @else
-                            A dispatcher or manager of {{ $flight->airline->name }} will review this PIREP. Its block time counts towards logged hours once accepted.
-                        @endif
-                    </p>
+                    <p class="small mb-0">A dispatcher or manager of {{ $flight->airline->name }} will review this PIREP. Its block time counts towards logged hours once accepted.</p>
                 </div>
             </div>
         @endif
 
-        <div class="row g-3 mb-4">
-            @php
-                $fuelUnit = session('activeairline')->unit_is_lbs ? 'lbs' : 'kg';
-                $stats = [
-                    ['icon' => 'stopwatch',   'label' => 'Duration',     'value' => $flight->flight_duration],
-                    ['icon' => 'geo-alt',     'label' => 'Distance',     'value' => ($flight->raw_distance !== null ? number_format($flight->raw_distance) : '—') . ' nm'],
-                    ['icon' => 'fuel-pump',   'label' => 'Fuel Burned',  'value' => number_format($flight->burned_fuel) . ' ' . $fuelUnit],
-                    ['icon' => 'arrows-expand', 'label' => 'Cruise Alt', 'value' => 'FL' . round($flight->crzalt / 100)],
-                ];
-            @endphp
-            @foreach ($stats as $stat)
-                <div class="col-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center gap-3 py-3 yaams-flight-stat">
-                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary flex-shrink-0" style="width: 44px; height: 44px;">
-                                <i class="bi bi-{{ $stat['icon'] }} fs-5" aria-hidden="true"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <span class="text-muted small text-uppercase d-block">{{ $stat['label'] }}</span>
-                                <span class="fw-bold text-dark font-monospace text-truncate d-block">{{ $stat['value'] }}</span>
-                            </div>
-                        </div>
+        @php
+            $fuelUnit = session('activeairline')->unit_is_lbs ? 'lbs' : 'kg';
+            $blockOff = \Illuminate\Support\Carbon::parse($flight->blockoff);
+            $blockOn = \Illuminate\Support\Carbon::parse($flight->blockon);
+            $blockMinutes = (int) $flight->flight_duration_minutes;
+        @endphp
+        <section class="card border-0 shadow-sm mb-4" aria-labelledby="flight-record-heading">
+            <div class="card-body">
+                <h2 id="flight-record-heading" class="visually-hidden">Flight record</h2>
+                <dl class="yaams-flight-facts">
+                    <div>
+                        <dt>Date</dt>
+                        <dd>{{ $blockOff->format('Y-m-d') }}</dd>
                     </div>
+                    <div>
+                        <dt>Block off</dt>
+                        <dd>{{ $blockOff->format('H:i') }}Z</dd>
+                    </div>
+                    <div>
+                        <dt>Block on</dt>
+                        <dd>{{ $blockOn->format('H:i') }}Z</dd>
+                    </div>
+                    <div>
+                        <dt>Block time</dt>
+                        <dd>{{ intdiv($blockMinutes, 60) }}:{{ sprintf('%02d', $blockMinutes % 60) }}</dd>
+                    </div>
+                    <div>
+                        <dt>Distance</dt>
+                        <dd>{{ $flight->raw_distance !== null ? number_format($flight->raw_distance) . ' nm' : '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Fuel burned</dt>
+                        <dd>{{ number_format($flight->burned_fuel) }} {{ $fuelUnit }}</dd>
+                    </div>
+                    <div>
+                        <dt>Cruise</dt>
+                        <dd title="{{ number_format($flight->crzalt) }} ft">FL{{ str_pad((string) round($flight->crzalt / 100), 3, '0', STR_PAD_LEFT) }}</dd>
+                    </div>
+                    <div>
+                        <dt>Network</dt>
+                        <dd>{{ $flight->online_network?->networkname ?? 'Offline' }}</dd>
+                    </div>
+                </dl>
+
+                <div class="yaams-flight-crew">
+                    <div>
+                        <i class="bi bi-person-badge" aria-hidden="true"></i>
+                        <span>
+                            <span class="fw-semibold">{{ $flight->pilot_name }}</span>
+                            @if($flight->pilot)
+                                <span class="text-secondary">· {{ $flight->pilot->logged_flights($flight->airline) }} accepted flights</span>
+                            @endif
+                        </span>
+                    </div>
+                    <div>
+                        <i class="bi bi-airplane" aria-hidden="true"></i>
+                        <span>
+                            <a class="fw-semibold font-monospace" href="{{ route('viewaircraft', $flight->aircraft->id) }}">{{ $flight->aircraft->registration }}</a>
+                            <span class="text-secondary">· {{ $flight->aircraft->full_type }}</span>
+                        </span>
+                    </div>
+                    @if($flight->reviewed_at && in_array((int) $flight->status_id, [2, 3], true))
+                        <div>
+                            <i class="bi {{ $flight->status_id == 2 ? 'bi-check-circle' : 'bi-x-circle' }}" aria-hidden="true"></i>
+                            <span>
+                                <span class="fw-semibold">{{ $flight->status_id == 2 ? 'Accepted' : 'Rejected' }} by {{ $flight->reviewer?->name ?? 'a deleted user' }}</span>
+                                <span class="text-secondary">· {{ $flight->reviewed_at->utc()->format('Y-m-d H:i') }}Z</span>
+                            </span>
+                        </div>
+                    @endif
                 </div>
-            @endforeach
-        </div>
+            </div>
+        </section>
 
         <div class="row g-4">
-
-            <div class="col-md-7">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
-                        <i class="bi bi-journal-text text-primary" aria-hidden="true"></i>
-                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase">Flight Log Metrics</h2>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-borderless align-middle mb-0">
-                                <tbody class="fs-6">
-                                    <tr class="border-bottom">
-                                        <td class="py-2 text-muted w-40"><i class="bi bi-calendar3 me-2" aria-hidden="true"></i>Flight Date</td>
-                                        <td class="py-2 fw-semibold text-dark">{{ $flight->flight_date }}</td>
-                                    </tr>
-                                    <tr class="border-bottom">
-                                        <td class="py-2 text-muted"><i class="bi bi-alt me-2" aria-hidden="true"></i>Cruise Altitude</td>
-                                        <td class="py-2 font-monospace fw-semibold text-dark">{{ number_format($flight->crzalt) }} ft (FL{{ round($flight->crzalt / 100) }})</td>
-                                    </tr>
-                                    <tr class="border-bottom">
-                                        <td class="py-2 text-muted"><i class="bi bi-fuel-pump me-2" aria-hidden="true"></i>Fuel Burned</td>
-                                        <td class="py-2 font-monospace fw-semibold text-dark">{{ number_format($flight->burned_fuel) }} {{ session('activeairline')->unit_is_lbs ? 'lbs' : 'kg' }}</td>
-                                    </tr>
-                                    <tr class="border-bottom">
-                                        <td class="py-2 text-muted"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Block Off</td>
-                                        <td class="py-2 font-monospace fw-semibold text-dark">{{ $flight->blockoff }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-muted"><i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Block On</td>
-                                        <td class="py-2 font-monospace fw-semibold text-dark">{{ $flight->blockon }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-5">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
-                        <i class="bi bi-person-badge text-primary" aria-hidden="true"></i>
-                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase">Pilot Information</h2>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-borderless align-middle mb-0 small">
-                                <tbody>
-                                    <tr>
-                                        <td class="py-2 text-muted">Name</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-muted">Accepted flights</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot ? $flight->pilot->logged_flights($flight->airline) : '—' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-muted">Member since</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->pilot ? $flight->pilot->created_at->format('M j, Y') : '—' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center gap-2">
-                        <i class="bi bi-airplane-fill text-primary" aria-hidden="true"></i>
-                        <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase">Aircraft Information</h2>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="p-3 bg-light rounded border border-dashed mb-3">
-                            <span class="text-muted small d-block mb-1">Registration & Type</span>
-                            <h3 class="h5 font-monospace fw-bold text-dark mb-1"><a class="text-decoration-none" href="{{ route('viewaircraft', $flight->aircraft->id) }}">{{ $flight->aircraft->registration }}</a></h3>
-                            <p class="text-secondary small mb-0">{{ $flight->aircraft->full_type }}</p>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-sm table-borderless align-middle mb-0 small">
-                                <tbody>
-                                    <tr>
-                                        <td class="py-2 text-muted">In service since</td>
-                                        <td class="py-2 fw-semibold text-dark text-end">{{ $flight->aircraft->in_service_since ?? 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3 border-bottom-0 d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-map text-primary" aria-hidden="true"></i>
                             <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase">ATC Route & Remarks</h2>
-                        </div>
-                        <div>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-2 py-1">
-                                <i class="bi bi-globe me-1" aria-hidden="true"></i>{{ $flight->online_network?->networkname ?? 'Offline' }}
-                            </span>
                         </div>
                     </div>
                     <div class="card-body pt-0">
@@ -305,4 +257,37 @@
         </div> </div>
 </div>
 
+@if($flight->status_id == 1 && $canReview)
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content border-0 shadow" action="{{ route('flightreviewreject', $flight->id) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="rejectModalLabel">Reject PIREP {{ $flight->full_flight_number }}</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="rejection_remarks" class="form-label fw-semibold">Reason for {{ $flight->pilot_name }}</label>
+                    <textarea class="form-control @error('rejection_remarks') is-invalid @enderror" id="rejection_remarks" name="rejection_remarks" rows="4" maxlength="1000" required aria-describedby="rejection_remarks_help">{{ old('rejection_remarks') }}</textarea>
+                    @error('rejection_remarks')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <div id="rejection_remarks_help" class="form-text">The pilot sees this reason. The flight's block time won't count towards their hours.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger fw-semibold">Reject PIREP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if($errors->has('rejection_remarks'))
+        @push('scripts')
+            <script>
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('rejectModal')).show();
+            </script>
+        @endpush
+    @endif
+@endif
 @endsection
