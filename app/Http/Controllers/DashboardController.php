@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Aircraft;
 use App\Models\Flight;
-use App\Models\Airline;
 
 
 class DashboardController extends Controller
 {
+    /** Relations every flight row on the dashboard renders. */
+    private const FLIGHT_RELATIONS = ['airline', 'aircraft', 'status', 'departure_airport', 'arrival_airport'];
 
     public function __construct()
     {
@@ -23,21 +22,39 @@ class DashboardController extends Controller
             return redirect()->route('portal');
         }
 
-        // Alternative approach:
-        // $airlineFlights = $currentActiveAirline->flights;
+        $user = auth()->user();
 
-        $airlineFlights = Flight::query()
-        ->orderBy('created_at', 'DESC')
-        ->where('airline_id', '=', $currentActiveAirline->id )
-        ->where('status_id', '=', 2)
+        // The pilot's own latest PIREPs in any state, so a pending or rejected
+        // report is visible right after login.
+        $myFlights = Flight::query()
+        ->with(self::FLIGHT_RELATIONS)
+        ->where('airline_id', '=', $currentActiveAirline->id)
+        ->where('pilot_id', '=', $user->id)
+        ->latest()
+        ->orderByDesc('id')
         ->limit(5)
         ->get();
 
-        $flightCount = auth()->user()->logged_flights($currentActiveAirline);
-        $flightHours = auth()->user()->logged_hours($currentActiveAirline);
+        $airlineFlights = Flight::query()
+        ->with([...self::FLIGHT_RELATIONS, 'pilot'])
+        ->where('airline_id', '=', $currentActiveAirline->id)
+        ->where('status_id', '=', 2)
+        ->latest()
+        ->orderByDesc('id')
+        ->limit(5)
+        ->get();
 
-        $notams = $currentActiveAirline->notams()->active()->latest()->get();
+        $flightCount = $user->logged_flights($currentActiveAirline);
+        $flightMinutes = $user->logged_minutes($currentActiveAirline);
 
-        return view('dashboard.index', ['flights' => $airlineFlights, 'flight_count' => $flightCount, 'flight_hours' => $flightHours, 'notams' => $notams]);
+        $notams = $currentActiveAirline->notams()->with('author')->active()->latest()->get();
+
+        return view('dashboard.index', [
+            'flights' => $airlineFlights,
+            'my_flights' => $myFlights,
+            'flight_count' => $flightCount,
+            'flight_minutes' => $flightMinutes,
+            'notams' => $notams,
+        ]);
     }
 }
