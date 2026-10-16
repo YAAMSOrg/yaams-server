@@ -1,7 +1,4 @@
 # AGENTS.md
-
-This file provides guidance to coding agents when working with code in this repository.
-
 ## Project Overview
 
 YAAMS (Yet Another Airline Management System) is a Laravel 13.x application providing a virtual airline management system with two parallel interfaces:
@@ -22,31 +19,12 @@ Seeder prints Sanctum API tokens for the three test users to stdout.
 ```bash
 docker exec yaams-dev-app php artisan test
 ```
-PHPUnit suite under `tests/` (Unit + Feature, incl. `tests/Feature/Api`). Tests run against SQLite `:memory:` (configured in `phpunit.xml`), so no database service is needed. Feature tests `use RefreshDatabase, SeedsDomain` (`tests/Concerns/SeedsDomain.php`) — the trait seeds the reference data `RefreshDatabase` does not (flight statuses, online networks, Spatie roles, a few airports) and provides the `memberOf($airline, $role)` builder. Model factories live in `database/factories/`. The suite focuses on the documented tricky rules (location continuity, PIREP review toggle, review authorization, aircraft lifecycle, invite redemption) and web-↔-API parity. CI runs it on every PR/push to `main` via `.github/workflows/tests.yml`.
+PHPUnit suite under `tests/` (Unit + Feature, incl. `tests/Feature/Api`). Tests run against SQLite `:memory:` (configured in `phpunit.xml`), so no database service is needed. 
 
 ## Architecture
-
-### Page Titles
-
-Every web page uses the single title scheme `{Page Title} - {Instance Name}`:
-
-- All five layouts (`app`, `landing`, `loginlayout`, `setuplayout`, `error` in `resources/views/layouts/`) render the tag themselves: `<title>@hasSection('title')@yield('title') - {{ $instanceName }}@else{{ $instanceName }}@endif</title>`
-- Views declare only the bare page name, e.g. `@section('title', 'Fleet Overview')` - never hardcode the app name, "YAAMS", or a separator in a view
-- `$instanceName` is `View::share`d in `AppServiceProvider` (the `app_name` setting, falling back to `config('app.name')`), so the configured instance name appears in every title
-- The public landing page (`home/index.blade.php`) sets no title section on purpose - it shows just the instance name
-
-### Page Backdrop
-
-All five layouts `@include('layouts._backdrop')` right after `<body>`: a fixed (`z-index: -1`) chart-grid background with a dashed flight route ending at the `bi-airplane-fill` icon. Styles live in `public/css/yaams-theme.css` (`.yaams-backdrop`). Only `loginlayout` passes `['animated' => true]` (route draws once on load, reduced motion respected); everywhere else it is static. The route's end point and the plane's `left`/`top` percentages must stay in sync.
-
 ### Error Pages
-
-Branded HTTP error pages live in `resources/views/errors/` and are picked up by Laravel automatically (no handler changes). JSON/API requests still get JSON errors; with `APP_DEBUG=true` a 500 still shows the debug page.
-
-- Each view `@extends('layouts.error')`, sets `@section('title', ...)` and renders the `<x-error-page>` component (`resources/views/components/error-page.blade.php`: logo, big status code, icon, heading, message, optional `actions` slot replacing the default "Go back" / "Back to homepage" buttons, optional `support-email` mailto)
-- Explicit views exist for every code Laravel ships a stock view for (`401`, `402`, `403`, `404`, `419`, `429`, `500`, `503`) - those stock views take priority over the `4xx`/`5xx` fallbacks, so a new code with a framework default needs its own view. `4xx`/`5xx` cover everything else
-- **Never depend on session, auth, CSRF, the navbar or a DB query** in `layouts/error` or the error views: a 404 for an unmatched route renders outside the `web` middleware group, and a 500 may be caused by the DB itself. Settings are read through `rescue(fn () => Setting::get(...), null, false)` (see `500`/`503`/`5xx`), and the layout uses `$instanceName ?? config('app.name')`
-- `403` shows the `abort()` / policy message when one is set; `404` and `5xx` never echo the exception message
+- Branded HTTP error pages live in `resources/views/errors/` and are picked up by Laravel automatically (no handler changes). JSON/API requests still get JSON errors; with `APP_DEBUG=true` a 500 still shows the debug page.
+-  Never depend on session, auth, CSRF
 
 ### Authentication & Authorization
 
@@ -59,34 +37,6 @@ Two role systems coexist — do not confuse them:
 - **Per-airline role** in `airline_memberships.role` (enum: `Pilot`, `Dispatcher`, `Manager`; the owner always has Manager rights): the low-level helpers are `User::airlineRole()`, `isMemberOf()`, `hasAirlineRole()`, `isManagerOf()`, `canReviewFlightsFor()` (they reuse a loaded `airlines` relation instead of querying).
 
 **`App\Policies\AirlinePolicy` is the single source of per-airline permissions** - web controllers, views, API requests and the API `abilities` all go through it (`$user->can('manageMembers', $airline)`). It is session-free (works under Sanctum) and does not check suspension (the `airline.writable` middleware does). Abilities: `create` (found an airline: Super-Admin or `allow_user_airline_creation`), `fileFlights` (member), `reviewFlights` (Dispatcher/Manager), `addAircraft`, `editAircraft`, `manageMembers`, `manageInviteCodes`, `manageNotams`, `editSettings` (Manager). Record-level rules stay in `AircraftPolicy` (owned + not retired) and `FlightPolicy::review()` (only Managers review their own PIREP). **A new per-airline permission is a new `AirlinePolicy` method plus an entry in `App\Support\Abilities::AIRLINE`** - never an inline role check.
-
-**Admin 2FA reset (account recovery)** — `php artisan yaams:reset-2fa {email} [--force]` (`App\Console\Commands\ResetTwoFactorCommand`) or the "Reset 2FA" button on the admin user page, both via the shared `App\Actions\Users\ResetTwoFactor` action, removes 2FA from a user who lost their authenticator and recovery codes:
-- Clears the three `two_factor_*` columns directly instead of using Fortify's `DisableTwoFactorAuthentication` - its `TwoFactorAuthenticationDisabled` event would be logged by `AuthEventSubscriber` as caused by the user themselves
-- Writes an explicit `two_factor_reset` activity (`warning`, subject = user, causer = the admin or none on the console, `via: console|admin`)
-- Notifies the user via `App\Notifications\TwoFactorReset` - a security notice, so `mail` is sent regardless of the `email_notifications` preference
-
-### Admin Area Layout
-
-Every page under `/admin` follows one structure - keep new admin pages on it:
-
-- `<x-admin.page-header>` (`resources/views/components/admin/page-header.blade.php`) above the `row g-4`: breadcrumb row ("Administration" / `crumbs` / current page, rendered on every page so the layout lines up), icon + **generic** title (`User details`, `Airline details` - never the name of the record), subtitle (prop or default slot) and an optional `actions` slot. The `<title>` section uses the same generic name
-- Left `admin._sidebar` (pass `$active`), main content in `col-12 col-lg-9`
-- Detail pages open the main column with `<x-admin.entity-header>`: tile (code tile `.yaams-entity-header__code` or `<x-pilot-avatar>`), record name + subtitle, `badges`, quick `actions` (activity link, suspend/reactivate) and a `facts` row of `<x-admin.fact label="...">` items. Styles are `.yaams-entity-header*` in `public/css/yaams-theme.css`
-
-### Admin User Management
-
-Super-Admins manage every account at `/admin/users` (`Admin\UserController`, views in `resources/views/admin/users/`, routes in the `admin.` group, aliased `AdminUserController` in `routes/web.php`):
-
-- **List** — search (name/e-mail via `User::scopeSearch()`), filters (status `active|suspended|unverified`, Super-Admin role, 2FA), sort, airline/flight counts
-- **Detail** — profile form (name, e-mail, verified toggle), airline memberships with owner badge, flight stats, API tokens, recent activity (link to `/admin/activity?user={id}`, which filters by causer or subject)
-- **Actions** — suspend/reactivate, grant/revoke Super-Admin, reset 2FA, send password reset link, revoke all API tokens, delete (type the e-mail to confirm)
-- **Suspension** — `users.suspended_at` + `suspension_reason` (not fillable, set via `forceFill`; replaced the unused legacy `isactive` column). Enforced in three places, all using `App\Support\Suspension::message()`:
-  - login: `Fortify::authenticateUsing` in `AppServiceProvider` refuses suspended accounts (covers the 2FA path too, `RedirectIfTwoFactorAuthenticatable` uses the same callback) and logs `login_suspended` (`warning`)
-  - live web sessions: `EnsureUserIsNotSuspended` in the `web` group logs the user out on the next request
-  - API: `Sanctum::authenticateAccessTokensUsing` makes tokens of suspended users fail (401); tokens are kept so reactivation restores access
-- **Deletion** — shared `App\Actions\Users\DeleteUser` (also used by self-deletion in `SettingsController::destroy()`); `blockingAirlines()` refuses while the user owns or is the sole Manager of an airline
-- **Safeguards** — no self-suspend/-demote/-delete from the admin UI, and never remove the last non-suspended Super-Admin
-- **Audit** — every action logs causer = admin, subject = user: `user_suspended`, `user_reactivated`, `super_admin_granted`, `super_admin_revoked`, `api_tokens_revoked`, `user_deleted_by_admin`, `two_factor_reset` (`warning`); `user_updated_by_admin`, `password_reset_sent` (`info`)
 
 ### Admin Airline Management
 
@@ -132,15 +82,6 @@ Current setting keys:
 
 Instances may run in the EU, so operators get Imprint / Privacy Policy / Terms of Use pages plus GDPR self-service. Everything goes through `App\Support\LegalPage`:
 
-- **Pages** - public routes `/imprint`, `/privacy`, `/terms` (`legal.*`, `LegalController`, view `legal/show`). Imprint (not required in the US) and Terms are off by default and 404 unless `*_enabled === '1'` **and** content is set; Privacy is always published
-- **Content** - Markdown in the `*_content` settings, rendered by `LegalPage::html()` via `Str::markdown()` with `html_input => strip` and `allow_unsafe_links => false` - never render it any other way (admin content must not inject HTML/JS). Single line breaks render as `<br>` (`soft_break`, like GitHub comments) so Imprint addresses keep their lines. Styles: `.yaams-legal` in `public/css/yaams-theme.css`
-- **Default privacy template** - `resources/views/legal/default-privacy.blade.php` (Blade producing Markdown) is used while `privacy_content` is empty. It describes what YAAMS stores and is filled live with the instance name, `support_email` and the activity-log retention. **When adding a feature that stores new personal data, update this template**
-- **Admin** - Super-Admins edit all three at `/admin/legal` (`Admin\LegalController`, sidebar `legal`). Saving bumps `legal_updated_at` when privacy/terms change (shown as "Last updated"), logs `legal_pages_updated` (`info`, changed keys in properties)
-- **Footer links** - `layouts/_legal_links` is included in all five layouts; it reads settings through `rescue()` so error pages stay DB-independent
-- **Consent** - registration requires the `accept_legal` checkbox (privacy policy, plus terms when published); `CreateNewUser` stores `users.legal_accepted_at` (not fillable, `forceFill`). Shown on the admin user page. No re-acceptance on policy changes yet
-- **Data export** - `/settings/privacy` + `GET /settings/privacy/export` download a JSON of the user's data via `App\Actions\Users\ExportUserData` (profile, memberships, flights, screenshots, notifications, token names, own activity) and log `user_data_exported` (`info`). Never add secrets (password, 2FA, token hashes) or other users' identities to it; extend it when new personal data is stored
-- **API** - `GET /api/v1/info` exposes `legal.imprintUrl` / `privacyUrl` / `termsUrl` (null when unpublished)
-
 ### Application Logging (Activity Log)
 
 An audit trail of who did what, built on `spatie/laravel-activitylog` (stored in the `activity_log` table). Written synchronously - no queue worker required.
@@ -166,19 +107,6 @@ The **Airline Portal** (`/portal`, always accessible from the nav) lets users:
 
 The `RequiresActiveAirline` middleware (`airline` alias in `Kernel.php`) guards all routes that depend on an active airline session and redirects to `/portal` if none is set. Apply it to any new airline-dependent routes.
 
-### User Account Settings
-
-User-facing account settings live at `/settings/*` (`App\Http\Controllers\SettingsController`, views in `resources/views/settings/`) — do not confuse this with `Admin\SettingsController`, which edits instance-wide settings. `routes/web.php` imports the admin one aliased as `AdminSettingsController` to avoid the name clash.
-
-The page mirrors the admin dashboard layout (page header + `row g-4` with a `settings._sidebar` nav card and a `col-lg-9` main area). Sections, keyed by the sidebar's `$active` argument:
-- **Profile** (`settings.profile`) — name/email form posting to Fortify's existing `user-profile-information.update` route. Since `User implements MustVerifyEmail`, changing the email re-triggers verification. Errors read from the `updateProfileInformation` bag.
-- **Security** (`settings.security`) — password form posting to Fortify's `user-password.update` route. Errors read from the `updatePassword` bag. Both Fortify features are enabled in `config/fortify.php`.
-- **Notifications** (`settings.notifications`) — toggles the `users.email_notifications` column via `SettingsController::updateNotifications()`. The form uses a hidden `0` + checkbox `1` so unchecking submits a value.
-- **Privacy & data** (`settings.privacy`) — GDPR data export download (see Legal Pages & GDPR).
-- **Danger zone** (`settings.danger`) — password-confirmed self-deletion via the shared `App\Actions\Users\DeleteUser`.
-
-The `email_notifications` boolean column (`$fillable` + `'boolean'` cast on `User`) is read in each PIREP notification's `via()`: `database` is always on, `mail` is appended only when `$notifiable->email_notifications ?? true`.
-
 ### Active Airline Session Pattern
 
 The currently selected airline is stored in the PHP session as `activeairline` (a full `Airline` model). Controllers retrieve it via `session()->get('activeairline')`. The `FlightController::addFlight()` method intentionally reloads this from the DB on each PIREP submission to avoid stale state.
@@ -200,10 +128,6 @@ Aircraft have a three-state lifecycle stored in the `aircraft.status` string col
 - `active` (`STATUS_ACTIVE`) — in service, the only state that can be assigned to flights.
 - `inactive` (`STATUS_INACTIVE`) — temporarily grounded; reversible via the edit form's status toggle.
 - `retired` (`STATUS_RETIRED`) — **permanent, irreversible** soft-delete. Cannot fly, cannot be reactivated or edited. The row is never hard-deleted so past flights (which FK `flights.aircraft_id`) keep their history intact.
-
-### Aircraft Screenshot Gallery (community uploads + manager moderation)
-
-Aircraft carry a gallery of flight-simulator screenshots (`aircraft_images` table, `App\Models\AircraftImage`). Any airline member may contribute a shot; **pilot uploads land in a pending queue and stay hidden until a Manager approves them** (Manager uploads are auto-approved). Exactly one approved image is flagged `is_primary` (the shot that best shows the livery).
 
 ### Location Continuity (opt-in realism mode)
 
@@ -292,30 +216,8 @@ Every list endpoint (airlines, aircraft, my flights, review queue, notifications
 
 The `/api/v1` REST API is documented with [Scribe](https://scribe.knuckles.wtf) (`knuckleswtf/scribe`, a **runtime** dependency in `require`). Docs are generated as a **`laravel`-type Blade view** (`resources/views/scribe/index.blade.php` + assets under `public/vendor/scribe/`) and served by a Laravel route at **`/docs`** — `Route::view('/docs', 'scribe.index')->name('scribe')` in `routes/web.php`. Because the page is rendered at request time, its **base URL resolves to the live `APP_URL`** on each request (fixing the old static-HTML bug where the build-time `localhost` was baked in). An "API Reference" link is in the footer of both the `app` and `landing` layouts (`url('/docs')`).
 
-- **Config** — `config/scribe.php`: `type => 'laravel'`; `base_url => '{{ config("app.url") }}'` (the dynamic-string form Scribe renders at request time, so the docs heading always shows this instance's URL); `laravel.add_routes => false` (routing is manual — see above — so only the `/docs` page is exposed, not the `.postman`/`.openapi` spec routes); `postman.enabled`/`openapi.enabled => false` (the machine-readable specs are dropped: they are raw static files that can't use the dynamic base URL, and their laravel-type output dir `storage/app/scribe` is hidden by the prod storage volume). `routes.match.prefixes => ['api/*']` (only API routes are documented); bearer-token auth (`auth.default => true`, so every endpoint needs a Sanctum token except those marked `@unauthenticated` — currently only `GET /api/v1/info`). The live `ResponseCalls` strategy is removed so generation is deterministic and never touches the DB. (Scribe is now always installed, so the old `if (! class_exists(AuthIn::class)) return [];` config guard is gone.)
-- **Doc content lives in source** — example responses, request-body fields, groups and auth flags are Scribe docblock annotations (`@group`, `@authenticated`/`@unauthenticated`, `@urlParam`, `@queryParam`, `@bodyParam`, `@response`) on the `app/Http/Controllers/Api/V1/*` controllers. `@bodyParam` values mirror the matching `Store*Request` rules. Keep them in sync when the API changes. The `GET /api/v1/user` endpoint was extracted from an inline route closure into `UserController` so it could be annotated.
-- **Generation** — `php artisan scribe:generate` writes the Blade view + assets; the output plus intermediates (`resources/views/scribe/`, `public/vendor/scribe/`, `.scribe/`, `storage/app/scribe/`) are **gitignored**, so it must be (re)generated wherever the app is deployed or `/docs` 500s on the missing view.
   - **Production** — baked into the image at build time: `Docker/Dockerfile.prod` runs `scribe:generate` in the runtime stage (Scribe is in the runtime `vendor`, no separate docs/dev-vendor stage). To make the copy-paste example snippets and the "Try It Out" host dynamic too (Scribe pre-renders `base_url` into those, which would otherwise freeze to the build-time URL), it generates against a sentinel base URL (`APP_URL=https://scribe-base-url.invalid`) and then `sed`-replaces that sentinel with `{{ config('app.url') }}` directly in the generated view — the request-time Blade render then resolves every occurrence to the real `APP_URL`. An arbitrary runtime UID cannot write `public/`/`resources/`, which is why generation happens at build (as root), not at container start.
   - **Dev** — the one-shot `docs` service in `Docker/docker-compose.yml` runs `scribe:generate` into the mounted repo before `app` serves; `php artisan serve` then serves `/docs` via the Laravel route. Dev needs no sentinel/`sed` — it generates against the dev `APP_URL` (`http://localhost:8000`), which is exactly where the dev server runs. Regenerate manually with `docker exec yaams-dev-app php artisan scribe:generate` after editing annotations.
-
-### Prometheus Metrics
-
-Instance monitoring endpoint at `/metrics` (`spatie/laravel-prometheus`), returning domain gauges in Prometheus text format with the `yaams_` namespace prefix:
-
-- **Scrape-time evaluation** — every gauge is a closure in `app/Providers/PrometheusServiceProvider.php`, executed fresh on each scrape as a cheap aggregate DB query. There is no cross-request metric storage (`config/prometheus.php` keeps `'cache' => null`), so no APCu/Redis is needed. HTTP request counters/histograms are intentionally out of scope — they would require shared FPM storage and are better harvested at the reverse-proxy layer.
-- **Gauges** — app info (`version` label from `config('app.version')`), users, recently active users (`window` label over `users.last_online_at`, which defaults to the creation time), users with confirmed 2FA, airlines, airline memberships by per-airline role, flights by review status (`status` label mapped from the hardcoded flight status IDs), accepted block time in seconds (driver-specific SQL in `App\Support\BlockTime::secondsSql()` - SQLite for tests, `timestampdiff` for MariaDB/MySQL), aircraft by lifecycle status, aircraft screenshots by moderation status, active NOTAMs, unused invite codes, activity-log rows by level, failed logins in the last 24h (from `login_failed` activity entries), failed jobs, plus the package's `QueueSizeCollector` (queue depth via `Queue::size()`) and `QueueOldestPendingJobCollector` (age of the oldest pending job - detects a stopped worker).
-- **Grafana dashboard** — shipped as `monitoring/grafana/yaams-dashboard.json` (importable, `${DS_PROMETHEUS}` input + `datasource`/`job`/`instance` variables, uid `yaams-overview`). When adding or renaming a gauge, update the dashboard and the metrics table in `README.md` too.
-- **Auth** — `App\Http\Middleware\MetricsAuth` (wired via the `middleware` key in `config/prometheus.php`) requires `Authorization: Bearer $METRICS_TOKEN`; when `METRICS_TOKEN` is unset, the endpoint always returns 403. The token is env-level ops config (`services.metrics.token` in `config/services.php`), deliberately **not** a `Setting` row — it belongs to the scraper's infrastructure, so it gets no setup-wizard/admin-settings wiring.
-- **Adding a gauge** — chain `Prometheus::addGauge('Label')->name('snake_name')->helpText(...)->value(fn () => ...)` in `PrometheusServiceProvider::register()`; labeled gauges return `[[value, [labelValue]], ...]` from the closure. Keep every closure a single cheap aggregate query.
-- Scribe API docs are unaffected (Scribe only matches `api/*` routes).
-
-### Key Model Relationships
-
-- `Aircraft::used_by` — FK to `airlines.id` (not `airline_id`)
-- `Aircraft::current_loc` — FK to `airports.id` (ICAO code)
-- `Flight` appends computed attributes: `full_flight_number`, `flight_duration`, `flight_duration_minutes`, `raw_distance` (Haversine in nautical miles)
-- `Aircraft` appends aggregate attributes computed from accepted flights: `total_flights_count`, `total_flights_hours`, `total_distance_flown`
-- `User::logged_hours()` and `logged_flights()` accept an `Airline` argument and only count `status_id = 2` flights
 
 ### Test Accounts (seeded)
 
@@ -362,7 +264,5 @@ Outgoing notification email is queued (see the Notifications section) so a slow/
   ```
   Without one of these, the activity log is never pruned and grows unbounded (everything else keeps working). A full production deploy runs both the queue worker and the scheduler (plus `php artisan queue:restart` on deploy).
 
-Docker setup lives in `Docker/` with `Dockerfile` and `docker-compose.yml`. A Nix flake (`flake.nix`) is also provided for NixOS environments.
-
-`docker compose up -d` (from `Docker/`) brings up the whole dev stack: `db` (auto-creates the `yaams` schema, with a healthcheck), a one-shot `migrate` service that applies migrations before anything long-running starts, then `app` (`php artisan serve --host=0.0.0.0`, port 8000), `worker`, `scheduler`, `phpmyadmin`, and `smtp4dev`. The `app`/`worker`/`scheduler`/`migrate` services build from `Docker/Dockerfile`, mount the repo at `/app`, and rely on `vendor/` being installed (run `composer install` first on a fresh clone). First-time data still needs a manual seed: `docker exec yaams-dev-app php artisan migrate --seed`.
+Docker setup lives in `Docker/` with `Dockerfile` and `docker-compose.yml`.
 
