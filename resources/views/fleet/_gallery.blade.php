@@ -191,6 +191,7 @@
 
 @once
 <style>
+    :root { --gl-ease: cubic-bezier(0.16, 1, 0.3, 1); }
     /* Thumbnail grid — sizes to the container, not the viewport, so tiles stay
        a sensible size whether the gallery is full-width (edit) or in a column
        (detail) instead of ballooning into 3 giant shots on wide screens. */
@@ -222,12 +223,11 @@
         width: 100%;
         aspect-ratio: 16 / 9;
         object-fit: cover;
-        transition: transform .35s ease, opacity .2s ease;
+        transition: transform .25s var(--gl-ease);
     }
     .aircraft-gallery .gallery-thumb:hover img,
     .aircraft-gallery .gallery-thumb:focus-visible img {
-        transform: scale(1.06);
-        opacity: .85;
+        transform: scale(1.03);
     }
     .aircraft-gallery .gallery-thumb-overlay {
         position: absolute;
@@ -238,7 +238,8 @@
         color: #fff;
         font-size: 1.5rem;
         opacity: 0;
-        transition: opacity .25s ease;
+        background: rgba(0,0,0,.25);
+        transition: opacity .15s ease-out;
         text-shadow: 0 1px 4px rgba(0,0,0,.6);
         pointer-events: none;
     }
@@ -266,7 +267,12 @@
     #gallery-lightbox::backdrop {
         background: rgba(10, 12, 16, .92);
         backdrop-filter: blur(4px);
+        animation: gl-fade .2s ease-out;
     }
+    #gallery-lightbox[open] figure { animation: gl-enter .3s var(--gl-ease); }
+    /* Exit is quicker than entry (set by close() before the dialog closes). */
+    #gallery-lightbox.is-closing,
+    #gallery-lightbox.is-closing::backdrop { animation: gl-fade .12s ease-in reverse forwards; }
     #gallery-lightbox figure {
         margin: 0;
         max-width: 92vw;
@@ -281,9 +287,12 @@
         object-fit: contain;
         border-radius: .375rem;
         box-shadow: 0 1rem 3rem rgba(0,0,0,.5);
-        animation: gallery-zoom .2s ease;
     }
-    @keyframes gallery-zoom {
+    @keyframes gl-fade {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    @keyframes gl-enter {
         from { transform: scale(.96); opacity: 0; }
         to   { transform: scale(1);   opacity: 1; }
     }
@@ -333,6 +342,14 @@
     @media (max-width: 576px) {
         .gl-prev { left: .4rem; }
         .gl-next { right: .4rem; }
+    }
+    /* Reduced motion: no scaling anywhere, only short fades, so opening,
+       stepping and closing still read as state changes. */
+    @media (prefers-reduced-motion: reduce) {
+        .aircraft-gallery .gallery-thumb img { transition: none; }
+        .aircraft-gallery .gallery-thumb:hover img,
+        .aircraft-gallery .gallery-thumb:focus-visible img { transform: none; }
+        #gallery-lightbox[open] figure { animation: gl-fade .15s ease-out; }
     }
 </style>
 
@@ -387,9 +404,29 @@
         document.body.style.overflow = 'hidden';
     }
 
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    // Fade out briefly, then close. The fallback timer covers a missed
+    // animationend (e.g. the tab is hidden mid-animation).
     function close() {
-        if (lb.open) lb.close();
+        if (!lb.open || lb.classList.contains('is-closing')) return;
+        lb.classList.add('is-closing');
+        let done = false;
+        const finish = function () {
+            if (done) return;
+            done = true;
+            lb.classList.remove('is-closing');
+            lb.close();
+        };
+        lb.addEventListener('animationend', finish, { once: true });
+        setTimeout(finish, 200);
     }
+
+    // Esc: run the same fade instead of the instant native close.
+    lb.addEventListener('cancel', function (e) {
+        e.preventDefault();
+        close();
+    });
 
     // Runs for every way of closing (button, backdrop, Esc).
     lb.addEventListener('close', function () {
@@ -400,9 +437,16 @@
     });
 
     function step(delta) {
-        if (!items.length) return;
+        if (items.length < 2) return;
         index = (index + delta + items.length) % items.length;
         render();
+        // Crossfade (shorter, no slide, with reduced motion).
+        img.animate(
+            reduceMotion.matches
+                ? [{ opacity: .4 }, { opacity: 1 }]
+                : [{ opacity: .3, transform: 'translateX(' + (delta * 12) + 'px)' }, { opacity: 1, transform: 'none' }],
+            { duration: reduceMotion.matches ? 120 : 220, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
+        );
     }
 
     // Delegate clicks; each lightbox set is scoped to its own .gallery-group so
