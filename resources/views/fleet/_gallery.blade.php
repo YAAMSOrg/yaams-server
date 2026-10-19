@@ -191,7 +191,14 @@
 
 @once
 <style>
-    :root { --gl-ease: cubic-bezier(0.16, 1, 0.3, 1); }
+    :root {
+        --gl-ease: cubic-bezier(0.16, 1, 0.3, 1);
+        /* The lightbox is always dark, whatever the page theme. */
+        --gl-surface: #0d1117;
+        --gl-backdrop: rgba(10, 12, 16, .92);
+        --gl-text: #e9ecef;
+        --gl-text-muted: #adb5bd;
+    }
     /* Thumbnail grid — sizes to the container, not the viewport, so tiles stay
        a sensible size whether the gallery is full-width (edit) or in a column
        (detail) instead of ballooning into 3 giant shots on wide screens. */
@@ -214,7 +221,7 @@
         overflow: hidden;
         cursor: zoom-in;
         position: relative;
-        background: #0d1117;
+        background: var(--gl-surface);
         box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
     }
     .aircraft-gallery .gallery-thumb.is-pending { opacity: .85; }
@@ -265,7 +272,7 @@
     }
     #gallery-lightbox[open] { display: flex; }
     #gallery-lightbox::backdrop {
-        background: rgba(10, 12, 16, .92);
+        background: var(--gl-backdrop);
         backdrop-filter: blur(4px);
         animation: gl-fade .2s ease-out;
     }
@@ -297,13 +304,13 @@
         to   { transform: scale(1);   opacity: 1; }
     }
     #gallery-lightbox figcaption {
-        color: #e9ecef;
+        color: var(--gl-text);
         margin-top: .75rem;
         font-size: .9rem;
         text-align: center;
     }
     #gallery-lightbox figcaption .gl-counter {
-        color: #adb5bd;
+        color: var(--gl-text-muted);
         margin-left: .5rem;
         font-variant-numeric: tabular-nums;
     }

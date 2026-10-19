@@ -318,9 +318,7 @@
         width: 2.5em;
         height: 1.25em;
     }
-    .fs-7 { font-size: 0.775rem !important; }
     .fs-8 { font-size: 0.7rem; }
-    .tracking-wider { letter-spacing: 0.05em; }
     /* Sticky action bar: floats just above the viewport bottom while the form is
        scrolled, resting at its natural spot (above the site footer) at page end. */
     .edit-actionbar { position: sticky; bottom: 1rem; z-index: 1020; }

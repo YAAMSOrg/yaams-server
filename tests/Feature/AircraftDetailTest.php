@@ -112,6 +112,27 @@ class AircraftDetailTest extends TestCase
             ->assertSeeInOrder(['1111', '2222']);
     }
 
+    public function test_spec_values_and_missing_data_render_consistently(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create([
+            'used_by' => $airline->id,
+            'mtow' => 79000,
+            'mlw' => null,
+            'msn' => null,
+        ]);
+        $manager = $this->memberOf($airline, 'Manager');
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $aircraft->id))
+            ->assertOk()
+            ->assertSee('79,000 kg')
+            ->assertSee('Not specified')
+            ->assertDontSee('@else')
+            ->assertDontSee('N/A');
+    }
+
     public function test_retired_aircraft_reads_last_seen_at(): void
     {
         $airline = Airline::factory()->create();

@@ -2,7 +2,7 @@
 @section('title', 'Aircraft ' . $aircraft->registration)
 @section('content')
 
-<div class="container py-4">
+<div>
     {{-- Upload errors render inline in the gallery's Upload tab, not here. --}}
     @php($pageErrors = collect($errors->getMessages())->except('screenshot')->flatten())
     @if($pageErrors->isNotEmpty())
@@ -74,7 +74,7 @@
                                 <i class="bi bi-hash fs-3 lh-1" aria-hidden="true"></i>
                             </div>
                             <div>
-                                <small class="text-muted d-block uppercase fw-bold tracking-wider fs-7">Accepted Flights</small>
+                                <small class="text-muted d-block text-uppercase fw-bold tracking-wider fs-7">Accepted Flights</small>
                                 <span class="h4 fw-bold mb-0">{{ $aircraft->total_flights_count ?? 0 }}</span>
                             </div>
                         </div>
@@ -87,7 +87,7 @@
                                 <i class="bi bi-clock-history fs-3 lh-1" aria-hidden="true"></i>
                             </div>
                             <div>
-                                <small class="text-muted d-block uppercase fw-bold tracking-wider fs-7">Block Time</small>
+                                <small class="text-muted d-block text-uppercase fw-bold tracking-wider fs-7">Block Time</small>
                                 <span class="h4 fw-bold mb-0 font-monospace">{{ $aircraft->total_block_time }}</span>
                             </div>
                         </div>
@@ -113,7 +113,7 @@
                 <div class="card-body p-0">
                     <div class="row g-0">
                         <div class="col-md-6 border-end">
-                            <table class="table table-striped table-hover mb-0 align-middle">
+                            <table class="table table-striped mb-0 align-middle">
                                 <thead>
                                     <tr>
                                         <th colspan="2" class="bg-light ps-4 py-2 text-secondary fw-bold fs-7 text-uppercase">General & Tech Codes</th>
@@ -121,30 +121,30 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5" style="width: 45%;">Manufacturer MSN</td>
-                                        <td class="fw-semibold pe-4">{{ $aircraft->msn ?? 'Not Specified' }}</td>
+                                        <td class="text-muted ps-4" style="width: 45%;">Manufacturer MSN</td>
+                                        <td class="fw-semibold pe-4">@if(filled($aircraft->msn)){{ $aircraft->msn }}@else<span class="text-muted fw-normal">Not specified</span>@endif</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5">SELCAL Code</td>
-                                        <td class="fw-semibold font-monospace text-primary pe-4">{{ $aircraft->selcal ?? 'Not Assigned' }}</td>
+                                        <td class="text-muted ps-4">SELCAL Code</td>
+                                        <td class="fw-semibold font-monospace pe-4">@if(filled($aircraft->selcal)){{ $aircraft->selcal }}@else<span class="text-muted fw-normal">Not specified</span>@endif</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5">ICAO 24-bit Hex</td>
-                                        <td class="fw-semibold font-monospace text-dark pe-4">{{ $aircraft->hex_code ?? 'Not Assigned' }}</td>
+                                        <td class="text-muted ps-4">ICAO 24-bit Hex</td>
+                                        <td class="fw-semibold font-monospace pe-4">@if(filled($aircraft->hex_code)){{ $aircraft->hex_code }}@else<span class="text-muted fw-normal">Not specified</span>@endif</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5">In Fleet Since</td>
+                                        <td class="text-muted ps-4">In Fleet Since</td>
                                         <td class="fw-medium pe-4">{{ $aircraft->in_service_since }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5">Distance Flown</td>
+                                        <td class="text-muted ps-4">Distance Flown</td>
                                         <td class="fw-medium pe-4">{{ number_format($aircraft->total_distance_flown) }} NM</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <div class="col-md-6">
-                            <table class="table table-striped table-hover mb-0 align-middle">
+                            <table class="table table-striped mb-0 align-middle">
                                 <thead>
                                     <tr>
                                         <th colspan="2" class="bg-light ps-4 py-2 text-secondary fw-bold fs-7 text-uppercase">Propulsion & Equipment</th>
@@ -152,30 +152,30 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5" style="width: 45%;">Engine Variant</td>
-                                        <td class="fw-semibold pe-4">{{ $aircraft->engine_type ?? 'Unknown' }}</td>
+                                        <td class="text-muted ps-4" style="width: 45%;">Engine Variant</td>
+                                        <td class="fw-semibold pe-4">@if(filled($aircraft->engine_type)){{ $aircraft->engine_type }}@else<span class="text-muted fw-normal">Not specified</span>@endif</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5">SATCOM</td>
+                                        <td class="text-muted ps-4">SATCOM</td>
                                         <td class="pe-4">
                                             @if($aircraft->satcom)
-                                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-2.5 py-1">
+                                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle py-1">
                                                     <i class="bi bi-wifi me-1" aria-hidden="true"></i> Equipped
                                                 </span>
                                             @else
-                                                <span class="badge bg-light text-muted border px-2.5 py-1">None</span>
+                                                <span class="badge bg-light text-muted border py-1">None</span>
                                             @endif
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5">Wingtip Devices</td>
+                                        <td class="text-muted ps-4">Wingtip Devices</td>
                                         <td class="pe-4">
                                             @if($aircraft->winglets)
-                                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-2.5 py-1">
+                                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle py-1">
                                                     <i class="bi bi-airplane-engines me-1" aria-hidden="true"></i> Winglets
                                                 </span>
                                             @else
-                                                <span class="badge bg-light text-muted border px-2.5 py-1">None</span>
+                                                <span class="badge bg-light text-muted border py-1">None</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -190,25 +190,25 @@
                         <dl class="row g-3 mb-0 px-4 py-3">
                             <div class="col-6 col-md-3">
                                 <dt class="text-muted fw-normal small">MTOW</dt>
-                                <dd class="fw-semibold mb-0">{{ $aircraft->mtow ? number_format($aircraft->mtow) . ' kg' : 'N/A' }}</dd>
+                                <dd class="fw-semibold mb-0">@if($aircraft->mtow){{ number_format($aircraft->mtow) }} kg @else<span class="text-muted fw-normal">Not specified</span>@endif</dd>
                             </div>
                             <div class="col-6 col-md-3">
                                 <dt class="text-muted fw-normal small">MZFW</dt>
-                                <dd class="fw-semibold mb-0">{{ $aircraft->mzfw ? number_format($aircraft->mzfw) . ' kg' : 'N/A' }}</dd>
+                                <dd class="fw-semibold mb-0">@if($aircraft->mzfw){{ number_format($aircraft->mzfw) }} kg @else<span class="text-muted fw-normal">Not specified</span>@endif</dd>
                             </div>
                             <div class="col-6 col-md-3">
                                 <dt class="text-muted fw-normal small">MLW</dt>
-                                <dd class="fw-semibold mb-0">{{ $aircraft->mlw ? number_format($aircraft->mlw) . ' kg' : 'N/A' }}</dd>
+                                <dd class="fw-semibold mb-0">@if($aircraft->mlw){{ number_format($aircraft->mlw) }} kg @else<span class="text-muted fw-normal">Not specified</span>@endif</dd>
                             </div>
                             <div class="col-6 col-md-3">
                                 <dt class="text-muted fw-normal small">Service Ceiling</dt>
-                                <dd class="fw-semibold mb-0">{{ $aircraft->service_ceiling ? number_format($aircraft->service_ceiling) . ' ft' : 'N/A' }}</dd>
+                                <dd class="fw-semibold mb-0">@if($aircraft->service_ceiling){{ number_format($aircraft->service_ceiling) }} ft @else<span class="text-muted fw-normal">Not specified</span>@endif</dd>
                             </div>
                         </dl>
                     </div>
 
                     <!-- Remarks Section -->
-                    <div class="border-top p-4 bg-light bg-opacity-30">
+                    <div class="border-top p-4 bg-light">
                         <h3 class="fw-bold text-secondary fs-7 text-uppercase mb-2">Remarks / Configuration Details</h3>
                         <p class="mb-0 text-muted text-break" style="font-size: 0.9rem; line-height: 1.5; white-space: pre-line;">{{-- pre-line keeps the remark's own line breaks, so no whitespace around it --}}{{ $aircraft->remarks ?: 'No additional remarks or custom configurations specified for this airframe.' }}</p>
                     </div>
@@ -248,9 +248,9 @@
                                                 {{ $flight->pilot_name }}
                                             </td>
                                             <td class="font-monospace">
-                                                <abbr title="{{ $flight->departure_airport?->name ?? $flight->departure_icao }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->departure_icao }}</abbr>
+                                                <abbr title="{{ $flight->departure_airport?->name ?? $flight->departure_icao }}" class="text-decoration-none text-dark fw-bold bg-light px-2 rounded border">{{ $flight->departure_icao }}</abbr>
                                                 <i class="bi bi-arrow-right text-muted mx-1" aria-hidden="true"></i>
-                                                <abbr title="{{ $flight->arrival_airport?->name ?? $flight->arrival_icao }}" class="text-decoration-none text-dark fw-bold bg-light px-2 py-0.5 rounded border">{{ $flight->arrival_icao }}</abbr>
+                                                <abbr title="{{ $flight->arrival_airport?->name ?? $flight->arrival_icao }}" class="text-decoration-none text-dark fw-bold bg-light px-2 rounded border">{{ $flight->arrival_icao }}</abbr>
                                             </td>
                                             <td class="text-muted">
                                                 {{ $flight->flight_duration }}
@@ -279,7 +279,7 @@
                     @endif
                 </div>
                 <div class="card-body bg-light border-top text-center py-3">
-                    <div class="small text-muted uppercase fw-bold tracking-wide mb-1">Status</div>
+                    <div class="small text-muted text-uppercase fw-bold tracking-wider mb-1">Status</div>
                     <p class="mb-0 fw-medium text-dark">
                         <i class="bi bi-building me-1" aria-hidden="true"></i> {{ $aircraft->isRetired() ? 'Last seen at' : 'On the ground at' }}
                         <span class="badge bg-dark font-monospace fs-6 px-2 py-1 ms-1" title="{{ $aircraft->location?->name }}">{{ $aircraft->current_loc }}</span>
@@ -289,14 +289,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    .border-dashed {
-        border-style: dashed !important;
-        border-color: #dee2e6 !important;
-    }
-    .fs-7 { font-size: 0.75rem; }
-    .tracking-wider { letter-spacing: 0.05em; }
-</style>
-
 @endsection
