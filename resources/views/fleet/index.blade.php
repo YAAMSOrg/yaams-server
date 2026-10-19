@@ -185,14 +185,14 @@
                                                     <i class="bi bi-geo-alt-fill me-1"></i> No Location
                                                 </span>
                                             @else
-                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 font-monospace" data-bs-toggle="tooltip" title="{{ $aircraft->location->name }}">
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 font-monospace" data-bs-toggle="tooltip" title="{{ $aircraft->location->name }}">
                                                     <i class="bi bi-geo-alt-fill me-1"></i> {{ $aircraft->location->icao_code }}
                                                 </span>
                                             @endif
                                         </td>
                                         
                                         <td class="py-3 text-end font-monospace fw-semibold text-dark">
-                                            {{ $aircraft->total_flights_hours }} hrs
+                                            {{ $aircraft->total_block_time }}
                                         </td>
  
                                         <td class="py-3 text-center">
@@ -208,11 +208,11 @@
                                         @if(session('activeairline') && auth()->user()->can('editAircraft', session('activeairline')))
                                             <td class="py-3 text-end pe-4">
                                                 @if($aircraft->isRetired())
-                                                    <a href="{{ route('viewaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary px-2.5 py-1 shadow-xs fs-7">
+                                                    <a href="{{ route('viewaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary py-1 shadow-xs fs-7">
                                                         <i class="bi bi-eye"></i> View
                                                     </a>
                                                 @else
-                                                    <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary px-2.5 py-1 shadow-xs fs-7">
+                                                    <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-sm btn-outline-secondary py-1 shadow-xs fs-7">
                                                         <i class="bi bi-pencil-square"></i> Edit
                                                     </a>
                                                 @endif
@@ -282,8 +282,6 @@
 
 
 <style>
-    /* Zusätzlicher nützlicher Hilfsstyle für kleinere Controls */
-    .fs-7 { font-size: 0.775rem !important; }
     .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .max-w-md { max-width: 450px; }
     .mx-auto { margin-left: auto; margin-right: auto; }

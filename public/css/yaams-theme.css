@@ -998,3 +998,8 @@
         column-gap: 2.5rem;
     }
 }
+
+/* Small type and label tracking shared by the fleet pages and the navbar
+   (previously re-declared inline per page, so missing everywhere else). */
+.fs-7 { font-size: .775rem !important; }
+.tracking-wider { letter-spacing: .05em; }

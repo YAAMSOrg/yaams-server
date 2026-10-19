@@ -106,6 +106,44 @@ class AircraftImageTest extends TestCase
         $this->assertSame($manager->id, $image->approved_by);
     }
 
+    public function test_manager_can_still_moderate_a_retired_aircraft(): void
+    {
+        [$airline, $aircraft, $manager, $pilot] = $this->airlineFixture();
+        $image = AircraftImage::factory()->pending()->create([
+            'aircraft_id' => $aircraft->id,
+            'uploaded_by' => $pilot->id,
+        ]);
+        $aircraft->forceFill(['status' => Aircraft::STATUS_RETIRED, 'retired_at' => now()])->save();
+
+        // The queue is shown, so the shot is not stranded.
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $aircraft->id))
+            ->assertOk()
+            ->assertSee('Awaiting review');
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->patch(route('aircraft.images.approve', [$aircraft->id, $image->id]))
+            ->assertRedirect(route('viewaircraft', $aircraft->id));
+
+        $this->assertTrue($image->refresh()->isApproved());
+    }
+
+    public function test_gallery_tiles_and_actions_carry_distinct_accessible_names(): void
+    {
+        [$airline, $aircraft, $manager] = $this->airlineFixture();
+        AircraftImage::factory()->count(2)->create(['aircraft_id' => $aircraft->id]);
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $aircraft->id))
+            ->assertOk()
+            ->assertSee('alt="Screenshot 1 of 2 of '.$aircraft->registration, false)
+            ->assertSee('alt="Screenshot 2 of 2 of '.$aircraft->registration, false)
+            ->assertSee('aria-label="Delete Screenshot 2 of 2 of '.$aircraft->registration, false);
+    }
+
     public function test_pilot_cannot_approve(): void
     {
         [$airline, $aircraft, , $pilot] = $this->airlineFixture();

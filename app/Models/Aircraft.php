@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\Models\Concerns\LogsModelActivity;
+use App\Support\BlockTime;
+use Illuminate\Support\Facades\DB;
 
 class Aircraft extends Model
 {
@@ -44,11 +46,11 @@ class Aircraft extends Model
     public const STATUS_INACTIVE = 'inactive';   // temporarily grounded, reversible
     public const STATUS_RETIRED = 'retired';     // permanently removed, irreversible
 
+    // Only cheap, column-derived values. The fleet totals (total_flights_count,
+    // total_block_minutes, total_distance_flown, ...) run queries, so they stay
+    // explicit accessors instead of running on every toArray()/toJson().
     protected $appends = [
         'full_type',
-        'total_flights_count',
-        'total_flights_hours',
-        'total_distance_flown',
         'in_service_since',
     ];
 
@@ -114,27 +116,40 @@ class Aircraft extends Model
         return Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->count();
     }
 
-    public function getTotalFlightsHoursAttribute() {
-        // Get all flights with the aircraft_id and where the flight is marked as accepted.
-        $flights = Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->get();
+    // Summed block time of all accepted flights, in whole minutes. One SQL
+    // aggregate instead of loading every flight.
+    public function getTotalBlockMinutesAttribute(): int {
+        $connection = (new Flight)->getConnection();
 
-        // Initialize a var
-        $totalFlightMinutes = 0;
+        $seconds = Flight::where('aircraft_id', '=', $this->id)
+            ->where('status_id', '=', 2)
+            ->sum(DB::raw(BlockTime::secondsSql($connection)));
 
-        // Loop through each found flight and add it
-        foreach ($flights as $flight) {
-            $totalFlightMinutes += $flight->flight_duration_minutes;
-        }
-
-        // Convert to hours
-        $hours = floor($totalFlightMinutes / 60);
-        $minutes = $totalFlightMinutes % 60;
-
-        return $hours;
+        return intdiv((int) $seconds, 60);
     }
 
+    // Decimal hours (one place), e.g. 12.5 for 12:30 of block time.
+    public function getTotalFlightsHoursAttribute(): float {
+        return round($this->total_block_minutes / 60, 1);
+    }
+
+    // Block time as "H:MM h", the format of a single flight's duration.
+    public function getTotalBlockTimeAttribute(): string {
+        $minutes = $this->total_block_minutes;
+
+        return sprintf('%s:%02d h', number_format(intdiv($minutes, 60)), $minutes % 60);
+    }
+
+    // Great-circle distance of all accepted flights, in NM. Loads only the
+    // route columns plus both airports' coordinates (3 queries in total, not
+    // 2 per flight).
     public function getTotalDistanceFlownAttribute() {
-        $flights = Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->get();
+        $airportCoords = 'icao_code,latitude_deg,longitude_deg';
+        $flights = Flight::where('aircraft_id', '=', $this->id)
+            ->where('status_id', '=', 2)
+            ->select(['id', 'departure_icao', 'arrival_icao'])
+            ->with(["departure_airport:{$airportCoords}", "arrival_airport:{$airportCoords}"])
+            ->get();
 
         $totalDistance = 0;
         foreach ($flights as $flight) {

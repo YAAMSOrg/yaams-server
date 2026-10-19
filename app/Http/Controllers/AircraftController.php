@@ -327,11 +327,13 @@ class AircraftController extends Controller
         // review queue (with uploader for display/authorization).
         $aircraft->load(['approvedImages', 'pendingImages.uploader']);
 
-        // Fetch last 5 accepted flights for this aircraft
+        // Fetch the last 5 accepted flights by when they were flown (block-on),
+        // not when the PIREP was filed.
         $lastFlights = $aircraft->flights()
             ->where('status_id', 2)
             ->with(['departure_airport', 'arrival_airport', 'pilot'])
-            ->orderBy('created_at', 'DESC')
+            ->orderByDesc('blockon')
+            ->orderByDesc('id')
             ->limit(5)
             ->get();
 
