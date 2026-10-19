@@ -19,9 +19,9 @@
         </div>
     @endif
 
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-2 border-bottom">
         <div>
-            <h1 class="display-5 fw-bold mb-1">
+            <h1 class="display-5 fw-bold mb-1 text-break">
                 {{ $aircraft->registration }}
                 @if($aircraft->status === \App\Models\Aircraft::STATUS_ACTIVE)
                     <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle ms-2 fs-6 align-middle">Active</span>
@@ -35,9 +35,9 @@
                 <i class="bi bi-airplane-fill me-1" aria-hidden="true"></i> {{ $aircraft->full_type }} &middot; Operated by <strong>{{ $aircraft->airline->name }}</strong>
             </p>
         </div>
-        <div>
+        <div class="d-flex flex-wrap gap-2">
             @can('update', $aircraft)
-                <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-outline-primary me-2">
+                <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-outline-primary">
                     <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Edit Aircraft
                 </a>
             @endcan
@@ -186,35 +186,25 @@
 
                     <!-- Weight Profile Section -->
                     <div class="border-top">
-                        <table class="table table-striped table-hover mb-0 align-middle">
-                            <thead>
-                                <tr>
-                                    <th colspan="6" class="bg-light ps-4 py-2 text-secondary fw-bold fs-7 text-uppercase">Performance Weights</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-muted ps-4 py-2.5" style="width: 20%;">MTOW</td>
-                                    <td class="fw-semibold text-dark py-2.5" style="width: 13%;">
-                                        {{ $aircraft->mtow ? number_format($aircraft->mtow) . ' kg' : 'N/A' }}
-                                    </td>
-                                    <td class="text-muted py-2.5" style="width: 20%;">MZFW</td>
-                                    <td class="fw-semibold text-dark py-2.5" style="width: 13%;">
-                                        {{ $aircraft->mzfw ? number_format($aircraft->mzfw) . ' kg' : 'N/A' }}
-                                    </td>
-                                    <td class="text-muted py-2.5" style="width: 20%;">MLW</td>
-                                    <td class="fw-semibold text-dark pe-4 py-2.5" style="width: 14%;">
-                                        {{ $aircraft->mlw ? number_format($aircraft->mlw) . ' kg' : 'N/A' }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted ps-4 py-2.5">Service Ceiling</td>
-                                    <td class="fw-semibold text-dark py-2.5" colspan="5">
-                                        {{ $aircraft->service_ceiling ? number_format($aircraft->service_ceiling) . ' ft' : 'N/A' }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <h3 class="bg-light ps-4 py-2 mb-0 text-secondary fw-bold fs-7 text-uppercase">Performance Weights</h3>
+                        <dl class="row g-3 mb-0 px-4 py-3">
+                            <div class="col-6 col-md-3">
+                                <dt class="text-muted fw-normal small">MTOW</dt>
+                                <dd class="fw-semibold mb-0">{{ $aircraft->mtow ? number_format($aircraft->mtow) . ' kg' : 'N/A' }}</dd>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <dt class="text-muted fw-normal small">MZFW</dt>
+                                <dd class="fw-semibold mb-0">{{ $aircraft->mzfw ? number_format($aircraft->mzfw) . ' kg' : 'N/A' }}</dd>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <dt class="text-muted fw-normal small">MLW</dt>
+                                <dd class="fw-semibold mb-0">{{ $aircraft->mlw ? number_format($aircraft->mlw) . ' kg' : 'N/A' }}</dd>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <dt class="text-muted fw-normal small">Service Ceiling</dt>
+                                <dd class="fw-semibold mb-0">{{ $aircraft->service_ceiling ? number_format($aircraft->service_ceiling) . ' ft' : 'N/A' }}</dd>
+                            </div>
+                        </dl>
                     </div>
 
                     <!-- Remarks Section -->

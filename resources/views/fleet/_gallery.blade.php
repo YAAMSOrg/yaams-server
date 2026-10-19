@@ -343,6 +343,16 @@
         .gl-prev { left: .4rem; }
         .gl-next { right: .4rem; }
     }
+    /* Touch screens: tile actions reach the 44px target size. */
+    @media (pointer: coarse) {
+        .aircraft-gallery .gallery-tile .btn-sm {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .25rem;
+        }
+    }
     /* Reduced motion: no scaling anywhere, only short fades, so opening,
        stepping and closing still read as state changes. */
     @media (prefers-reduced-motion: reduce) {
