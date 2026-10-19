@@ -130,6 +130,20 @@ class AircraftImageTest extends TestCase
         $this->assertTrue($image->refresh()->isApproved());
     }
 
+    public function test_gallery_tiles_and_actions_carry_distinct_accessible_names(): void
+    {
+        [$airline, $aircraft, $manager] = $this->airlineFixture();
+        AircraftImage::factory()->count(2)->create(['aircraft_id' => $aircraft->id]);
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $aircraft->id))
+            ->assertOk()
+            ->assertSee('alt="Screenshot 1 of 2 of '.$aircraft->registration, false)
+            ->assertSee('alt="Screenshot 2 of 2 of '.$aircraft->registration, false)
+            ->assertSee('aria-label="Delete Screenshot 2 of 2 of '.$aircraft->registration, false);
+    }
+
     public function test_pilot_cannot_approve(): void
     {
         [$airline, $aircraft, , $pilot] = $this->airlineFixture();
