@@ -106,6 +106,30 @@ class AircraftImageTest extends TestCase
         $this->assertSame($manager->id, $image->approved_by);
     }
 
+    public function test_manager_can_still_moderate_a_retired_aircraft(): void
+    {
+        [$airline, $aircraft, $manager, $pilot] = $this->airlineFixture();
+        $image = AircraftImage::factory()->pending()->create([
+            'aircraft_id' => $aircraft->id,
+            'uploaded_by' => $pilot->id,
+        ]);
+        $aircraft->forceFill(['status' => Aircraft::STATUS_RETIRED, 'retired_at' => now()])->save();
+
+        // The queue is shown, so the shot is not stranded.
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $aircraft->id))
+            ->assertOk()
+            ->assertSee('Awaiting review');
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->patch(route('aircraft.images.approve', [$aircraft->id, $image->id]))
+            ->assertRedirect(route('viewaircraft', $aircraft->id));
+
+        $this->assertTrue($image->refresh()->isApproved());
+    }
+
     public function test_pilot_cannot_approve(): void
     {
         [$airline, $aircraft, , $pilot] = $this->airlineFixture();

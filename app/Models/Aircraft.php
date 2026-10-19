@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\Models\Concerns\LogsModelActivity;
+use App\Support\BlockTime;
+use Illuminate\Support\Facades\DB;
 
 class Aircraft extends Model
 {
@@ -114,23 +116,28 @@ class Aircraft extends Model
         return Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->count();
     }
 
-    public function getTotalFlightsHoursAttribute() {
-        // Get all flights with the aircraft_id and where the flight is marked as accepted.
-        $flights = Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->get();
+    // Summed block time of all accepted flights, in whole minutes. One SQL
+    // aggregate instead of loading every flight.
+    public function getTotalBlockMinutesAttribute(): int {
+        $connection = (new Flight)->getConnection();
 
-        // Initialize a var
-        $totalFlightMinutes = 0;
+        $seconds = Flight::where('aircraft_id', '=', $this->id)
+            ->where('status_id', '=', 2)
+            ->sum(DB::raw(BlockTime::secondsSql($connection)));
 
-        // Loop through each found flight and add it
-        foreach ($flights as $flight) {
-            $totalFlightMinutes += $flight->flight_duration_minutes;
-        }
+        return intdiv((int) $seconds, 60);
+    }
 
-        // Convert to hours
-        $hours = floor($totalFlightMinutes / 60);
-        $minutes = $totalFlightMinutes % 60;
+    // Decimal hours (one place), e.g. 12.5 for 12:30 of block time.
+    public function getTotalFlightsHoursAttribute(): float {
+        return round($this->total_block_minutes / 60, 1);
+    }
 
-        return $hours;
+    // Block time as "H:MM h", the format of a single flight's duration.
+    public function getTotalBlockTimeAttribute(): string {
+        $minutes = $this->total_block_minutes;
+
+        return sprintf('%s:%02d h', number_format(intdiv($minutes, 60)), $minutes % 60);
     }
 
     public function getTotalDistanceFlownAttribute() {

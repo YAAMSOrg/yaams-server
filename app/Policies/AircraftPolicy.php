@@ -54,6 +54,22 @@ class AircraftPolicy
     }
 
     /**
+     * Determine whether the user can moderate the aircraft's screenshots
+     * (approve, reject, delete any, set the main shot).
+     *
+     * Unlike `update`, this holds for retired aircraft too: shots submitted
+     * before retirement must not be stranded in an unreachable review queue.
+     * Retired aircraft still accept no new uploads (see `uploadImage`).
+     */
+    public function moderateImages(User $user, Aircraft $aircraft): bool
+    {
+        $activeAirline = session('activeairline');
+        return $activeAirline
+            && $aircraft->ownedBy($activeAirline)
+            && $user->can('editAircraft', $activeAirline);
+    }
+
+    /**
      * Determine whether the user can retire (permanently remove) the aircraft.
      *
      * @param  \App\Models\User  $user

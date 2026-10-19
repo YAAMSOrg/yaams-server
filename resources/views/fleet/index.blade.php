@@ -192,7 +192,7 @@
                                         </td>
                                         
                                         <td class="py-3 text-end font-monospace fw-semibold text-dark">
-                                            {{ $aircraft->total_flights_hours }} hrs
+                                            {{ $aircraft->total_block_time }}
                                         </td>
  
                                         <td class="py-3 text-center">

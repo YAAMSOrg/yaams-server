@@ -3,14 +3,16 @@
 @section('content')
 
 <div class="container py-4">
-    @if($errors->any())
+    {{-- Upload errors render inline in the gallery's Upload tab, not here. --}}
+    @php($pageErrors = collect($errors->getMessages())->except('screenshot')->flatten())
+    @if($pageErrors->isNotEmpty())
         <div class="alert alert-danger border-0 shadow-sm mb-4">
             <div class="d-flex align-items-center mb-2">
                 <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
                 <strong>Error during request:</strong>
             </div>
             <ul class="mb-0 ps-3">
-                @foreach($errors->all() as $error)
+                @foreach($pageErrors as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
@@ -72,7 +74,7 @@
                                 <i class="bi bi-hash fs-3 lh-1"></i>
                             </div>
                             <div>
-                                <small class="text-muted d-block uppercase fw-bold tracking-wider fs-7">Total Flights</small>
+                                <small class="text-muted d-block uppercase fw-bold tracking-wider fs-7">Accepted Flights</small>
                                 <span class="h4 fw-bold mb-0">{{ $aircraft->total_flights_count ?? 0 }}</span>
                             </div>
                         </div>
@@ -85,20 +87,23 @@
                                 <i class="bi bi-clock-history fs-3 lh-1"></i>
                             </div>
                             <div>
-                                <small class="text-muted d-block uppercase fw-bold tracking-wider fs-7">Flight Hours</small>
-                                <span class="h4 fw-bold mb-0">{{ number_format($aircraft->total_flights_hours ?? 0, 1) }} hrs</span>
+                                <small class="text-muted d-block uppercase fw-bold tracking-wider fs-7">Block Time</small>
+                                <span class="h4 fw-bold mb-0 font-monospace">{{ $aircraft->total_block_time }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {{-- A suspended airline is read-only (every POST is refused), so it
+                 offers neither moderation nor uploads. --}}
+            @php($airlineWritable = ! $aircraft->airline->isSuspended())
             @include('fleet._gallery', [
                 'aircraft' => $aircraft,
-                'canModerate' => auth()->user()->can('update', $aircraft),
-                // Any member viewing this page may contribute a screenshot,
-                // unless the airframe is retired.
-                'canUpload' => !$aircraft->isRetired(),
+                // Managers moderate even a retired airframe's queue.
+                'canModerate' => $airlineWritable && auth()->user()->can('moderateImages', $aircraft),
+                // Any member may contribute, unless the airframe is retired.
+                'canUpload' => $airlineWritable && auth()->user()->can('uploadImage', $aircraft),
             ])
 
             <div class="card border-0 shadow-sm mb-4">
@@ -128,8 +133,8 @@
                                         <td class="fw-semibold font-monospace text-dark pe-4">{{ $aircraft->hex_code ?? 'Not Assigned' }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-muted ps-4 py-2.5">In Service Since</td>
-                                        <td class="fw-medium pe-4">{{ \Carbon\Carbon::parse($aircraft->created_at)->format('Y-m-d') }}</td>
+                                        <td class="text-muted ps-4 py-2.5">In Fleet Since</td>
+                                        <td class="fw-medium pe-4">{{ $aircraft->in_service_since }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-muted ps-4 py-2.5">Distance Flown</td>
@@ -215,9 +220,7 @@
                     <!-- Remarks Section -->
                     <div class="border-top p-4 bg-light bg-opacity-30">
                         <h6 class="fw-bold text-secondary fs-7 text-uppercase mb-2">Remarks / Configuration Details</h6>
-                        <p class="mb-0 text-muted" style="font-size: 0.9rem; line-height: 1.5;">
-                            {{ $aircraft->remarks ? $aircraft->remarks : 'No additional remarks or custom configurations specified for this airframe.' }}
-                        </p>
+                        <p class="mb-0 text-muted text-break" style="font-size: 0.9rem; line-height: 1.5; white-space: pre-line;">{{-- pre-line keeps the remark's own line breaks, so no whitespace around it --}}{{ $aircraft->remarks ?: 'No additional remarks or custom configurations specified for this airframe.' }}</p>
                     </div>
                 </div>
             </div>
@@ -240,7 +243,7 @@
                                         <th scope="col">Pilot</th>
                                         <th scope="col">Route</th>
                                         <th scope="col">Duration</th>
-                                        <th scope="col" class="pe-4 text-end">Date</th>
+                                        <th scope="col" class="pe-4 text-end">Date (UTC)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -288,8 +291,8 @@
                 <div class="card-body bg-light border-top text-center py-3">
                     <div class="small text-muted uppercase fw-bold tracking-wide mb-1">Status</div>
                     <p class="mb-0 fw-medium text-dark">
-                        <i class="bi bi-building me-1"></i> On the ground at 
-                        <span class="badge bg-dark font-monospace fs-6 px-2 py-1 ms-1">{{ $aircraft->current_loc }}</span>
+                        <i class="bi bi-building me-1"></i> {{ $aircraft->isRetired() ? 'Last seen at' : 'On the ground at' }}
+                        <span class="badge bg-dark font-monospace fs-6 px-2 py-1 ms-1" title="{{ $aircraft->location?->name }}">{{ $aircraft->current_loc }}</span>
                     </p>
                 </div>
             </div>

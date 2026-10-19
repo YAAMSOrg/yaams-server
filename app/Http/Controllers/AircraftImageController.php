@@ -74,7 +74,7 @@ class AircraftImageController extends Controller
             throw ValidationException::withMessages(['screenshot' => $e->getMessage()]);
         }
 
-        $isModerator = $request->user()->can('update', $aircraft);
+        $isModerator = $request->user()->can('moderateImages', $aircraft);
 
         $image = $aircraft->images()->create([
             'path' => $path,
@@ -120,7 +120,7 @@ class AircraftImageController extends Controller
      */
     public function approve(Request $request, Aircraft $aircraft, AircraftImage $image)
     {
-        if ($request->user()->cannot('update', $aircraft)) {
+        if ($request->user()->cannot('moderateImages', $aircraft)) {
             return redirect()->route('viewaircraft', $aircraft->id)
                 ->with('error', 'You do not have permission to manage this aircraft.');
         }
@@ -154,7 +154,7 @@ class AircraftImageController extends Controller
      */
     public function setPrimary(Request $request, Aircraft $aircraft, AircraftImage $image)
     {
-        if ($request->user()->cannot('update', $aircraft)) {
+        if ($request->user()->cannot('moderateImages', $aircraft)) {
             return redirect()->route('viewaircraft', $aircraft->id)
                 ->with('error', 'You do not have permission to manage this aircraft.');
         }
@@ -179,7 +179,7 @@ class AircraftImageController extends Controller
      */
     public function destroy(Request $request, Aircraft $aircraft, AircraftImage $image)
     {
-        $isModerator = $request->user()->can('update', $aircraft);
+        $isModerator = $request->user()->can('moderateImages', $aircraft);
         $isUploader = $image->uploaded_by === $request->user()->id;
 
         if (! $isModerator && ! $isUploader) {
@@ -224,7 +224,7 @@ class AircraftImageController extends Controller
     private function canSeePending(Request $request, Aircraft $aircraft, AircraftImage $image): bool
     {
         return $image->uploaded_by === $request->user()->id
-            || $request->user()->can('update', $aircraft);
+            || $request->user()->can('moderateImages', $aircraft);
     }
 
     /**
