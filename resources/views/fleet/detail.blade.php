@@ -4,7 +4,9 @@
 
 <div>
     {{-- Upload errors render inline in the gallery's Upload tab, not here. --}}
-    @php($pageErrors = collect($errors->getMessages())->except('screenshot')->flatten())
+    @php
+        $pageErrors = collect($errors->getMessages())->except('screenshot')->flatten();
+    @endphp
     @if($pageErrors->isNotEmpty())
         <div class="alert alert-danger border-0 shadow-sm mb-4">
             <div class="d-flex align-items-center mb-2">
@@ -19,91 +21,124 @@
         </div>
     @endif
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-2 border-bottom">
-        <div>
-            <h1 class="display-5 fw-bold mb-1 text-break">
-                {{ $aircraft->registration }}
-                @if($aircraft->status === \App\Models\Aircraft::STATUS_ACTIVE)
-                    <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle ms-2 fs-6 align-middle">Active</span>
-                @elseif($aircraft->status === \App\Models\Aircraft::STATUS_RETIRED)
-                    <span class="badge bg-dark ms-2 fs-6 align-middle">Retired</span>
-                @else
-                    <span class="badge bg-secondary ms-2 fs-6 align-middle">Inactive</span>
-                @endif
-            </h1>
-            <p class="text-muted mb-0">
-                <i class="bi bi-airplane-fill me-1" aria-hidden="true"></i> {{ $aircraft->full_type }} &middot; Operated by <strong>{{ $aircraft->airline->name }}</strong>
-            </p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            @can('update', $aircraft)
-                <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-outline-primary">
-                    <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Edit Aircraft
-                </a>
-            @endcan
-            <a href="{{ route('fleetmanager') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Back to Fleet
-            </a>
-        </div>
-    </div>
+    {{-- A suspended airline is read-only (every POST is refused), so it
+         offers neither moderation nor uploads. --}}
+    @php
+        $airlineWritable = ! $aircraft->airline->isSuspended();
+        $canModerate = $airlineWritable && auth()->user()->can('moderateImages', $aircraft);
+        $canUpload = $airlineWritable && auth()->user()->can('uploadImage', $aircraft);
+        $lastFlight = $lastFlights->first();
+        $livery = $aircraft->approvedImages->firstWhere('is_primary', true);
+        $pendingCount = $canModerate ? $aircraft->pendingImages->count() : 0;
+        $airportName = $aircraft->location?->name;
+    @endphp
 
-    @if($aircraft->isRetired())
-        <div class="alert alert-dark border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
-            <i class="bi bi-archive-fill fs-5 me-3" aria-hidden="true"></i>
-            <div>
-                This aircraft was retired on <strong>{{ $aircraft->retired_at?->format('Y-m-d') }}</strong>@if($aircraft->retired_reason) &middot; {{ $aircraft->retired_reason }}@endif.
-                It can no longer fly and cannot be reactivated. Its flight history is preserved.
+    {{-- Status first: where it is and whether it can fly, when it last flew,
+         and what is waiting on a moderator. The livery shot sits beside it. --}}
+    <header class="aircraft-header d-flex flex-column flex-md-row gap-4 mb-4 pb-4 border-bottom">
+        <div class="flex-grow-1">
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                <div>
+                    <h1 class="display-5 fw-bold mb-1 text-break">
+                        {{ $aircraft->registration }}
+                        @if($aircraft->status === \App\Models\Aircraft::STATUS_ACTIVE)
+                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle ms-2 fs-6 align-middle">Active</span>
+                        @elseif($aircraft->status === \App\Models\Aircraft::STATUS_RETIRED)
+                            <span class="badge bg-dark ms-2 fs-6 align-middle">Retired</span>
+                        @else
+                            <span class="badge bg-secondary ms-2 fs-6 align-middle">Inactive</span>
+                        @endif
+                    </h1>
+                    <p class="font-monospace text-muted mb-0">{{ $aircraft->full_type }}</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    @can('update', $aircraft)
+                        <a href="{{ route('editaircraft', $aircraft->id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Edit Aircraft
+                        </a>
+                    @endcan
+                    <a href="{{ route('fleetmanager') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Back to Fleet
+                    </a>
+                </div>
             </div>
+
+            <ul class="aircraft-status list-unstyled mt-4 mb-0">
+                <li>
+                    @if($aircraft->isRetired())
+                        <i class="bi bi-archive" aria-hidden="true"></i>
+                        <span>
+                            Last seen at <strong class="font-monospace">{{ $aircraft->current_loc }}</strong>@if($airportName) &middot; {{ $airportName }}@endif
+                            <span class="d-block text-muted small">Retired {{ $aircraft->retired_at?->format('Y-m-d') }}@if($aircraft->retired_reason) &middot; <span class="text-break" style="white-space: pre-line;">{{ $aircraft->retired_reason }}</span>@endif. It cannot fly again; its history is kept.</span>
+                        </span>
+                    @elseif($aircraft->status === \App\Models\Aircraft::STATUS_INACTIVE)
+                        <i class="bi bi-pause-circle" aria-hidden="true"></i>
+                        <span>
+                            Grounded at <strong class="font-monospace">{{ $aircraft->current_loc }}</strong>@if($airportName) &middot; {{ $airportName }}@endif
+                            <span class="d-block text-muted small">Inactive, so it cannot be assigned to flights.</span>
+                        </span>
+                    @else
+                        <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                        <span>On the ground at <strong class="font-monospace">{{ $aircraft->current_loc }}</strong>@if($airportName) &middot; {{ $airportName }}@endif</span>
+                    @endif
+                </li>
+                <li>
+                    <i class="bi bi-clock-history" aria-hidden="true"></i>
+                    @if($lastFlight)
+                        @php
+                            $blockOn = \Carbon\Carbon::parse($lastFlight->blockon, 'UTC');
+                        @endphp
+                        <span>
+                            Last flown <time datetime="{{ $blockOn->toIso8601ZuluString() }}" title="{{ $blockOn->format('Y-m-d H:i') }} UTC">{{ $blockOn->diffForHumans() }}</time>
+                            &middot; <a href="{{ route('viewflight', $lastFlight->id) }}" class="font-monospace fw-semibold">{{ $lastFlight->full_flight_number }}</a>
+                            <span class="font-monospace">{{ $lastFlight->departure_icao }}</span><i class="bi bi-arrow-right text-muted mx-1" aria-hidden="true"></i><span class="visually-hidden">to</span><span class="font-monospace">{{ $lastFlight->arrival_icao }}</span>
+                        </span>
+                    @else
+                        <span class="text-muted">Not flown yet</span>
+                    @endif
+                </li>
+                @if($pendingCount > 0)
+                    <li>
+                        <i class="bi bi-hourglass-split text-warning-emphasis" aria-hidden="true"></i>
+                        <a href="#pending-review-{{ $aircraft->id }}" class="link-warning-emphasis fw-semibold">
+                            {{ $pendingCount }} {{ \Illuminate\Support\Str::plural('screenshot', $pendingCount) }} awaiting review
+                        </a>
+                    </li>
+                @endif
+            </ul>
         </div>
-    @elseif($aircraft->status === \App\Models\Aircraft::STATUS_INACTIVE)
-        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
-            <i class="bi bi-info-circle-fill fs-5 me-3" aria-hidden="true"></i>
-            <div>
-                This aircraft is currently inactive and cannot be assigned to flights.
-            </div>
-        </div>
-    @endif
+
+        <figure class="aircraft-livery aircraft-gallery mb-0 flex-shrink-0">
+            @if($livery)
+                <div class="gallery-group d-block">
+                    <button type="button"
+                            class="gallery-thumb"
+                            data-gallery-full="{{ route('aircraft.images.show', [$aircraft->id, $livery->id]) }}"
+                            data-gallery-caption="{{ $aircraft->registration }} · Main livery shot"
+                            aria-label="Open main livery shot of {{ $aircraft->registration }}">
+                        <img src="{{ route('aircraft.images.show', [$aircraft->id, $livery->id]) }}"
+                             alt="Main livery shot of {{ $aircraft->registration }}">
+                        <span class="gallery-thumb-overlay"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></span>
+                    </button>
+                </div>
+            @else
+                <div class="aircraft-livery__empty">
+                    <i class="bi bi-airplane fs-2 opacity-50" aria-hidden="true"></i>
+                    <span>No livery shot yet</span>
+                    @if($canUpload)
+                        <button type="button" class="btn btn-link btn-sm p-0" data-open-upload="upload-tab-btn-{{ $aircraft->id }}">Upload one</button>
+                    @endif
+                </div>
+            @endif
+        </figure>
+    </header>
 
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="row g-3 mb-4">
-                <div class="col-sm-6">
-                    <div class="card border-0 shadow-sm h-100 bg-light">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="p-3 bg-white rounded-3 shadow-sm me-3 text-primary">
-                                <i class="bi bi-hash fs-3 lh-1" aria-hidden="true"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block text-uppercase fw-bold tracking-wider fs-7">Accepted Flights</small>
-                                <span class="h4 fw-bold mb-0">{{ $aircraft->total_flights_count ?? 0 }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="card border-0 shadow-sm h-100 bg-light">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="p-3 bg-white rounded-3 shadow-sm me-3 text-success">
-                                <i class="bi bi-clock-history fs-3 lh-1" aria-hidden="true"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block text-uppercase fw-bold tracking-wider fs-7">Block Time</small>
-                                <span class="h4 fw-bold mb-0 font-monospace">{{ $aircraft->total_block_time }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- A suspended airline is read-only (every POST is refused), so it
-                 offers neither moderation nor uploads. --}}
-            @php($airlineWritable = ! $aircraft->airline->isSuspended())
             @include('fleet._gallery', [
                 'aircraft' => $aircraft,
-                // Managers moderate even a retired airframe's queue.
-                'canModerate' => $airlineWritable && auth()->user()->can('moderateImages', $aircraft),
-                // Any member may contribute, unless the airframe is retired.
-                'canUpload' => $airlineWritable && auth()->user()->can('uploadImage', $aircraft),
+                'canModerate' => $canModerate,
+                'canUpload' => $canUpload,
             ])
 
             <div class="card border-0 shadow-sm mb-4">
@@ -135,6 +170,14 @@
                                     <tr>
                                         <td class="text-muted ps-4">In Fleet Since</td>
                                         <td class="fw-medium pe-4">{{ $aircraft->in_service_since }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted ps-4">Accepted Flights</td>
+                                        <td class="fw-medium pe-4">{{ number_format($aircraft->total_flights_count) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted ps-4">Block Time</td>
+                                        <td class="fw-medium pe-4 font-monospace">{{ $aircraft->total_block_time }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-muted ps-4">Distance Flown</td>
@@ -271,7 +314,7 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm overflow-hidden mb-4">
                 <div class="card-header bg-white py-3 fw-bold border-bottom d-flex align-items-center">
-                    <h2 class="h6 fw-bold mb-0 d-flex align-items-center"><i class="bi bi-geo-alt-fill text-danger me-2" aria-hidden="true"></i> Current Location Tracking</h2>
+                    <h2 class="h6 fw-bold mb-0 d-flex align-items-center"><i class="bi bi-geo-alt-fill text-danger me-2" aria-hidden="true"></i> Location</h2>
                 </div>
                 <div class="position-relative" role="region" aria-label="Map of {{ $aircraft->registration }} at {{ $aircraft->current_loc }}">
                     @if ($lat !== null && $lon !== null)
@@ -289,4 +332,38 @@
         </div>
     </div>
 </div>
+<style>
+    .aircraft-status { display: grid; gap: .6rem; }
+    .aircraft-status li { display: flex; gap: .6rem; align-items: baseline; }
+    .aircraft-status li > .bi { flex: none; width: 1.1rem; color: var(--bs-secondary-color); }
+    .aircraft-livery { width: 100%; }
+    @media (min-width: 768px) { .aircraft-livery { width: 280px; } }
+    .aircraft-livery__empty {
+        aspect-ratio: 16 / 9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: .25rem;
+        border: 1px dashed var(--bs-border-color);
+        border-radius: .5rem;
+        color: var(--bs-secondary-color);
+        background: var(--bs-tertiary-bg);
+        font-size: .9rem;
+    }
+</style>
+
+<script>
+    // "Upload one" in the empty livery slot: switch to the Upload tab and bring it into view.
+    document.addEventListener('click', function (e) {
+        const trigger = e.target.closest('[data-open-upload]');
+        if (!trigger) return;
+        const tab = document.getElementById(trigger.dataset.openUpload);
+        if (!tab) return;
+        bootstrap.Tab.getOrCreateInstance(tab).show();
+        tab.scrollIntoView({ block: 'center' });
+        tab.focus({ preventScroll: true });
+    });
+</script>
+
 @endsection

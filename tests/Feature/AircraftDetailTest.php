@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Aircraft;
+use App\Models\AircraftImage;
 use App\Models\Airline;
 use App\Models\Airport;
 use App\Models\Flight;
@@ -146,6 +147,79 @@ class AircraftDetailTest extends TestCase
             ->assertOk()
             ->assertSee('Last seen at')
             ->assertDontSee('On the ground at');
+    }
+
+    public function test_header_location_line_follows_the_aircraft_status(): void
+    {
+        $airline = Airline::factory()->create();
+        $manager = $this->memberOf($airline, 'Manager');
+        $cases = [
+            Aircraft::STATUS_ACTIVE => 'On the ground at',
+            Aircraft::STATUS_INACTIVE => 'Grounded at',
+            Aircraft::STATUS_RETIRED => 'Last seen at',
+        ];
+
+        foreach ($cases as $status => $wording) {
+            $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+            $aircraft->forceFill(['status' => $status, 'retired_at' => $status === Aircraft::STATUS_RETIRED ? now() : null])->save();
+
+            $this->actingAs($manager)
+                ->withSession(['activeairline' => $airline])
+                ->get(route('viewaircraft', $aircraft->id))
+                ->assertOk()
+                ->assertSee($wording)
+                ->assertSee($aircraft->current_loc);
+        }
+    }
+
+    public function test_header_shows_last_flight_or_not_flown_yet(): void
+    {
+        $airline = Airline::factory()->create();
+        $manager = $this->memberOf($airline, 'Manager');
+        $idle = Aircraft::factory()->create(['used_by' => $airline->id]);
+        $flown = Aircraft::factory()->create(['used_by' => $airline->id]);
+        Flight::factory()->accepted()->create([
+            'airline_id' => $airline->id,
+            'aircraft_id' => $flown->id,
+            'flightnumber' => 4711,
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $idle->id))
+            ->assertSee('Not flown yet')
+            ->assertSee('No livery shot yet');
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $flown->id))
+            ->assertSee('Last flown')
+            ->assertSee('4711')
+            ->assertDontSee('Not flown yet');
+    }
+
+    public function test_pending_screenshots_are_flagged_for_managers_only(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        $manager = $this->memberOf($airline, 'Manager');
+        $pilot = $this->memberOf($airline, 'Pilot');
+        $uploader = $this->memberOf($airline, 'Pilot');
+        AircraftImage::factory()->pending()->count(2)->create([
+            'aircraft_id' => $aircraft->id,
+            'uploaded_by' => $uploader->id,
+        ]);
+
+        $this->actingAs($manager)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $aircraft->id))
+            ->assertSee('2 screenshots awaiting review')
+            ->assertSee('href="#pending-review-'.$aircraft->id.'"', false);
+
+        $this->actingAs($pilot)
+            ->withSession(['activeairline' => $airline])
+            ->get(route('viewaircraft', $aircraft->id))
+            ->assertDontSee('awaiting review');
     }
 
     public function test_suspended_airline_offers_no_upload_tab(): void

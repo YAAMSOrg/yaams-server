@@ -22,8 +22,11 @@
                         data-bs-toggle="tab" data-bs-target="#gallery-pane-{{ $aircraft->id }}"
                         type="button" role="tab" aria-controls="gallery-pane-{{ $aircraft->id }}"
                         aria-selected="{{ $uploadHasError ? 'false' : 'true' }}">
-                    <i class="bi bi-images me-1"></i> Gallery
+                    <i class="bi bi-images me-1" aria-hidden="true"></i> Gallery
                     <span class="badge bg-secondary ms-1 fs-7">{{ $approved->count() }}</span>
+                    @if($canModerate && $pending->isNotEmpty())
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle fs-7">{{ $pending->count() }} pending</span>
+                    @endif
                 </button>
             </li>
             @if($canUpload)
@@ -32,7 +35,7 @@
                             data-bs-toggle="tab" data-bs-target="#upload-pane-{{ $aircraft->id }}"
                             type="button" role="tab" aria-controls="upload-pane-{{ $aircraft->id }}"
                             aria-selected="{{ $uploadHasError ? 'true' : 'false' }}">
-                        <i class="bi bi-upload me-1"></i> Upload
+                        <i class="bi bi-upload me-1" aria-hidden="true"></i> Upload
                     </button>
                 </li>
             @endif
@@ -45,7 +48,7 @@
         {{-- Approved gallery --}}
         @if($approved->isEmpty())
             <div class="text-center text-muted py-4">
-                <i class="bi bi-image fs-1 text-secondary opacity-50 d-block mb-2"></i>
+                <i class="bi bi-image fs-1 text-secondary opacity-50 d-block mb-2" aria-hidden="true"></i>
                 No screenshots yet.
                 @if($canUpload) Upload the first one from the <strong>Upload</strong> tab. @endif
             </div>
@@ -64,12 +67,12 @@
                                      alt="{{ $shotLabel }}"
                                      loading="lazy">
                                 <span class="gallery-thumb-overlay">
-                                    <i class="bi bi-arrows-fullscreen"></i>
+                                    <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
                                 </span>
                             </button>
                             @if($img->is_primary)
                                 <span class="badge bg-primary position-absolute top-0 start-0 m-2 shadow-sm">
-                                    <i class="bi bi-star-fill me-1"></i> Main
+                                    <i class="bi bi-star-fill me-1" aria-hidden="true"></i> Main
                                 </span>
                             @endif
                             @if($canModerate || $img->uploaded_by === $userId)
@@ -79,7 +82,7 @@
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm btn-outline-primary w-100" aria-label="Set {{ $shotLabel }} as main">
-                                                <i class="bi bi-star"></i> Main
+                                                <i class="bi bi-star" aria-hidden="true"></i> Main
                                             </button>
                                         </form>
                                     @endif
@@ -88,7 +91,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="Delete" aria-label="Delete {{ $shotLabel }}">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -101,9 +104,9 @@
 
         {{-- Pending review queue --}}
         @if($pending->isNotEmpty())
-            <div class="mt-4 pt-3 border-top">
+            <div class="mt-4 pt-3 border-top" id="pending-review-{{ $aircraft->id }}">
                 <h3 class="h6 fw-semibold text-secondary mb-3">
-                    <i class="bi bi-hourglass-split me-1"></i>
+                    <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>
                     {{ $canModerate ? 'Awaiting review' : 'Your uploads awaiting review' }}
                     <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-1">{{ $pending->count() }}</span>
                 </h3>
@@ -121,11 +124,11 @@
                                          alt="{{ ucfirst($shotLabel) }}"
                                          loading="lazy">
                                     <span class="gallery-thumb-overlay">
-                                        <i class="bi bi-arrows-fullscreen"></i>
+                                        <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
                                     </span>
                                 </button>
                                 <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 shadow-sm">
-                                    <i class="bi bi-hourglass me-1"></i> Pending
+                                    <i class="bi bi-hourglass me-1" aria-hidden="true"></i> Pending
                                 </span>
                                 @if($canModerate)
                                     <div class="small text-muted mt-2 text-truncate">by {{ $img->uploader?->name ?? 'Unknown' }}</div>
@@ -136,7 +139,7 @@
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm btn-success w-100" aria-label="Approve {{ $shotLabel }}">
-                                                <i class="bi bi-check-lg"></i> Approve
+                                                <i class="bi bi-check-lg" aria-hidden="true"></i> Approve
                                             </button>
                                         </form>
                                     @endif
@@ -147,7 +150,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger w-100" aria-label="{{ $canModerate ? 'Reject' : 'Delete' }} {{ $shotLabel }}">
-                                                <i class="bi bi-x-lg"></i> {{ $canModerate ? 'Reject' : 'Delete' }}
+                                                <i class="bi bi-x-lg" aria-hidden="true"></i> {{ $canModerate ? 'Reject' : 'Delete' }}
                                             </button>
                                         </form>
                                     @endif
@@ -172,7 +175,7 @@
                         <input type="file" name="screenshot" id="screenshot" accept="image/jpeg,image/png,image/webp"
                                class="form-control @error('screenshot') is-invalid @enderror" required>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-upload me-1"></i> Upload
+                            <i class="bi bi-upload me-1" aria-hidden="true"></i> Upload
                         </button>
                     </div>
                     @error('screenshot')
