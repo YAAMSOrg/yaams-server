@@ -46,11 +46,11 @@ class Aircraft extends Model
     public const STATUS_INACTIVE = 'inactive';   // temporarily grounded, reversible
     public const STATUS_RETIRED = 'retired';     // permanently removed, irreversible
 
+    // Only cheap, column-derived values. The fleet totals (total_flights_count,
+    // total_block_minutes, total_distance_flown, ...) run queries, so they stay
+    // explicit accessors instead of running on every toArray()/toJson().
     protected $appends = [
         'full_type',
-        'total_flights_count',
-        'total_flights_hours',
-        'total_distance_flown',
         'in_service_since',
     ];
 
@@ -140,8 +140,16 @@ class Aircraft extends Model
         return sprintf('%s:%02d h', number_format(intdiv($minutes, 60)), $minutes % 60);
     }
 
+    // Great-circle distance of all accepted flights, in NM. Loads only the
+    // route columns plus both airports' coordinates (3 queries in total, not
+    // 2 per flight).
     public function getTotalDistanceFlownAttribute() {
-        $flights = Flight::where('aircraft_id', '=', $this->id)->where('status_id', '=', 2)->get();
+        $airportCoords = 'icao_code,latitude_deg,longitude_deg';
+        $flights = Flight::where('aircraft_id', '=', $this->id)
+            ->where('status_id', '=', 2)
+            ->select(['id', 'departure_icao', 'arrival_icao'])
+            ->with(["departure_airport:{$airportCoords}", "arrival_airport:{$airportCoords}"])
+            ->get();
 
         $totalDistance = 0;
         foreach ($flights as $flight) {

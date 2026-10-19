@@ -182,7 +182,8 @@ class Flight extends Model
         $arrival = $this->arrival_airport;
 
         // Sicherheitsprüfung: Fehlen Daten, geben wir null zurück
-        if (!$departure || !$arrival || !$departure->latitude_deg || !$departure->longitude_deg || !$arrival->latitude_deg || !$arrival->longitude_deg) {
+        // (A null check, not a falsy one: 0.0 is a valid latitude/longitude.)
+        if (!$departure || !$arrival || $departure->latitude_deg === null || $departure->longitude_deg === null || $arrival->latitude_deg === null || $arrival->longitude_deg === null) {
             return null;
         }
 

@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Aircraft;
 use App\Models\Airline;
+use App\Models\Airport;
 use App\Models\Flight;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Concerns\SeedsDomain;
 use Tests\TestCase;
 
@@ -37,6 +39,49 @@ class AircraftDetailTest extends TestCase
         $this->assertSame(135, $aircraft->total_block_minutes);
         $this->assertSame('2:15 h', $aircraft->total_block_time);
         $this->assertSame(2.3, $aircraft->total_flights_hours);
+    }
+
+    public function test_distance_flown_sums_accepted_routes_in_constant_queries(): void
+    {
+        $airline = Airline::factory()->create();
+        $aircraft = Aircraft::factory()->create(['used_by' => $airline->id]);
+        Airport::factory()->icao('XXAA', 0.0, 0.0)->create();
+        Airport::factory()->icao('XXBB', 0.0, 1.0)->create(); // 1 degree of longitude on the equator: 60 NM
+
+        Flight::factory()->accepted()->count(5)->create([
+            'airline_id' => $airline->id,
+            'aircraft_id' => $aircraft->id,
+            'departure_icao' => 'XXAA',
+            'arrival_icao' => 'XXBB',
+        ]);
+        Flight::factory()->create([
+            'airline_id' => $airline->id,
+            'aircraft_id' => $aircraft->id,
+            'departure_icao' => 'XXAA',
+            'arrival_icao' => 'XXBB',
+        ]);
+
+        DB::enableQueryLog();
+        $distance = $aircraft->total_distance_flown;
+        $queries = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        $this->assertEquals(300, $distance);
+        $this->assertSame(3, $queries);
+    }
+
+    public function test_serializing_an_aircraft_runs_no_aggregate_queries(): void
+    {
+        $aircraft = Aircraft::factory()->create();
+
+        DB::enableQueryLog();
+        $data = $aircraft->toArray();
+        $queries = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        $this->assertSame(0, $queries);
+        $this->assertArrayHasKey('in_service_since', $data);
+        $this->assertArrayNotHasKey('total_distance_flown', $data);
     }
 
     public function test_detail_page_shows_block_time_and_orders_recent_flights_by_block_on(): void
